@@ -18,6 +18,9 @@ INSTALLED_APPS = [
 
     # third party
     'rest_framework',
+
+    # internal
+    'badfeed.feeds',
 ]
 
 MIDDLEWARE = [
@@ -96,3 +99,5 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+
+RQ_ENABLED = env.bool('RQ_ENABLED', default=False)

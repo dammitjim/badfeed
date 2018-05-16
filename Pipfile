@@ -9,6 +9,7 @@ envparse = "*"
 "argon2-cffi" = "*"
 "psycopg2-binary" = "*"
 djangorestframework = "*"
+awesome-slugify = "==1.6.5"
 
 [dev-packages]
 "flake8" = "*"
