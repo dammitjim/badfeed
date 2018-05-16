@@ -1,0 +1,20 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+envparse = "*"
+"argon2-cffi" = "*"
+"psycopg2-binary" = "*"
+djangorestframework = "*"
+
+[dev-packages]
+"flake8" = "*"
+model-mommy = "*"
+pytest = "*"
+pytest-django = "*"
+
+[requires]
+python_version = "3.6"
