@@ -18,6 +18,7 @@ INSTALLED_APPS = [
 
     # third party
     'rest_framework',
+    'django_rq',
 
     # internal
     'badfeed.feeds',
@@ -100,4 +101,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-RQ_ENABLED = env.bool('RQ_ENABLED', default=False)
+RQ_ENABLED = env.bool('RQ_ENABLED', default=True)
+RQ_QUEUES = {
+    'default': {
+        'HOST': env.str('REDIS_HOST', default='localhost'),
+        'PORT': env.int('REDIS_PORT', default=6379),
+        'DB': env.int('REDIS_DB', default=0),
+        'PASSWORD': env.str('REDIS_PASSWORD', default=''),
+        'DEFAULT_TIMEOUT': 360,
+    }
+}

@@ -1,6 +1,6 @@
 import logging
-from dateutil import parser
 
+from dateutil import parser
 from django.utils.timezone import now
 from django_rq import job
 from feedparser import parse
@@ -12,7 +12,7 @@ from .utils import clean_item_content, clean_content
 log = logging.getLogger('rq.worker')
 
 
-@job('feeds')
+@job
 def pull_feed(feed):
     log.info(f'importing feed {feed.url}')
     response = parse(feed.url)

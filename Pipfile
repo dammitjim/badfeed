@@ -10,6 +10,11 @@ envparse = "*"
 "psycopg2-binary" = "*"
 djangorestframework = "*"
 awesome-slugify = "==1.6.5"
+bleach = "*"
+feedparser = "*"
+rq = "*"
+django-rq = "*"
+python-dateutil = "*"
 
 [dev-packages]
 "flake8" = "*"
