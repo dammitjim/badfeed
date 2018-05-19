@@ -16,10 +16,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-]
+urlpatterns = [path("admin/", admin.site.urls)]
 
-urlpatterns += [
-    path('django-rq/', include('django_rq.urls'))
-]
+urlpatterns += [path("django-rq/", include("django_rq.urls"))]

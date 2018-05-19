@@ -6,7 +6,7 @@ from badfeed.feeds.jobs import pull_feed
 
 
 class Command(BaseCommand):
-    help = 'Enqueue feeds to be parsed'
+    help = "Enqueue feeds to be parsed"
 
     def add_arguments(self, parser):
         # TODO: pass in specific feeds

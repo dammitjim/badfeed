@@ -8,62 +8,87 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Entry',
+            name="Entry",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('slug', models.SlugField(blank=True, max_length=200)),
-                ('name', models.CharField(max_length=1000)),
-                ('url', models.CharField(max_length=1000)),
-                ('remote_id', models.CharField(max_length=1000)),
-                ('content', models.TextField()),
-                ('teaser', models.TextField(blank=True, null=True)),
-                ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('date_modified', models.DateTimeField(auto_now=True)),
-                ('date_first_published', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("slug", models.SlugField(blank=True, max_length=200)),
+                ("name", models.CharField(max_length=1000)),
+                ("url", models.CharField(max_length=1000)),
+                ("remote_id", models.CharField(max_length=1000)),
+                ("content", models.TextField()),
+                ("teaser", models.TextField(blank=True, null=True)),
+                ("date_created", models.DateTimeField(auto_now_add=True)),
+                ("date_modified", models.DateTimeField(auto_now=True)),
+                ("date_first_published", models.DateTimeField(blank=True, null=True)),
             ],
-            options={
-                'verbose_name_plural': 'entries',
-            },
+            options={"verbose_name_plural": "entries"},
         ),
         migrations.CreateModel(
-            name='Feed',
+            name="Feed",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('slug', models.SlugField(blank=True, max_length=200)),
-                ('name', models.CharField(max_length=255)),
-                ('url', models.CharField(max_length=1000, unique=True)),
-                ('date_created', models.DateTimeField(auto_now_add=True)),
-                ('date_modified', models.DateTimeField(auto_now=True)),
-                ('date_last_scraped', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("slug", models.SlugField(blank=True, max_length=200)),
+                ("name", models.CharField(max_length=255)),
+                ("url", models.CharField(max_length=1000, unique=True)),
+                ("date_created", models.DateTimeField(auto_now_add=True)),
+                ("date_modified", models.DateTimeField(auto_now=True)),
+                ("date_last_scraped", models.DateTimeField(blank=True, null=True)),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False},
         ),
         migrations.CreateModel(
-            name='Media',
+            name="Media",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.CharField(max_length=1000)),
-                ('type', models.CharField(max_length=1000)),
-                ('entry', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='feeds.Entry')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("url", models.CharField(max_length=1000)),
+                ("type", models.CharField(max_length=1000)),
+                (
+                    "entry",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="feeds.Entry"
+                    ),
+                ),
             ],
-            options={
-                'verbose_name_plural': 'media',
-            },
+            options={"verbose_name_plural": "media"},
         ),
         migrations.AddField(
-            model_name='entry',
-            name='feed',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='entries', to='feeds.Feed'),
+            model_name="entry",
+            name="feed",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="entries",
+                to="feeds.Feed",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='entry',
-            unique_together={('remote_id', 'feed')},
+            name="entry", unique_together={("remote_id", "feed")}
         ),
     ]

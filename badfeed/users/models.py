@@ -6,4 +6,4 @@ from badfeed.feeds.models import Feed
 
 class BadFeedUser(AbstractUser):
 
-    watching = models.ManyToManyField(Feed, related_name='watched_by')
+    watching = models.ManyToManyField(Feed, related_name="watched_by")

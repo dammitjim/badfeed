@@ -8,7 +8,7 @@ from badfeed.core.models import Slugified
 
 class Feed(Slugified, models.Model):
     """A feed of content."""
-    slugify_source = 'name'
+    slugify_source = "name"
 
     name = models.CharField(max_length=255)
     url = models.CharField(max_length=1000, unique=True)
@@ -23,7 +23,7 @@ class Feed(Slugified, models.Model):
 
 class Entry(Slugified, models.Model):
     """An entry into a Feed."""
-    slugify_source = 'name'
+    slugify_source = "name"
 
     name = models.CharField(max_length=1000)
     url = models.CharField(max_length=1000)
@@ -36,22 +36,18 @@ class Entry(Slugified, models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     date_first_published = models.DateTimeField(blank=True, null=True)
 
-    feed = models.ForeignKey(
-        Feed,
-        on_delete=models.CASCADE,
-        related_name='entries'
-    )
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
 
     def get_additional_slug_filters(self):
         """Used by Slugified to help generate the slug by uniqueness."""
-        return {'feed': self.feed}
+        return {"feed": self.feed}
 
     def __str__(self):
         return self.name
 
     class Meta:
-        verbose_name_plural = 'entries'
-        unique_together = (('remote_id', 'feed'), )
+        verbose_name_plural = "entries"
+        unique_together = (("remote_id", "feed"),)
 
 
 class Media(models.Model):
@@ -65,24 +61,28 @@ class Media(models.Model):
         return self.url
 
     class Meta:
-        verbose_name_plural = 'media'
+        verbose_name_plural = "media"
 
 
-class EntryState(models.Model):
-    """Track the entry state in relation to the user, can be saved or archived."""
-    STATE_SAVED = 'saved'
-    STATE_DONE = 'done'
-    STATE_PINNED = 'pinned'
-    STATE_NA = 'na'
-    STATE_CHOICES = (
-        (STATE_SAVED, 'Saved'),
-        (STATE_DONE, 'Done'),
-        (STATE_PINNED, 'Pinned'),
-        (STATE_NA, 'N/A')
-    )
-    state = models.CharField(max_length=255, choices=STATE_CHOICES, default=STATE_NA)
-    viewed = models.BooleanField(default=False)
-    date_updated = models.DateTimeField(auto_now_add=True)
+# class EntryState(models.Model):
+#     """Track the entry state in relation to the user, can be saved or archived."""
+#     STATE_SAVED = "saved"
+#     STATE_DONE = "done"
+#     STATE_PINNED = "pinned"
+#     STATE_NA = "na"
+#     STATE_CHOICES = (
+#         (STATE_SAVED, "Saved"),
+#         (STATE_DONE, "Done"),
+#         (STATE_PINNED, "Pinned"),
+#         (STATE_NA, "N/A"),
+#     )
+#     state = models.CharField(max_length=255, choices=STATE_CHOICES, default=STATE_NA)
+#     viewed = models.BooleanField(default=False)
+#     date_updated = models.DateTimeField(auto_now_add=True)
 
-    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='entry_state')
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='entry_state')
+#     entry = models.ForeignKey(
+#         Entry, on_delete=models.CASCADE, related_name="entry_state"
+#     )
+#     user = models.ForeignKey(
+#         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="entry_state"
+#     )
