@@ -1,9 +1,9 @@
 from django.db import models
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from badfeed.core.models import Slugified
-# from .models import User
 
 
 class Feed(Slugified, models.Model):
@@ -68,19 +68,21 @@ class Media(models.Model):
         verbose_name_plural = 'media'
 
 
-# class EntryState(models.Model):
-#     """Track the entry state in relation to the user, can be saved or archived."""
-#     STATE_SAVED = 'saved'
-#     STATE_ARCHIVED = 'archived'
-#     STATE_NA = 'na'
-#     STATE_CHOICES = (
-#         (STATE_SAVED, 'Saved'),
-#         (STATE_ARCHIVED, 'Archived'),
-#         (STATE_NA, 'N/A')
-#     )
-#     state = models.CharField(max_length=255, choices=STATE_CHOICES, default=STATE_NA)
-#     viewed = models.BooleanField(default=False)
-#     date_updated = models.DateTimeField(auto_now_add=True)
+class EntryState(models.Model):
+    """Track the entry state in relation to the user, can be saved or archived."""
+    STATE_SAVED = 'saved'
+    STATE_DONE = 'done'
+    STATE_PINNED = 'pinned'
+    STATE_NA = 'na'
+    STATE_CHOICES = (
+        (STATE_SAVED, 'Saved'),
+        (STATE_DONE, 'Done'),
+        (STATE_PINNED, 'Pinned'),
+        (STATE_NA, 'N/A')
+    )
+    state = models.CharField(max_length=255, choices=STATE_CHOICES, default=STATE_NA)
+    viewed = models.BooleanField(default=False)
+    date_updated = models.DateTimeField(auto_now_add=True)
 
-#     entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='entry_state')
-#     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='entry_state')
+    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name='entry_state')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='entry_state')
