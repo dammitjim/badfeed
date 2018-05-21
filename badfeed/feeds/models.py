@@ -1,88 +1,90 @@
 from django.db import models
-from django.conf import settings
-from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 from badfeed.core.models import Slugified
 
 
 class Feed(Slugified, models.Model):
     """A feed of content."""
-    slugify_source = "name"
+    slugify_source = "title"
 
-    name = models.CharField(max_length=255)
-    url = models.CharField(max_length=1000, unique=True)
+    title = models.CharField(max_length=255)
+    link = models.CharField(max_length=1000, unique=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     date_last_scraped = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
+        return self.title
+
+
+class Author(models.Model):
+    """An author of an entry."""
+    name = models.CharField(max_length=255)
+    link = models.CharField(max_length=1000, blank=True, null=True)
+    email = models.CharField(max_length=250, blank=True, null=True)
+
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="authors")
+
+    def __str__(self):
         return self.name
+
+
+class Tag(models.Model):
+    """A tag to categories entries."""
+    term = models.CharField(max_length=255)
+    scheme = models.CharField(max_length=255, blank=True, null=True)
+    label = models.CharField(max_length=1000, blank=True, null=True)
+
+    feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="tags")
+
+    def __str__(self):
+        return self.term
 
 
 class Entry(Slugified, models.Model):
     """An entry into a Feed."""
-    slugify_source = "name"
+    slugify_source = "title"
 
-    name = models.CharField(max_length=1000)
-    url = models.CharField(max_length=1000)
-    remote_id = models.CharField(max_length=1000)
-
+    title = models.CharField(max_length=1000)
+    link = models.CharField(max_length=1000)
+    guid = models.CharField(max_length=1000)
     content = models.TextField()
-    teaser = models.TextField(blank=True, null=True)
+    summary = models.TextField(blank=True, null=True)
 
+    date_published = models.DateTimeField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    date_first_published = models.DateTimeField(blank=True, null=True)
 
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
+
+    author = models.ForeignKey(
+        Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries"
+    )
+    contributors = models.ManyToManyField(Author, related_name="contributed_to")
+
+    tags = models.ManyToManyField(Tag, related_name="entries")
 
     def get_additional_slug_filters(self):
         """Used by Slugified to help generate the slug by uniqueness."""
         return {"feed": self.feed}
 
     def __str__(self):
-        return self.name
+        return self.title
 
     class Meta:
         verbose_name_plural = "entries"
-        unique_together = (("remote_id", "feed"),)
+        unique_together = (("guid", "feed"),)
 
 
-class Media(models.Model):
-    """A media file, often contained within an enclosure."""
-    url = models.CharField(max_length=1000)
-    type = models.CharField(max_length=1000)
+class Enclosure(models.Model):
+    """A media file."""
+    href = models.CharField(max_length=1000)
+    file_type = models.CharField(max_length=1000)
+    # TODO this seems dirty but I'm not sure of the best way to handle this
+    length = models.TextField()
 
     entry = models.ForeignKey(Entry, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.url
-
-    class Meta:
-        verbose_name_plural = "media"
-
-
-# class EntryState(models.Model):
-#     """Track the entry state in relation to the user, can be saved or archived."""
-#     STATE_SAVED = "saved"
-#     STATE_DONE = "done"
-#     STATE_PINNED = "pinned"
-#     STATE_NA = "na"
-#     STATE_CHOICES = (
-#         (STATE_SAVED, "Saved"),
-#         (STATE_DONE, "Done"),
-#         (STATE_PINNED, "Pinned"),
-#         (STATE_NA, "N/A"),
-#     )
-#     state = models.CharField(max_length=255, choices=STATE_CHOICES, default=STATE_NA)
-#     viewed = models.BooleanField(default=False)
-#     date_updated = models.DateTimeField(auto_now_add=True)
-
-#     entry = models.ForeignKey(
-#         Entry, on_delete=models.CASCADE, related_name="entry_state"
-#     )
-#     user = models.ForeignKey(
-#         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="entry_state"
-#     )
+        return self.href

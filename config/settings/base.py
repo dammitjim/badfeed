@@ -95,7 +95,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-RQ_ENABLED = env.bool("RQ_ENABLED", default=True)
+RQ_ENABLED = env.bool("RQ_ENABLED", default=False)
 RQ_QUEUES = {
     "default": {
         "HOST": env.str("REDIS_HOST", default="localhost"),

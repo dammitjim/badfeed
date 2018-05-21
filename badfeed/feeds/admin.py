@@ -1,44 +1,68 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import Feed, Entry, Media
+from .models import Author, Feed, Entry, Enclosure, Tag
 
 
 @admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
     list_display = (
-        "name",
+        "title",
         "slug",
-        "url",
+        "link",
         "date_last_scraped",
         "date_created",
         "date_modified",
     )
     list_filter = ("date_created", "date_modified", "date_last_scraped")
-    search_fields = ("name",)
+    search_fields = ("title",)
 
 
 @admin.register(Entry)
 class EntryAdmin(admin.ModelAdmin):
     list_display = (
-        "name",
-        "url",
+        "title",
+        "link",
         "feed",
-        "date_first_published",
+        "date_published",
         "date_created",
         "date_modified",
     )
-    list_filter = ("date_created", "date_modified", "date_first_published", "feed")
-    search_fields = ("name",)
-    ordering = ("-date_first_published",)
+    list_filter = ("date_created", "date_modified", "date_published", "feed")
+    search_fields = ("title",)
+    ordering = ("-date_published",)
 
 
-# @admin.register(EntryState)
-# class UserEntryStateAdmin(admin.ModelAdmin):
-#     pass
+@admin.register(Enclosure)
+class EnclosureAdmin(admin.ModelAdmin):
+    list_display = (
+        'href',
+        'file_type',
+        'entry',
+    )
+    list_filter = ("entry", )
+    ordering = ("-entry__date_published",)
 
 
-@admin.register(Media)
-class MediaAdmin(admin.ModelAdmin):
-    list_display = ("url", "type", "entry")
-    list_filter = ("entry",)
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = (
+        'term',
+        'scheme',
+        'feed'
+    )
+    list_filter = ('feed', )
+    ordering = ('term', )
+
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'link',
+        'feed',
+    )
+    list_filter = (
+        'feed',
+    )
+    ordering = ('name', )
