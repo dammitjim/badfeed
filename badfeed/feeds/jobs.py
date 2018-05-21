@@ -32,6 +32,7 @@ class EntryIngest:
         raise ContentErrorException('no content')
 
     def get_summary(self):
+        # TODO: the summary needs to strip all html tags i think
         if hasattr(self._ingest_entry, 'summary_detail'):
             return clean_content(self._ingest_entry.summary_detail.value).article
 
@@ -59,6 +60,7 @@ class EntryIngest:
         return self._ingest_entry.link
 
     def get_author(self, commit=True):
+        # TODO: some feeds have comma separated author fields, check if a comma is present and split on it
         if hasattr(self._ingest_entry, "author_detail"):
             try:
                 db_author = Author.objects.get(
