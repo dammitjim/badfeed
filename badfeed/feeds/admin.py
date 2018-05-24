@@ -35,34 +35,20 @@ class EntryAdmin(admin.ModelAdmin):
 
 @admin.register(Enclosure)
 class EnclosureAdmin(admin.ModelAdmin):
-    list_display = (
-        'href',
-        'file_type',
-        'entry',
-    )
-    list_filter = ("entry", )
+    list_display = ("href", "file_type", "entry")
+    list_filter = ("entry",)
     ordering = ("-entry__date_published",)
 
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    list_display = (
-        'term',
-        'scheme',
-        'feed'
-    )
-    list_filter = ('feed', )
-    ordering = ('term', )
+    list_display = ("term", "scheme", "feed")
+    list_filter = ("feed",)
+    ordering = ("term",)
 
 
 @admin.register(Author)
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = (
-        'name',
-        'link',
-        'feed',
-    )
-    list_filter = (
-        'feed',
-    )
-    ordering = ('name', )
+    list_display = ("name", "link", "feed")
+    list_filter = ("feed",)
+    ordering = ("name",)

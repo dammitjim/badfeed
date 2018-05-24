@@ -22,7 +22,7 @@ class EntryList(ListAPIView):
     serializer_class = _serializers.EntrySerializer
 
     def get_queryset(self):
-        return get_list_or_404(_models.Entry, feed=self.kwargs['feed_pk'])
+        return get_list_or_404(_models.Entry, feed=self.kwargs["feed_pk"])
 
 
 class EntryDetail(RetrieveAPIView):
@@ -30,4 +30,6 @@ class EntryDetail(RetrieveAPIView):
     serializer_class = _serializers.EntrySerializer
 
     def get_object(self):
-        return get_object_or_404(_models.Entry, feed=self.kwargs['feed_pk'], pk=self.kwargs['pk'])
+        return get_object_or_404(
+            _models.Entry, feed=self.kwargs["feed_pk"], pk=self.kwargs["pk"]
+        )

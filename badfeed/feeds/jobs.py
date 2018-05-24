@@ -29,17 +29,17 @@ class EntryIngest:
         if hasattr(self._ingest_entry, "description"):
             return clean_content(self._ingest_entry.description).article
 
-        raise ContentErrorException('no content')
+        raise ContentErrorException("no content")
 
     def get_summary(self):
         # TODO: the summary needs to strip all html tags i think
-        if hasattr(self._ingest_entry, 'summary_detail'):
+        if hasattr(self._ingest_entry, "summary_detail"):
             return clean_content(self._ingest_entry.summary_detail.value).article
 
-        if hasattr(self._ingest_entry, 'summary'):
+        if hasattr(self._ingest_entry, "summary"):
             return clean_content(self._ingest_entry.summary).article
 
-        return ''
+        return ""
 
     def get_guid(self):
         if not hasattr(self._ingest_entry, "id"):
