@@ -1,10 +1,12 @@
 from django.urls import path
 
+import badfeed.feeds.views as _views
+
 
 app_name = "feeds"
 urlpatterns = [
-    # path('<str:feed>/<str:slug>/', EntryView.as_view(), name='entry'),
-    # path('<str:feed>/<str:slug>/archive/', EntryArchiveView.as_view(), name='entry_archive'),
-    # path('<str:feed>/<str:slug>/save/', EntrySaveView.as_view(), name='entry_save'),
-    # path('<str:slug>/', FeedView.as_view(), name='feed'),
+    path('', _views.FeedList.as_view(), name='feed_list'),
+    path('<int:pk>/', _views.FeedDetail.as_view(), name='feed_detail'),
+    path('<int:feed_pk>/entries/', _views.EntryList.as_view(), name='entry_list'),
+    path('<int:feed_pk>/entries/<int:pk>/', _views.EntryDetail.as_view(), name='entry_detail'),
 ]
