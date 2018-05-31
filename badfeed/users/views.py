@@ -19,8 +19,5 @@ class WatchedFeedsList(ListAPIView):
             feed = Feed.objects.get(pk=request.data["feed"])
         except Feed.DoesNotExist:
             raise Http404
-        if self.request.user.watching.filter(pk=feed.pk):
-            return rest_message("You are already watching this feed.", status.HTTP_400_BAD_REQUEST)
-        self.request.user.watching.add(feed)
-        self.request.user.save()
+        self.request.user.watch(feed)
         return rest_message(f"You are now watching {feed.title}", status.HTTP_201_CREATED)
