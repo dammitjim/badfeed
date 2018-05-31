@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 from envparse import env
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -65,6 +67,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = "users.BadFeedUser"
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -105,5 +108,10 @@ RQ_QUEUES = {
     }
 }
 
-REST_FRAMEWORK = {"DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination", "PAGE_SIZE": 10}
-AUTH_USER_MODEL = "users.BadFeedUser"
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_jwt.authentication.JSONWebTokenAuthentication",),
+    "PAGE_SIZE": 10,
+}
+JWT_AUTH = {"JWT_EXPIRATION_DELTA": timedelta(hours=1), "JWT_ALLOW_REFRESH": True}
