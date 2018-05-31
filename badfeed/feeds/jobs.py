@@ -14,7 +14,6 @@ log = logging.getLogger("rq.worker")
 
 
 class EntryIngest:
-
     def __init__(self, feed):
         self.feed = feed
         self._ingest_entry = None
@@ -63,9 +62,7 @@ class EntryIngest:
         # TODO: some feeds have comma separated author fields, check if a comma is present and split on it
         if hasattr(self._ingest_entry, "author_detail"):
             try:
-                db_author = Author.objects.get(
-                    name=self._ingest_entry.author_detail.name, feed=self.feed
-                )
+                db_author = Author.objects.get(name=self._ingest_entry.author_detail.name, feed=self.feed)
             except Author.DoesNotExist:
                 db_author = Author(
                     name=self._ingest_entry.author_detail.name,
@@ -79,9 +76,7 @@ class EntryIngest:
 
         if hasattr(self._ingest_entry, "author"):
             try:
-                db_author = Author.objects.get(
-                    name=self._ingest_entry.author, feed=self.feed
-                )
+                db_author = Author.objects.get(name=self._ingest_entry.author, feed=self.feed)
             except Author.DoesNotExist:
                 db_author = Author(name=self._ingest_entry.author, feed=self.feed)
                 if commit:
@@ -120,12 +115,7 @@ class EntryIngest:
             try:
                 db_tag = Tag.objects.get(term=term, feed=self.feed)
             except Tag.DoesNotExist:
-                db_tag = Tag(
-                    term=term,
-                    scheme=tag.get("scheme", ""),
-                    label=tag.get("label", ""),
-                    feed=self.feed,
-                )
+                db_tag = Tag(term=term, scheme=tag.get("scheme", ""), label=tag.get("label", ""), feed=self.feed)
                 if commit:
                     db_tag.save()
             tags.append(db_tag)
@@ -136,12 +126,7 @@ class EntryIngest:
             return None
 
         enclosures = [
-            Enclosure(
-                href=enclosure.href,
-                length=enclosure.length,
-                file_type=enclosure.type,
-                entry=entry,
-            )
+            Enclosure(href=enclosure.href, length=enclosure.length, file_type=enclosure.type, entry=entry)
             for enclosure in self._ingest_entry.enclosures
         ]
 

@@ -23,6 +23,7 @@ model-mommy = "*"
 pytest = "*"
 pytest-django = "*"
 black = "==18.5b0"
+pre-commit = "*"
 
 [requires]
 python_version = "3.6"

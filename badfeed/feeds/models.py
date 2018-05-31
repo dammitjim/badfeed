@@ -5,6 +5,7 @@ from badfeed.core.models import Slugified
 
 class Feed(Slugified, models.Model):
     """A feed of content."""
+
     slugify_source = "title"
 
     title = models.CharField(max_length=255)
@@ -20,6 +21,7 @@ class Feed(Slugified, models.Model):
 
 class Author(models.Model):
     """An author of an entry."""
+
     name = models.CharField(max_length=255)
     link = models.CharField(max_length=1000, blank=True, null=True)
     email = models.CharField(max_length=250, blank=True, null=True)
@@ -32,6 +34,7 @@ class Author(models.Model):
 
 class Tag(models.Model):
     """A tag to categories entries."""
+
     term = models.CharField(max_length=255)
     scheme = models.CharField(max_length=255, blank=True, null=True)
     label = models.CharField(max_length=1000, blank=True, null=True)
@@ -44,6 +47,7 @@ class Tag(models.Model):
 
 class Entry(Slugified, models.Model):
     """An entry into a Feed."""
+
     slugify_source = "title"
 
     title = models.CharField(max_length=1000)
@@ -58,9 +62,7 @@ class Entry(Slugified, models.Model):
 
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
 
-    author = models.ForeignKey(
-        Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries"
-    )
+    author = models.ForeignKey(Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries")
     contributors = models.ManyToManyField(Author, related_name="contributed_to")
 
     tags = models.ManyToManyField(Tag, related_name="entries")
@@ -79,6 +81,7 @@ class Entry(Slugified, models.Model):
 
 class Enclosure(models.Model):
     """A media file."""
+
     href = models.CharField(max_length=1000)
     file_type = models.CharField(max_length=1000)
     # TODO this seems dirty but I'm not sure of the best way to handle this

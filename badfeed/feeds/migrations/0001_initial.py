@@ -14,15 +14,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Author",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("name", models.CharField(max_length=255)),
                 ("link", models.CharField(blank=True, max_length=1000, null=True)),
                 ("email", models.CharField(blank=True, max_length=250, null=True)),
@@ -31,15 +23,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Enclosure",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("href", models.CharField(max_length=1000)),
                 ("file_type", models.CharField(max_length=1000)),
                 ("length", models.TextField()),
@@ -48,15 +32,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Entry",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("slug", models.SlugField(blank=True, max_length=200)),
                 ("title", models.CharField(max_length=1000)),
                 ("link", models.CharField(max_length=1000)),
@@ -76,27 +52,14 @@ class Migration(migrations.Migration):
                         to="feeds.Author",
                     ),
                 ),
-                (
-                    "contributors",
-                    models.ManyToManyField(
-                        related_name="contributed_to", to="feeds.Author"
-                    ),
-                ),
+                ("contributors", models.ManyToManyField(related_name="contributed_to", to="feeds.Author")),
             ],
             options={"verbose_name_plural": "entries"},
         ),
         migrations.CreateModel(
             name="Feed",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("slug", models.SlugField(blank=True, max_length=200)),
                 ("title", models.CharField(max_length=255)),
                 ("link", models.CharField(max_length=1000, unique=True)),
@@ -109,24 +72,14 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Tag",
             fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("term", models.CharField(max_length=255)),
                 ("scheme", models.CharField(blank=True, max_length=255, null=True)),
                 ("label", models.CharField(blank=True, max_length=1000, null=True)),
                 (
                     "feed",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="tags",
-                        to="feeds.Feed",
+                        on_delete=django.db.models.deletion.CASCADE, related_name="tags", to="feeds.Feed"
                     ),
                 ),
             ],
@@ -135,33 +88,23 @@ class Migration(migrations.Migration):
             model_name="entry",
             name="feed",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="entries",
-                to="feeds.Feed",
+                on_delete=django.db.models.deletion.CASCADE, related_name="entries", to="feeds.Feed"
             ),
         ),
         migrations.AddField(
-            model_name="entry",
-            name="tags",
-            field=models.ManyToManyField(related_name="entries", to="feeds.Tag"),
+            model_name="entry", name="tags", field=models.ManyToManyField(related_name="entries", to="feeds.Tag")
         ),
         migrations.AddField(
             model_name="enclosure",
             name="entry",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="feeds.Entry"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="feeds.Entry"),
         ),
         migrations.AddField(
             model_name="author",
             name="feed",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="authors",
-                to="feeds.Feed",
+                on_delete=django.db.models.deletion.CASCADE, related_name="authors", to="feeds.Feed"
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name="entry", unique_together={("guid", "feed")}
-        ),
+        migrations.AlterUniqueTogether(name="entry", unique_together={("guid", "feed")}),
     ]

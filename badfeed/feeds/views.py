@@ -7,28 +7,33 @@ import badfeed.feeds.serializers as _serializers
 
 class FeedList(ListAPIView):
     """List of all Feed objects."""
+
     queryset = _models.Feed.objects.all()
     serializer_class = _serializers.FeedSerializer
 
 
 class BaseFeedDetail(RetrieveAPIView):
     """Detail of a single Feed object."""
+
     queryset = _models.Feed.objects.all()
     serializer_class = _serializers.FeedSerializer
 
 
 class FeedDetailByPK(BaseFeedDetail):
     """Detail of a single Feed object by PK"""
+
     pass
 
 
 class FeedDetailBySlug(BaseFeedDetail):
     """Detail of a single Feed object by slug"""
+
     lookup_field = "slug"
 
 
 class BaseEntryList(ListAPIView):
     """List of Entry objects for Feed."""
+
     serializer_class = _serializers.EntrySerializer
 
 
@@ -48,9 +53,8 @@ class EntryListBySlug(BaseEntryList):
 
 class EntryDetail(RetrieveAPIView):
     """List of Entry objects for Feed."""
+
     serializer_class = _serializers.EntrySerializer
 
     def get_object(self):
-        return get_object_or_404(
-            _models.Entry, feed=self.kwargs["feed_pk"], pk=self.kwargs["pk"]
-        )
+        return get_object_or_404(_models.Entry, feed=self.kwargs["feed_pk"], pk=self.kwargs["pk"])

@@ -12,9 +12,7 @@ class Slugified(models.Model):
         """Check for presence of slugify_source."""
         super().__init__(*args, **kwargs)
         if not hasattr(self, self.SLUG_SOURCE_ATTR):
-            raise FieldError(
-                f"{self.__class__} requires {self.SLUG_SOURCE_ATTR} to use Slugified abstract class."
-            )
+            raise FieldError(f"{self.__class__} requires {self.SLUG_SOURCE_ATTR} to use Slugified abstract class.")
 
     def save(self, *args, **kwargs):
         """Use the lookup result from self.slugify_source to load our slug."""
@@ -31,11 +29,7 @@ class Slugified(models.Model):
         """Generate slug from slug source defined on concrete class."""
         append = f"-{extra}" if extra > 0 else ""
         slug = slugify(slug_source, to_lower=True) + append
-        while (
-            type(self)
-            .objects.filter(slug=slug, **self.get_additional_slug_filters())
-            .exists()
-        ):
+        while type(self).objects.filter(slug=slug, **self.get_additional_slug_filters()).exists():
             # OH BABY
             return self.generate_slug(slug_source, extra=extra + 1)
         return slug

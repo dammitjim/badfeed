@@ -17,7 +17,6 @@ def entry():
 
 @pytest.mark.django_db
 class TestFeedModel:
-
     def test_dunder_str(self, feed):
         """The model should render the name as the string."""
         assert str(feed) == feed.title
@@ -29,7 +28,6 @@ class TestFeedModel:
 
 @pytest.mark.django_db
 class TestEntryModel:
-
     def test_dunder_str(self, entry):
         """The model should render the name as the string."""
         assert str(entry) == entry.title
@@ -37,7 +35,7 @@ class TestEntryModel:
     def test_clean_checks_duplicates(self, entry):
         """A duplicated entry within a feed should raise an IntegrityError."""
         with pytest.raises(IntegrityError):
-            entry_dup = mommy.make(Entry, guid=entry.guid, feed=entry.feed)
+            mommy.make(Entry, guid=entry.guid, feed=entry.feed)
 
     def test_slug_handles_duplicates_per_feed(self, entry):
         """A duplicated slug should not raise, should handle."""
