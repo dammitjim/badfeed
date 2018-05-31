@@ -110,8 +110,8 @@ RQ_QUEUES = {
 
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_jwt.authentication.JSONWebTokenAuthentication",),
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["rest_framework_jwt.authentication.JSONWebTokenAuthentication"],
     "PAGE_SIZE": 10,
 }
 JWT_AUTH = {"JWT_EXPIRATION_DELTA": timedelta(hours=1), "JWT_ALLOW_REFRESH": True}
