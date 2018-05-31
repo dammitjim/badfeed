@@ -24,7 +24,7 @@ class FeedDetailByPK(BaseFeedDetail):
 
 class FeedDetailBySlug(BaseFeedDetail):
     """Detail of a single Feed object by slug"""
-    lookup_field = 'slug'
+    lookup_field = "slug"
 
 
 class BaseEntryList(ListAPIView):
@@ -36,14 +36,14 @@ class EntryListByPK(BaseEntryList):
     """List of Entry objects for Feed."""
 
     def get_queryset(self):
-        return get_list_or_404(_models.Entry, feed=self.kwargs['feed_pk'])
+        return get_list_or_404(_models.Entry, feed=self.kwargs["feed_pk"])
 
 
 class EntryListBySlug(BaseEntryList):
     """List of Entry objects for Feed by slug."""
 
     def get_queryset(self):
-        return get_list_or_404(_models.Entry, feed__slug=self.kwargs['feed_slug'])
+        return get_list_or_404(_models.Entry, feed__slug=self.kwargs["feed_slug"])
 
 
 class EntryDetail(RetrieveAPIView):
