@@ -11,7 +11,7 @@ class BadFeedUser(AbstractUser):
     email = models.EmailField(unique=True)
     watching = models.ManyToManyField(Feed, related_name="watched_by", blank=True)
 
-    def watch(self, feed, commit=True):
+    def watch(self, feed, commit=False):
         if self.watching.filter(pk=feed.pk).exists():
             raise ParseError("You are already watching this feed.")
 
