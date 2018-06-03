@@ -17,6 +17,7 @@ django-rq = "*"
 python-dateutil = "*"
 gunicorn = "*"
 djangorestframework-jwt = "*"
+raven = "*"
 
 [dev-packages]
 "flake8" = "*"
