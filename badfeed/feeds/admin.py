@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import Author, Feed, Entry, Enclosure, Tag
+from .models import Author, Feed, Entry, Enclosure, Tag, EntryState
 
 
 @admin.register(Feed)
@@ -17,6 +17,11 @@ class EntryAdmin(admin.ModelAdmin):
     list_filter = ("date_created", "date_modified", "date_published", "feed")
     search_fields = ("title",)
     ordering = ("-date_published",)
+
+
+@admin.register(EntryState)
+class EntryStateAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Enclosure)

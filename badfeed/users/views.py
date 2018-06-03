@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from badfeed.core.utils import rest_message
 from badfeed.feeds.models import Feed, Entry
-from badfeed.feeds.serializers import FeedSerializer, EntrySerializer, EntryDetailSerializer
+from badfeed.feeds.serializers import FeedSerializer, EntrySerializer, MyEntryDetailSerializer
 
 
 class MyFeedList(ListAPIView):
@@ -47,7 +47,7 @@ class MyFeedEntryList(ListAPIView):
 
 
 class MyFeedEntryDetail(RetrieveAPIView):
-    serializer_class = EntryDetailSerializer
+    serializer_class = MyEntryDetailSerializer
 
     def get_object(self):
         return get_object_or_404(

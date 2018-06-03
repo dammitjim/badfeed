@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from badfeed.core.models import Slugified
@@ -77,6 +78,26 @@ class Entry(Slugified, models.Model):
     class Meta:
         verbose_name_plural = "entries"
         unique_together = (("guid", "feed"),)
+
+
+class EntryState(models.Model):
+    """The user state of an entry.
+
+    TODO needs work, something can be unread and saved simultaneously
+    """
+
+    STATE_UNREAD = "unread"
+    STATE_READ = "read"
+    STATE_SAVED = "saved"
+    STATE_DELETED = "deleted"
+    STATE_CHOICES = [(STATE_UNREAD, "Unread"), (STATE_READ, "Read"), (STATE_SAVED, "Saved"), (STATE_DELETED, "Deleted")]
+    state = models.CharField(choices=STATE_CHOICES, max_length=50)
+
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_modified = models.DateTimeField(auto_now=True)
+
+    entry = models.ForeignKey(Entry, related_name="states", on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="entry_states", on_delete=models.CASCADE)
 
 
 class Enclosure(models.Model):

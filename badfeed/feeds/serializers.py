@@ -46,3 +46,18 @@ class EntryDetailSerializer(EntrySerializer):
     class Meta:
         model = EntrySerializer.Meta.model
         fields = EntrySerializer.Meta.fields + ["author", "contributors", "tags", "enclosures"]
+
+
+class EntryStateSerializer(ModelSerializer):
+    class Meta:
+        model = _models.EntryState
+        fields = ["id", "state", "entry"]
+
+
+class MyEntryDetailSerializer(EntryDetailSerializer):
+
+    states = EntryStateSerializer(many=True)
+
+    class Meta:
+        model = EntryDetailSerializer.Meta.model
+        fields = EntryDetailSerializer.Meta.fields + ["states"]
