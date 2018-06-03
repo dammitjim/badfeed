@@ -87,7 +87,7 @@ class Enclosure(models.Model):
     # TODO this seems dirty but I'm not sure of the best way to handle this
     length = models.TextField()
 
-    entry = models.ForeignKey(Entry, on_delete=models.CASCADE)
+    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name="enclosures")
 
     def __str__(self):
         return self.href

@@ -54,7 +54,7 @@ class EntryListBySlug(BaseEntryList):
 class EntryDetail(RetrieveAPIView):
     """List of Entry objects for Feed."""
 
-    serializer_class = _serializers.EntrySerializer
+    serializer_class = _serializers.EntryDetailSerializer
 
     def get_object(self):
         return get_object_or_404(_models.Entry, feed=self.kwargs["feed_pk"], pk=self.kwargs["pk"])
