@@ -18,6 +18,7 @@ python-dateutil = "*"
 gunicorn = "*"
 djangorestframework-jwt = "*"
 raven = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 "flake8" = "*"
