@@ -27,6 +27,7 @@ class Slugified(models.Model):
 
     def generate_slug(self, slug_source, extra=0):
         """Generate slug from slug source defined on concrete class."""
+        # TODO can replace this with unique slugify
         append = f"-{extra}" if extra > 0 else ""
         slug = slugify(slug_source, to_lower=True) + append
         while type(self).objects.filter(slug=slug, **self.get_additional_slug_filters()).exists():
