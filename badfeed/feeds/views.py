@@ -11,6 +11,12 @@ class FeedList(ListAPIView):
     queryset = _models.Feed.objects.all()
     serializer_class = _serializers.FeedSerializer
 
+    def get_queryset(self):
+        term = self.request.query_params.get("search", None)
+        if term:
+            return _models.Feed.objects.filter(title__icontains=term)
+        return self.queryset
+
 
 class BaseFeedDetail(RetrieveAPIView):
     """Detail of a single Feed object."""
