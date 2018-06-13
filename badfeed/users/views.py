@@ -54,7 +54,7 @@ class MyFeedEntryDetail(RetrieveAPIView):
         entry = self.get_object()
         state = request.data.get("state", None)
         try:
-            entry.mark_as(state, self.request.user)
+            entry.add_state(state, self.request.user)
         except InvalidStateException:
             return rest_message(f"{state} is not a valid entry state.", status.HTTP_400_BAD_REQUEST)
         response = self.get(request, *args, **kwargs)

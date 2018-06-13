@@ -73,7 +73,7 @@ class Entry(Slugified, models.Model):
         """Used by Slugified to help generate the slug by uniqueness."""
         return {"feed": self.feed}
 
-    def mark_as(self, state, user):
+    def add_state(self, state, user):
         """Mark the entry as the given state for user."""
         if not EntryState.is_valid_state(state):
             raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
