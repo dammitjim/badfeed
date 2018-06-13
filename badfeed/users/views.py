@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from badfeed.core.utils import rest_message
+from badfeed.feeds.exceptions import InvalidStateException
 from badfeed.feeds.models import Feed, Entry
 from badfeed.feeds.serializers import MyFeedSerializer, EntrySerializer, MyEntryDetailSerializer
 
@@ -51,7 +52,11 @@ class MyFeedEntryDetail(RetrieveAPIView):
     def post(self, request, *args, **kwargs):
         """Add to the user state of the entry."""
         entry = self.get_object()
-        entry.mark_as(request.data.get("state", None), self.request.user)
+        state = request.data.get("state", None)
+        try:
+            entry.mark_as(state, self.request.user)
+        except InvalidStateException:
+            return rest_message(f"{state} is not a valid entry state.", status.HTTP_400_BAD_REQUEST)
         response = self.get(request, *args, **kwargs)
         response.status_code = status.HTTP_201_CREATED
         return response
@@ -59,10 +64,14 @@ class MyFeedEntryDetail(RetrieveAPIView):
     def delete(self, request, *args, **kwargs):
         """Delete a entry state.
 
-        TODO this shouldnt really be here, should be nested resource
+        TODO this shouldn't really be here, should be nested resource
         """
         entry = self.get_object()
-        entry.remove_state(request.data.get("state", None), self.request.user)
+        state = request.data.get("state", None)
+        try:
+            entry.remove_state(state, self.request.user)
+        except InvalidStateException:
+            return rest_message(f"{state} is not a valid entry state.", status.HTTP_400_BAD_REQUEST)
         return rest_message(f"State modified for {entry.title}", status.HTTP_200_OK)
 
 

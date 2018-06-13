@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db import models
 
 from badfeed.core.models import Slugified
+from badfeed.feeds.exceptions import InvalidStateException
 
 
 class Feed(Slugified, models.Model):
@@ -75,13 +76,13 @@ class Entry(Slugified, models.Model):
     def mark_as(self, state, user):
         """Mark the entry as the given state for user."""
         if not EntryState.is_valid_state(state):
-            raise ValueError(f"Invalid state {state} when attempting to update entry state")
+            raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
         return EntryState.objects.create(entry=self, user=user, state=state)
 
     def remove_state(self, state, user):
         """Remove the given state for user."""
         if not EntryState.is_valid_state(state):
-            raise ValueError(f"Invalid state {state} when attempting to update entry state")
+            raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
         entry_state = EntryState.objects.get(entry=self, user=user, state=state)
         entry_state.delete()
 

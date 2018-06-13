@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Feed, Entry, EntryState
 
 
 @pytest.fixture
@@ -32,6 +32,11 @@ def watched_feed(user):
 @pytest.fixture
 def watched_entry(watched_feed):
     return mommy.make(Entry, feed=watched_feed, title="My Amazing Entry!")
+
+
+@pytest.fixture
+def entry_state(watched_entry, user):
+    return mommy.make(EntryState, entry=watched_entry, user=user)
 
 
 @pytest.fixture

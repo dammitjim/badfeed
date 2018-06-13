@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 import pytest
 
+from badfeed.feeds.models import EntryState
 from badfeed.feeds.serializers import MyFeedSerializer
 
 
@@ -95,7 +96,7 @@ class TestMyFeedDetail:
 
 @pytest.mark.django_db
 class TestMyFeedEntryDetail:
-    # TODO test POST and DELETE
+    # TODO look in pytest docs for a way to not have to duplicate the URL every time
 
     def test_get_requires_authorization(self, anon_client, watched_feed, watched_entry):
         """When logged out, the endpoint should require authorization."""
@@ -114,3 +115,31 @@ class TestMyFeedEntryDetail:
         url = reverse("users:feed_entry_detail", kwargs={"slug": watched_entry.slug, "feed_slug": watched_feed.slug})
         response = anon_client.delete(url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_post_invalid_state_400s(self, auth_client, watched_feed, watched_entry):
+        """An invalid state should raise a 400."""
+        url = reverse("users:feed_entry_detail", kwargs={"slug": watched_entry.slug, "feed_slug": watched_feed.slug})
+        response = auth_client.post(url, data={"state": "butts"})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_delete_invalid_state_400s(self, auth_client, watched_feed, watched_entry):
+        """An invalid state should raise a 400."""
+        url = reverse("users:feed_entry_detail", kwargs={"slug": watched_entry.slug, "feed_slug": watched_feed.slug})
+        response = auth_client.delete(url, data={"state": "butts"})
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_post_creates_entry_state(self, auth_client, watched_feed, watched_entry, user):
+        """A POST request should create a new entry state object."""
+        url = reverse("users:feed_entry_detail", kwargs={"slug": watched_entry.slug, "feed_slug": watched_feed.slug})
+        assert not EntryState.objects.filter(entry=watched_entry, user=user, state=EntryState.STATE_SAVED).exists()
+        response = auth_client.post(url, data={"state": EntryState.STATE_SAVED})
+        assert response.status_code == status.HTTP_201_CREATED
+        assert EntryState.objects.filter(entry=watched_entry, user=user, state=EntryState.STATE_SAVED).exists()
+
+    def test_delete_creates_entry_state(self, auth_client, watched_feed, watched_entry, user, entry_state):
+        """A DELETE request should remove a entry state object."""
+        url = reverse("users:feed_entry_detail", kwargs={"slug": watched_entry.slug, "feed_slug": watched_feed.slug})
+        assert EntryState.objects.filter(entry=watched_entry, user=user, state=entry_state.state).exists()
+        response = auth_client.delete(url, data={"state": entry_state.state})
+        assert response.status_code == status.HTTP_200_OK
+        assert not EntryState.objects.filter(entry=watched_entry, user=user, state=EntryState.STATE_SAVED).exists()
