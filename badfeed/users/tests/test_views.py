@@ -43,3 +43,36 @@ class TestMyFeedList:
         content = response.data["results"]
         assert MyFeedSerializer(watched_feed).data in content
         assert MyFeedSerializer(feed).data not in content
+
+
+@pytest.mark.django_db
+class TestMyFeedDetail:
+    def test_get_requires_authorization(self, anon_client, watched_feed):
+        """When logged out, the endpoint should require authorization."""
+        url = reverse("users:feed_detail", kwargs={"slug": watched_feed.slug})
+        response = anon_client.get(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_responds_200_when_logged_in(self, auth_client, watched_feed):
+        """When logged in, the endpoint should respond 200."""
+        url = reverse("users:feed_detail", kwargs={"slug": watched_feed.slug})
+        response = auth_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_post_requires_authorization(self, anon_client, watched_feed):
+        """When logged out, the endpoint should require authorization."""
+        url = reverse("users:feed_detail", kwargs={"slug": watched_feed.slug})
+        response = anon_client.delete(url)
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_responds_404_if_not_watching(self, auth_client, feed):
+        """When you are not following a feed, you should not see the detail."""
+        url = reverse("users:feed_detail", kwargs={"slug": feed.slug})
+        response = auth_client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_response_content(self, auth_client, watched_feed):
+        """Ensure the response content is serialized appropriately."""
+        url = reverse("users:feed_detail", kwargs={"slug": watched_feed.slug})
+        response = auth_client.get(url)
+        assert response.data == MyFeedSerializer(watched_feed).data

@@ -30,12 +30,10 @@ class MyFeedDetail(RetrieveAPIView):
     def get_object(self):
         return get_object_or_404(Feed, slug=self.kwargs["slug"], watched_by=self.request.user)
 
-    def patch(self, request, *args, **kwargs):
-        """Patch the user state of the feed."""
-        return rest_message("Patch me daddy", status.HTTP_200_OK)
-
     def delete(self, request, *args, **kwargs):
         """Delete stops the feed being watched."""
+        # feed = self.get_object()
+
         return rest_message("Delet ths", status.HTTP_200_OK)
 
 
