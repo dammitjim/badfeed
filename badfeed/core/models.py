@@ -4,6 +4,7 @@ from slugify import slugify
 
 
 class Slugified(models.Model):
+    # TODO: much of this can be removed for UniqueSlugify in awesome-slugify
     SLUG_SOURCE_ATTR = "slugify_source"
 
     slug = models.SlugField(blank=True, max_length=200)
