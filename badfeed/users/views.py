@@ -1,4 +1,3 @@
-from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import ListAPIView, RetrieveAPIView
@@ -15,11 +14,8 @@ class MyFeedList(ListAPIView):
     def get_queryset(self):
         return Feed.objects.filter(watched_by=self.request.user)
 
-    def post(self, request, *args, **kwargs):
-        try:
-            feed = Feed.objects.get(pk=request.data.get("feed", None))
-        except Feed.DoesNotExist:
-            raise Http404
+    def patch(self, request, *args, **kwargs):
+        feed = get_object_or_404(Feed, pk=request.data.get("feed", None))
         self.request.user.watch(feed, commit=True)
         return rest_message(f"You are now watching {feed.title}", status.HTTP_201_CREATED)
 
@@ -32,9 +28,9 @@ class MyFeedDetail(RetrieveAPIView):
 
     def delete(self, request, *args, **kwargs):
         """Delete stops the feed being watched."""
-        # feed = self.get_object()
-
-        return rest_message("Delet ths", status.HTTP_200_OK)
+        feed = self.get_object()
+        request.user.unwatch(feed, commit=True)
+        return rest_message(f"You are no longer watching {feed.title}", status.HTTP_200_OK)
 
 
 class MyFeedEntryList(ListAPIView):
@@ -52,9 +48,22 @@ class MyFeedEntryDetail(RetrieveAPIView):
             Entry, slug=self.kwargs["slug"], feed__slug=self.kwargs["feed_slug"], feed__watched_by=self.request.user
         )
 
-    def patch(self, request, *args, **kwargs):
-        """Patch the user state of the entry."""
-        return rest_message("Patch me daddy", status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        """Add to the user state of the entry."""
+        entry = self.get_object()
+        entry.mark_as(request.data.get("state", None), self.request.user)
+        response = self.get(request, *args, **kwargs)
+        response.status_code = status.HTTP_201_CREATED
+        return response
+
+    def delete(self, request, *args, **kwargs):
+        """Delete a entry state.
+
+        TODO this shouldnt really be here, should be nested resource
+        """
+        entry = self.get_object()
+        entry.remove_state(request.data.get("state", None), self.request.user)
+        return rest_message(f"State modified for {entry.title}", status.HTTP_200_OK)
 
 
 class MyEntryList(ListAPIView):

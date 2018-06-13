@@ -72,6 +72,19 @@ class Entry(Slugified, models.Model):
         """Used by Slugified to help generate the slug by uniqueness."""
         return {"feed": self.feed}
 
+    def mark_as(self, state, user):
+        """Mark the entry as the given state for user."""
+        if not EntryState.is_valid_state(state):
+            raise ValueError(f"Invalid state {state} when attempting to update entry state")
+        return EntryState.objects.create(entry=self, user=user, state=state)
+
+    def remove_state(self, state, user):
+        """Remove the given state for user."""
+        if not EntryState.is_valid_state(state):
+            raise ValueError(f"Invalid state {state} when attempting to update entry state")
+        entry_state = EntryState.objects.get(entry=self, user=user, state=state)
+        entry_state.delete()
+
     def __str__(self):
         return self.title
 
@@ -105,6 +118,10 @@ class EntryState(models.Model):
 
     entry = models.ForeignKey(Entry, related_name="states", on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="entry_states", on_delete=models.CASCADE)
+
+    @staticmethod
+    def is_valid_state(state):
+        return state in dict(EntryState.STATE_CHOICES)
 
     class Meta:
         unique_together = (("state", "user", "entry"),)

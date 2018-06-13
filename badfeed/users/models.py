@@ -18,3 +18,11 @@ class BadFeedUser(AbstractUser):
         self.watching.add(feed)
         if commit:
             self.save()
+
+    def unwatch(self, feed, commit=False):
+        if not self.watching.filter(pk=feed.pk).exists():
+            raise ParseError("You are not watching this feed")
+
+        self.watching.remove(feed)
+        if commit:
+            self.save()
