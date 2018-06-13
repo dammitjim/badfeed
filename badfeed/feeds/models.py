@@ -90,7 +90,14 @@ class EntryState(models.Model):
     STATE_READ = "read"
     STATE_SAVED = "saved"
     STATE_DELETED = "deleted"
-    STATE_CHOICES = [(STATE_UNREAD, "Unread"), (STATE_READ, "Read"), (STATE_SAVED, "Saved"), (STATE_DELETED, "Deleted")]
+    STATE_PINNED = "pinned"
+    STATE_CHOICES = [
+        (STATE_UNREAD, "Unread"),
+        (STATE_READ, "Read"),
+        (STATE_SAVED, "Saved"),
+        (STATE_DELETED, "Deleted"),
+        (STATE_PINNED, "Pinned"),
+    ]
     state = models.CharField(choices=STATE_CHOICES, max_length=50)
 
     date_created = models.DateTimeField(auto_now_add=True)
