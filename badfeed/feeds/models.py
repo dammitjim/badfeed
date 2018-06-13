@@ -83,7 +83,7 @@ class Entry(Slugified, models.Model):
 class EntryState(models.Model):
     """The user state of an entry.
 
-    TODO needs work, something can be unread and saved simultaneously
+    TODO unread state doesn't need to exist
     """
 
     STATE_UNREAD = "unread"
@@ -105,6 +105,9 @@ class EntryState(models.Model):
 
     entry = models.ForeignKey(Entry, related_name="states", on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="entry_states", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (("state", "user", "entry"),)
 
 
 class Enclosure(models.Model):

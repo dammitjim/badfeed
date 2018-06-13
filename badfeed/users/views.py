@@ -17,7 +17,7 @@ class MyFeedList(ListAPIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            feed = Feed.objects.get(pk=request.data["feed"])
+            feed = Feed.objects.get(pk=request.data.get("feed", None))
         except Feed.DoesNotExist:
             raise Http404
         self.request.user.watch(feed, commit=True)

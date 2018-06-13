@@ -1,19 +1,7 @@
 from rest_framework.exceptions import ParseError
-from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed
 from badfeed.users.models import BadFeedUser
-
-
-@pytest.fixture
-def feed():
-    return mommy.make(Feed, title="My amazing feed!")
-
-
-@pytest.fixture
-def user():
-    return mommy.make(BadFeedUser, username="BadUser")
 
 
 @pytest.mark.django_db

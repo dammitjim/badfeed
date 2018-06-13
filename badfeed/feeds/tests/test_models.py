@@ -1,8 +1,9 @@
+from django.conf import settings
 from django.db.utils import IntegrityError
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Feed, Entry, EntryState
 
 
 @pytest.fixture
@@ -15,6 +16,11 @@ def entry():
     return mommy.make(Entry, title="My Amazing Entry!", _fill_optional=True)
 
 
+@pytest.fixture
+def user():
+    return mommy.make(settings.AUTH_USER_MODEL)
+
+
 @pytest.mark.django_db
 class TestFeedModel:
     def test_dunder_str(self, feed):
@@ -24,6 +30,25 @@ class TestFeedModel:
     def test_generated_slug(self, feed):
         """The model should generate an appropriate slug."""
         assert feed.slug == "my-amazing-feed"
+
+
+@pytest.mark.django_db
+class TestEntryStateModel:
+    def test_unique_together_constraint(self, entry, user):
+        """The model should forbid state, user, entry combo duplicates."""
+        mommy.make(EntryState, entry=entry, state=EntryState.STATE_PINNED, user=user)
+        with pytest.raises(IntegrityError):
+            mommy.make(EntryState, entry=entry, state=EntryState.STATE_PINNED, user=user)
+
+    def test_pinned_and_read(self, entry, user):
+        """The model should allow an entry to be both pinned and read."""
+        mommy.make(EntryState, entry=entry, state=EntryState.STATE_PINNED, user=user)
+        mommy.make(EntryState, entry=entry, state=EntryState.STATE_READ, user=user)
+
+    def test_saved_and_pinned(self, entry, user):
+        """The model should allow an entry to be both pinned and saved."""
+        mommy.make(EntryState, entry=entry, state=EntryState.STATE_PINNED, user=user)
+        mommy.make(EntryState, entry=entry, state=EntryState.STATE_SAVED, user=user)
 
 
 @pytest.mark.django_db

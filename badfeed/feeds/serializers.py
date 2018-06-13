@@ -32,6 +32,8 @@ class MyFeedSerializer(FeedSerializer):
     unread = SerializerMethodField()
 
     def get_unread(self, obj):
+        if "request" not in self.context:
+            return 0
         return obj.entries.count() - obj.entries.filter(states__user=self.context["request"].user).count()
 
     class Meta:
