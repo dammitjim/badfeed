@@ -63,4 +63,4 @@ class MyEntryList(ListAPIView):
     serializer_class = EntrySerializer
 
     def get_queryset(self):
-        return Entry.objects.filter(feed__watched_by=self.request.user)
+        return Entry.objects.filter(feed__watched_by=self.request.user).order_by("-date_published")
