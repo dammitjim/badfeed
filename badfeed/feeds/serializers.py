@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 import badfeed.feeds.models as _models
 
@@ -25,6 +25,18 @@ class FeedSerializer(ModelSerializer):
     class Meta:
         model = _models.Feed
         fields = ["id", "slug", "title", "link", "date_last_scraped"]
+
+
+class MyFeedSerializer(FeedSerializer):
+
+    unread = SerializerMethodField()
+
+    def get_unread(self, obj):
+        return obj.entries.count() - obj.entries.filter(states__user=self.context["request"].user).count()
+
+    class Meta:
+        model = FeedSerializer.Meta.model
+        fields = FeedSerializer.Meta.fields + ["unread"]
 
 
 class EntrySerializer(ModelSerializer):

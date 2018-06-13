@@ -5,12 +5,12 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 from badfeed.core.utils import rest_message
 from badfeed.feeds.models import Feed, Entry
-from badfeed.feeds.serializers import FeedSerializer, EntrySerializer, MyEntryDetailSerializer
+from badfeed.feeds.serializers import MyFeedSerializer, EntrySerializer, MyEntryDetailSerializer
 
 
 class MyFeedList(ListAPIView):
 
-    serializer_class = FeedSerializer
+    serializer_class = MyFeedSerializer
 
     def get_queryset(self):
         return Feed.objects.filter(watched_by=self.request.user)
@@ -25,7 +25,7 @@ class MyFeedList(ListAPIView):
 
 
 class MyFeedDetail(RetrieveAPIView):
-    serializer_class = FeedSerializer
+    serializer_class = MyFeedSerializer
 
     def get_object(self):
         return get_object_or_404(Feed, slug=self.kwargs["slug"], watched_by=self.request.user)
