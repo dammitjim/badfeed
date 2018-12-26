@@ -45,3 +45,64 @@ class TestRegisterView:
         response = client.post(self.url, {})
         assert response.status_code == 200
         assert len(BadFeedUser.objects.all()) == 0
+
+
+@pytest.mark.django_db
+class TestLoginView:
+    def setup(self):
+        self.url = reverse("users:login")
+
+    def test_logged_in_users_redirect(self, auth_client):
+        """Logged in users should not be able to log in again."""
+        response = auth_client.get(self.url)
+        assert response.status_code == 302
+        str_msg = [m.message for m in get_messages(response.wsgi_request)._queued_messages]
+        assert views.LoginView.Messages.ALREADY_LOGGED_IN in str_msg
+
+    def test_renders(self, client):
+        """The login view should render."""
+        response = client.get(self.url)
+        assert response.status_code == 200
+
+    def test_valid_form_logs_user_in(self, client, user):
+        """The view should log the user in."""
+        new_pass = "Password123"
+        user.set_password(new_pass)
+        user.save()
+
+        client.post(self.url, {"username": user.username, "password": new_pass})
+
+        client_user = get_user(client)
+        assert client_user.is_authenticated
+        assert client_user == user
+
+    def test_invalid_form_fails(self, client, user):
+        """The view should log the user in."""
+        new_pass = "Password123"
+        user.set_password(new_pass)
+        user.save()
+
+        client.post(self.url, {"username": user.username, "password": "NotMyPassword"})
+
+        client_user = get_user(client)
+        assert not client_user.is_authenticated
+
+
+@pytest.mark.django_db
+class TestLogoutView:
+    def setup(self):
+        self.url = reverse("users:logout")
+
+    def test_logs_user_out(self, auth_client):
+        """The view should log out the user."""
+        client_user = get_user(auth_client)
+        assert client_user.is_authenticated
+        auth_client.get(self.url)
+        client_user = get_user(auth_client)
+        assert not client_user.is_authenticated
+
+    def test_redirects_after_logout(self, auth_client):
+        """Should redirect to a non-default page on logout."""
+        response = auth_client.get(self.url)
+        assert response.status_code == 302
+        assert response.url == "/"
