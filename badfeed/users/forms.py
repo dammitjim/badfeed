@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 from badfeed.users.models import BadFeedUser
 
@@ -33,3 +33,11 @@ class RegistrationForm(UserCreationForm):
 
     class Errors:
         EMAIL_MISMATCH = "The two email fields didn't match."
+
+
+class ExtendedAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        """Load some additional attributes into the form."""
+        super().__init__(*args, **kwargs)
+        self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "Username"})
+        self.fields["password"].widget.attrs.update({"class": "form-control", "placeholder": "Password"})
