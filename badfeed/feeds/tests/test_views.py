@@ -45,4 +45,4 @@ class TestFeedSearch:
         """The view should require a user to be logged in."""
         response = client.get(self._search_url("test"))
         assert response.status_code == 302
-        assert response.url == f"{settings.LOGIN_URL}?next=/feeds/search/%3Fterm%3Dtest"
+        assert response.url == f"{settings.LOGIN_URL}?next=/f/search/%3Fterm%3Dtest"
