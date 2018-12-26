@@ -9,7 +9,6 @@ from badfeed.users.models import BadFeedUser
 
 @pytest.mark.django_db
 class TestRegisterView:
-
     def setup(self):
         self.url = reverse("users:register")
 
@@ -38,7 +37,7 @@ class TestRegisterView:
         client.post(self.url, registration_form_data)
         user = get_user(client)
         assert user.is_authenticated
-        assert user.username == registration_form_data['username']
+        assert user.username == registration_form_data["username"]
 
     def test_invalid_form_doesnt_create_user(self, client):
         """If the form is invalid, nothing should be created."""

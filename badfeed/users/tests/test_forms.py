@@ -6,7 +6,6 @@ from badfeed.users.models import BadFeedUser
 
 @pytest.mark.django_db
 class TestRegistrationForm:
-
     def test_valid_data(self, registration_form_data):
         """Should work with valid data."""
         form = RegistrationForm(registration_form_data)
@@ -36,7 +35,9 @@ class TestRegistrationForm:
         """Successful validation creates a user."""
         form = RegistrationForm(data=registration_form_data)
         form.save()
-        assert BadFeedUser.objects.filter(username=registration_form_data["username"], email=registration_form_data["email"]).exists()
+        assert BadFeedUser.objects.filter(
+            username=registration_form_data["username"], email=registration_form_data["email"]
+        ).exists()
 
     def test_email_taken(self, registration_form_data, user):
         """Emails already registered do not create users."""
