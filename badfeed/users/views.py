@@ -54,7 +54,7 @@ class RegisterView(FormView):
 
     def dispatch(self, request, *args, **kwargs):
         """Redirect already logged in users if they try to be cheeky."""
-        if self.request.user.is_authenticated:
+        if request.user.is_authenticated:
             messages.info(request, self.Messages.ALREADY_REGISTERED)
             return redirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)

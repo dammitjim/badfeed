@@ -40,12 +40,12 @@ def entry_state(watched_entry, user):
 
 
 @pytest.fixture
-def anon_client():
+def anon_api_client():
     return APIClient()
 
 
 @pytest.fixture
-def auth_client(user):
+def aith_api_client(user):
     client = APIClient()
     client.force_authenticate(user)
     return client
