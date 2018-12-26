@@ -7,6 +7,18 @@ from badfeed.users.models import BadFeedUser
 class RegistrationForm(UserCreationForm):
     confirm_email = forms.EmailField(required=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._load_widgets()
+
+    def _load_widgets(self):
+        """Loads in some bootstrap attributes for the form elements."""
+        self.fields["confirm_email"].widget.attrs.update({"class": "form-control", "placeholder": "Confirm email"})
+        self.fields["email"].widget.attrs.update({"class": "form-control", "placeholder": "Email"})
+        self.fields["password1"].widget.attrs.update({"class": "form-control", "placeholder": "Password"})
+        self.fields["password2"].widget.attrs.update({"class": "form-control", "placeholder": "Confirm password"})
+        self.fields["username"].widget.attrs.update({"class": "form-control", "placeholder": "Username"})
+
     class Meta(UserCreationForm.Meta):
         fields = ("username", "email")
         model = BadFeedUser

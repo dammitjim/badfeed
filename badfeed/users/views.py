@@ -1,6 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
+from django.contrib.auth import login
 from django.views.generic import FormView
+from django.shortcuts import redirect
 
 from badfeed.users.forms import RegistrationForm
 
@@ -48,3 +50,20 @@ class LogoutView(auth_views.LogoutView):
 class RegisterView(FormView):
     template_name = "users/register.html"
     form_class = RegistrationForm
+    success_url = "/"
+
+    def dispatch(self, request, *args, **kwargs):
+        """Redirect already logged in users if they try to be cheeky."""
+        if self.request.user.is_authenticated:
+            messages.info(request, self.Messages.ALREADY_REGISTERED)
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Save the form and log in the user as the new account."""
+        user = form.save()
+        login(self.request, user)
+        return super().form_valid(form)
+
+    class Messages:
+        ALREADY_REGISTERED = "You are already registered."
