@@ -20,6 +20,7 @@ class Feed(SlugifiedMixin, models.Model):
 
     @staticmethod
     def slug_uniqueness_check(text, uids):
+        """Check for other feeds with this slug."""
         if text in uids:
             return False
         return not Feed.objects.filter(slug=text).exists()
@@ -72,17 +73,18 @@ class Entry(SlugifiedMixin, models.Model):
     tags = models.ManyToManyField(Tag, related_name="entries")
 
     def get_initial_slug_uids(self):
+        """Prepopulate slug uids with titles for entries in this feed.
+
+        This is required due to the `unique_together` constraint of the model.
+        """
         return [entry.title for entry in Entry.objects.filter(feed=self.feed).only("title")]
 
     @staticmethod
     def slug_uniqueness_check(text, uids):
+        """Ensure no other entries with this slug exist."""
         if text in uids:
             return False
         return not Entry.objects.filter(slug=text).exists()
-
-    def get_additional_slug_filters(self):
-        """Used by Slugified to help generate the slug by uniqueness."""
-        return {"feed": self.feed}
 
     def add_state(self, state, user):
         """Mark the entry as the given state for user."""
