@@ -7,7 +7,7 @@ import pytest
 class TestFeedList:
     @classmethod
     def setup_class(cls):
-        cls.url = reverse("feeds:feed_list")
+        cls.url = reverse("api_v1:feeds:feed_list")
 
     def test_requires_authorization(self, anon_client):
         """When logged out, the endpoint should respond unauthorized."""

@@ -1,6 +1,6 @@
 from django.urls import path
 
-import badfeed.feeds.views as _views
+import badfeed.feeds.api.views as _views
 
 
 app_name = "feeds"

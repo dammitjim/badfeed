@@ -5,7 +5,7 @@ from rest_framework.generics import ListAPIView, RetrieveAPIView
 from badfeed.core.utils import rest_message
 from badfeed.feeds.exceptions import InvalidStateException
 from badfeed.feeds.models import Feed, Entry
-from badfeed.feeds.serializers import MyFeedSerializer, EntrySerializer, MyEntryDetailSerializer
+from badfeed.feeds.api.serializers import MyFeedSerializer, EntrySerializer, MyEntryDetailSerializer
 
 
 class MyFeedList(ListAPIView):

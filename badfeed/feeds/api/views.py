@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 
 import badfeed.feeds.models as _models
-import badfeed.feeds.serializers as _serializers
+import badfeed.feeds.api.serializers as _serializers
 
 
 class FeedList(ListAPIView):
