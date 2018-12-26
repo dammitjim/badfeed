@@ -9,12 +9,12 @@ class TestFeedList:
     def setup_class(cls):
         cls.url = reverse("api_v1:feeds:feed_list")
 
-    def test_requires_authorization(self, anon_client):
+    def test_requires_authorization(self, anon_api_client):
         """When logged out, the endpoint should respond unauthorized."""
-        response = anon_client.get(self.url)
+        response = anon_api_client.get(self.url)
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_responds_200_when_logged_in(self, auth_client):
+    def test_responds_200_when_logged_in(self, auth_api_client):
         """When logged in, the endpoint should respond 200."""
-        response = auth_client.get(self.url)
+        response = auth_api_client.get(self.url)
         assert response.status_code == status.HTTP_200_OK
