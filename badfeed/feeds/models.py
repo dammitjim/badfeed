@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+import maya
 
 from badfeed.core.models import SlugifiedMixin
 from badfeed.feeds.exceptions import InvalidStateException
@@ -68,9 +69,9 @@ class Entry(SlugifiedMixin, models.Model):
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
 
     author = models.ForeignKey(Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries")
-    contributors = models.ManyToManyField(Author, related_name="contributed_to")
+    contributors = models.ManyToManyField(Author, related_name="contributed_to", blank=True)
 
-    tags = models.ManyToManyField(Tag, related_name="entries")
+    tags = models.ManyToManyField(Tag, related_name="entries", blank=True)
 
     def get_initial_slug_uids(self):
         """Prepopulate slug uids with titles for entries in this feed.
@@ -98,6 +99,14 @@ class Entry(SlugifiedMixin, models.Model):
             raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
         entry_state = EntryState.objects.get(entry=self, user=user, state=state)
         entry_state.delete()
+
+    def mark_read_by(self, user):
+        EntryState.objects.get_or_create(state=EntryState.STATE_READ, entry=self, user=user)
+
+    @property
+    def slang_date_published(self):
+        maya_dt = maya.MayaDT.from_datetime(self.date_published)
+        return maya_dt.slang_time()
 
     def __str__(self):
         return self.title

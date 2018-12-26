@@ -4,7 +4,7 @@ import random
 import itertools
 
 from django.core.management import BaseCommand
-from model_mommy.random_gen import gen_url
+from model_mommy.random_gen import gen_url, gen_datetime
 from model_mommy.recipe import Recipe, seq
 
 from badfeed.feeds.models import Feed, Entry
@@ -22,7 +22,7 @@ class Command(BaseCommand):
             random.shuffle(breeds)
 
         feed_recipe = Recipe(Feed, link=seq(gen_url()), title=itertools.cycle(breeds))
-        entry_recipe = Recipe(Entry, title=itertools.cycle(breeds), link=gen_url())
+        entry_recipe = Recipe(Entry, title=itertools.cycle(breeds), link=gen_url(), date_published=gen_datetime())
         for i in range(100):
             dog = feed_recipe.make()
             for x in range(random.randint(0, 20)):
