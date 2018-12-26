@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponseNotFound
 from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse
 from django.views.generic import ListView, DetailView
 from django.views import View
 
@@ -36,3 +37,43 @@ class EntryDetail(LoginRequiredMixin, View):
         entry = get_object_or_404(Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"])
         entry.mark_read_by(request.user)
         return redirect(entry.link)
+
+
+class EntryPin(LoginRequiredMixin, View):
+    should_pin = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.should_pin = kwargs["should_pin"]
+
+    def dispatch(self, request, *args, **kwargs):
+        feed_slug = kwargs["feed_slug"]
+        entry = get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
+
+        if self.should_pin:
+            entry.mark_pinned(request.user)
+        else:
+            entry.mark_unpinned(request.user)
+
+        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        return redirect(redirect_url)
+
+
+class EntrySave(LoginRequiredMixin, View):
+    should_save = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.should_save = kwargs["should_save"]
+
+    def dispatch(self, request, *args, **kwargs):
+        feed_slug = kwargs["feed_slug"]
+        entry = get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
+
+        if self.should_save:
+            entry.mark_saved(request.user)
+        else:
+            entry.mark_unsaved(request.user)
+
+        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        return redirect(redirect_url)

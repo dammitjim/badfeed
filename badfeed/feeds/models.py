@@ -81,7 +81,7 @@ class Entry(SlugifiedMixin, models.Model):
         return [entry.title for entry in Entry.objects.filter(feed=self.feed).only("title")]
 
     @staticmethod
-    def slug_uniqueness_check(text, uids):
+    def slug_uniqueness_check(text, uids) -> bool:
         """Ensure no other entries with this slug exist."""
         if text in uids:
             return False
@@ -101,10 +101,44 @@ class Entry(SlugifiedMixin, models.Model):
         entry_state.delete()
 
     def mark_read_by(self, user):
+        """Create an entrystate object marking this entry as having been read."""
         EntryState.objects.get_or_create(state=EntryState.STATE_READ, entry=self, user=user)
+
+    def mark_pinned(self, user):
+        """Pin the entry for the user if not already pinned."""
+        EntryState.objects.get_or_create(state=EntryState.STATE_PINNED, entry=self, user=user)
+
+    def mark_unpinned(self, user):
+        """Unpin the entry for the user."""
+        try:
+            state = EntryState.objects.get(state=EntryState.STATE_PINNED, entry=self, user=user)
+            state.delete()
+        except EntryState.DoesNotExist:
+            # TODO log attempt to delete?
+            pass
+
+    def mark_saved(self, user):
+        """Saves the entry for the user if not already saved."""
+        EntryState.objects.get_or_create(state=EntryState.STATE_SAVED, entry=self, user=user)
+
+    def mark_unsaved(self, user):
+        """Removes the saved state of an entry."""
+        try:
+            state = EntryState.objects.get(state=EntryState.STATE_SAVED, entry=self, user=user)
+            state.delete()
+        except EntryState.DoesNotExist:
+            # TODO log attempt to delete?
+            pass
+
+    def is_pinned_by(self, user) -> bool:
+        return EntryState.objects.filter(state=EntryState.STATE_PINNED, entry=self, user=user).exists()
+
+    def is_saved_by(self, user) -> bool:
+        return EntryState.objects.filter(state=EntryState.STATE_SAVED, entry=self, user=user).exists()
 
     @property
     def slang_date_published(self):
+        """Display a human readable, slang datetime."""
         maya_dt = maya.MayaDT.from_datetime(self.date_published)
         return maya_dt.slang_time()
 
