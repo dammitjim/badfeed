@@ -1,5 +1,3 @@
-from django.conf import settings
-from rest_framework.test import APIClient
 from model_mommy import mommy
 import pytest
 
@@ -12,17 +10,8 @@ def feed():
 
 
 @pytest.fixture
-def user():
-    return mommy.make(settings.AUTH_USER_MODEL, username="BadUser")
+def feed_factory():
+    def _make(**kwargs):
+        return mommy.make(Feed, **kwargs)
 
-
-@pytest.fixture
-def anon_client():
-    return APIClient()
-
-
-@pytest.fixture
-def auth_client(user):
-    client = APIClient()
-    client.force_authenticate(user)
-    return client
+    return _make

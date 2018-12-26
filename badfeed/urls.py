@@ -12,6 +12,10 @@ api_v1_patterns = (
     "api_v1",
 )
 
-urlpatterns = [path("admin/", admin.site.urls), path("api/v1/", include(api_v1_patterns))]
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("api/v1/", include(api_v1_patterns)),
+    path("feeds/", include("badfeed.feeds.urls")),
+]
 
 urlpatterns += [path("django-rq/", include("django_rq.urls"))]

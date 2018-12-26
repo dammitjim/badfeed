@@ -42,7 +42,7 @@ ROOT_URLCONF = "badfeed.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "..", "badfeed", "core", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
