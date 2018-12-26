@@ -31,6 +31,12 @@ class TestFeedModel:
         """The model should generate an appropriate slug."""
         assert feed.slug == "my-amazing-feed"
 
+    def test_handles_duplicated_slug(self):
+        """The model should generate an appropriate slug if a duplicate is found."""
+        mommy.make(Feed, title="This is only a test")
+        feed_dup = mommy.make(Feed, title="This is only a test")
+        assert feed_dup.slug == "this-is-only-a-test-1"
+
 
 @pytest.mark.django_db
 class TestEntryStateModel:
