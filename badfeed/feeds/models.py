@@ -1,14 +1,12 @@
 from django.conf import settings
 from django.db import models
 
-from badfeed.core.models import Slugified
+from badfeed.core.models import SlugifiedMixin
 from badfeed.feeds.exceptions import InvalidStateException
 
 
-class Feed(Slugified, models.Model):
+class Feed(SlugifiedMixin, models.Model):
     """A feed of content."""
-
-    slugify_source = "title"
 
     title = models.CharField(max_length=255)
     link = models.CharField(max_length=1000, unique=True)
@@ -19,6 +17,13 @@ class Feed(Slugified, models.Model):
 
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def slug_uniqueness_check(text, uids):
+        """Check for other feeds with this slug."""
+        if text in uids:
+            return False
+        return not Feed.objects.filter(slug=text).exists()
 
 
 class Author(models.Model):
@@ -47,10 +52,8 @@ class Tag(models.Model):
         return self.term
 
 
-class Entry(Slugified, models.Model):
+class Entry(SlugifiedMixin, models.Model):
     """An entry into a Feed."""
-
-    slugify_source = "title"
 
     title = models.CharField(max_length=1000)
     link = models.CharField(max_length=1000)
@@ -69,9 +72,19 @@ class Entry(Slugified, models.Model):
 
     tags = models.ManyToManyField(Tag, related_name="entries")
 
-    def get_additional_slug_filters(self):
-        """Used by Slugified to help generate the slug by uniqueness."""
-        return {"feed": self.feed}
+    def get_initial_slug_uids(self):
+        """Prepopulate slug uids with titles for entries in this feed.
+
+        This is required due to the `unique_together` constraint of the model.
+        """
+        return [entry.title for entry in Entry.objects.filter(feed=self.feed).only("title")]
+
+    @staticmethod
+    def slug_uniqueness_check(text, uids):
+        """Ensure no other entries with this slug exist."""
+        if text in uids:
+            return False
+        return not Entry.objects.filter(slug=text).exists()
 
     def add_state(self, state, user):
         """Mark the entry as the given state for user."""
