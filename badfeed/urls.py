@@ -16,6 +16,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include(api_v1_patterns)),
     path("feeds/", include("badfeed.feeds.urls")),
+    path("", include("badfeed.users.urls")),
 ]
 
 urlpatterns += [path("django-rq/", include("django_rq.urls"))]
