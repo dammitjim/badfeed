@@ -19,6 +19,7 @@ gunicorn = "*"
 djangorestframework-jwt = "*"
 raven = "*"
 django-cors-headers = "*"
+maya = "*"
 
 [dev-packages]
 "flake8" = "*"
