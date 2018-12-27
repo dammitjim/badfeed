@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 from envparse import env
 
@@ -18,8 +17,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # third party
-    "corsheaders",
-    "rest_framework",
     "django_rq",
     # internal
     "badfeed.users",
@@ -27,7 +24,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -109,16 +105,3 @@ RQ_QUEUES = {
         "DEFAULT_TIMEOUT": 360,
     }
 }
-
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
-    "EXCEPTION_HANDLER": "badfeed.core.exceptions.status_code_exception_handler",
-    "PAGE_SIZE": 10,
-}
-
-JWT_AUTH = {"JWT_EXPIRATION_DELTA": timedelta(hours=1), "JWT_ALLOW_REFRESH": True}

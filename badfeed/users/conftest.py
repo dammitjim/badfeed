@@ -1,5 +1,4 @@
 from django.conf import settings
-from rest_framework.test import APIClient
 from model_mommy import mommy
 import pytest
 
@@ -37,15 +36,3 @@ def watched_entry(watched_feed):
 @pytest.fixture
 def entry_state(watched_entry, user):
     return mommy.make(EntryState, entry=watched_entry, user=user)
-
-
-@pytest.fixture
-def anon_api_client():
-    return APIClient()
-
-
-@pytest.fixture
-def aith_api_client(user):
-    client = APIClient()
-    client.force_authenticate(user)
-    return client

@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from rest_framework.exceptions import ParseError
-
 from badfeed.feeds.models import Feed
 
 
@@ -13,7 +11,7 @@ class BadFeedUser(AbstractUser):
 
     def watch(self, feed, commit=False):
         if self.watching.filter(pk=feed.pk).exists():
-            raise ParseError("You are already watching this feed.")
+            raise ValueError("You are already watching this feed.")
 
         self.watching.add(feed)
         if commit:
@@ -21,7 +19,7 @@ class BadFeedUser(AbstractUser):
 
     def unwatch(self, feed, commit=False):
         if not self.watching.filter(pk=feed.pk).exists():
-            raise ParseError("You are not watching this feed")
+            raise ValueError("You are not watching this feed")
 
         self.watching.remove(feed)
         if commit:
