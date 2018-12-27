@@ -41,6 +41,34 @@ class EntryOffloadView(LoginRequiredMixin, View):
         return HttpResponseRedirect(entry.link)
 
 
+class FeedWatchToggleView(LoginRequiredMixin, View):
+    should_watch = False
+
+    def __init__(self, *args, **kwargs):
+        """Adds a flag signifying if this view should watch or unwatch the feed.
+
+        This is done to allow the same view be used across two different URLs, with the
+        difference being the business logic.
+        """
+        super().__init__(*args, **kwargs)
+        if "should_watch" not in kwargs:
+            raise ImproperlyConfigured("should_watch is a required parameter of FeedWatchToggleView")
+        self.should_watch = kwargs["should_watch"]
+
+    def get(self, *args, **kwargs):
+        """Pin or unpin the entry, redirect back to the feed,"""
+        feed_slug = kwargs["slug"]
+        feed = get_object_or_404(Feed, slug=feed_slug)
+
+        if self.should_watch:
+            self.request.user.watch(feed)
+        else:
+            self.request.user.unwatch(feed)
+
+        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        return redirect(redirect_url)
+
+
 class EntryPinToggleView(LoginRequiredMixin, View):
     should_pin = False
 

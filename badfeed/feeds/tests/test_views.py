@@ -5,7 +5,7 @@ from django.urls import reverse
 import pytest
 
 from badfeed.feeds.models import EntryState
-from badfeed.feeds.views import EntryPinToggleView, EntrySaveToggleView
+from badfeed.feeds.views import EntryPinToggleView, EntrySaveToggleView, FeedWatchToggleView
 
 
 @pytest.mark.django_db
@@ -206,3 +206,55 @@ class TestEntrySaveToggleView:
         response = auth_client.get(url)
         assert response.status_code == 302
         assert response.url == reverse("feeds:detail", kwargs={"slug": entry.feed.slug})
+
+
+@pytest.mark.django_db
+class TestFeedWatchToggleView:
+    def _get_watch_url(self, feed):
+        return reverse("feeds:watch", kwargs={"slug": feed.slug})
+
+    def _get_unwatch_url(self, feed):
+        return reverse("feeds:unwatch", kwargs={"slug": feed.slug})
+
+    def test_required_kwargs(self):
+        """The view requires the `should_save` kwarg."""
+        with pytest.raises(ImproperlyConfigured):
+            FeedWatchToggleView()
+
+    def test_requires_login(self, client, feed):
+        """Must require an authenticated session to access."""
+        url = self._get_watch_url(feed)
+        response = client.get(url)
+        assert response.status_code == 302
+        assert response.url == f"{settings.LOGIN_URL}?next={url}"
+
+    def test_object_not_found_404s(self, auth_client, feed):
+        """If an object cannot be matched via slugs, return 404."""
+        url = self._get_watch_url(feed)
+        feed.delete()
+        response = auth_client.get(url)
+        assert response.status_code == 404
+
+    def test_should_save_creates_state(self, auth_client, feed):
+        """If should_save is true, create the corresponding state object."""
+        user = get_user(auth_client)
+        assert not feed.is_watched_by(user)
+        url = self._get_watch_url(feed)
+        auth_client.get(url)
+        assert feed.is_watched_by(user)
+
+    def test_unsave_deletes_state(self, auth_client, feed):
+        """If should_save is false, the corresponding state is deleted."""
+        user = get_user(auth_client)
+        user.watch(feed)
+        assert feed.is_watched_by(user)
+        url = self._get_unwatch_url(feed)
+        auth_client.get(url)
+        assert not feed.is_watched_by(user)
+
+    def test_redirect_to_feed(self, auth_client, feed):
+        """If all goes well, redirect to the feed."""
+        url = self._get_watch_url(feed)
+        response = auth_client.get(url)
+        assert response.status_code == 302
+        assert response.url == reverse("feeds:detail", kwargs={"slug": feed.slug})

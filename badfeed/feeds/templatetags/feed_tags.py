@@ -11,3 +11,8 @@ def pin_button(context, entry):
 @register.inclusion_tag("feeds/tags/save_button.html", takes_context=True)
 def save_button(context, entry):
     return {"is_saved": entry.is_saved_by(context["request"].user), "entry": entry}
+
+
+@register.inclusion_tag("feeds/tags/watch_button.html", takes_context=True)
+def watch_button(context, feed):
+    return {"is_watched": feed.is_watched_by(context["request"].user), "feed": feed}

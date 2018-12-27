@@ -2,11 +2,14 @@ from django.urls import path
 
 from badfeed.feeds import views
 
+# TODO these url patterns may need refactoring at some point
 
 app_name = "feeds"
 urlpatterns = [
     path("search/", views.FeedSearch.as_view(), name="search"),
     path("<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
+    path("<slug:slug>/watch/", views.FeedWatchToggleView.as_view(should_watch=True), name="watch"),
+    path("<slug:slug>/unwatch/", views.FeedWatchToggleView.as_view(should_watch=False), name="unwatch"),
     path("<slug:feed_slug>/<slug:entry_slug>/read/", views.EntryOffloadView.as_view(), name="entry_read"),
     path(
         "<slug:feed_slug>/<slug:entry_slug>/pin/", views.EntryPinToggleView.as_view(should_pin=True), name="entry_pin"

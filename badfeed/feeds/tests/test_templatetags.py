@@ -60,3 +60,31 @@ class TestSaveButton:
 
         expected_url = reverse("feeds:entry_save", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
         assert expected_url in output
+
+
+@pytest.mark.django_db
+class TestWatchButton:
+    def setup(self):
+        self.template = Template("{% load feed_tags %}{% watch_button feed %}")
+
+    @pytest.fixture()
+    def authenticated_request(self, user):
+        request = RequestFactory().get("/")
+        request.user = user
+        return request
+
+    def test_is_watched(self, feed_factory, authenticated_request):
+        """If watched, should have an option to unpin."""
+        feed = feed_factory()
+        authenticated_request.user.watch(feed)
+
+        output = self.template.render(Context({"request": authenticated_request, "feed": feed}))
+
+        expected_url = reverse("feeds:unwatch", kwargs={"slug": feed.slug})
+        assert expected_url in output
+
+    def test_is_not_watched(self, feed, authenticated_request):
+        """If not watched, should have an option to pin."""
+        output = self.template.render(Context({"request": authenticated_request, "feed": feed}))
+        expected_url = reverse("feeds:watch", kwargs={"slug": feed.slug})
+        assert expected_url in output
