@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http.response import HttpResponseNotFound
+from django.http.response import HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic import ListView, DetailView
@@ -27,16 +27,16 @@ class FeedSearch(LoginRequiredMixin, ListView):
         return {"search_term": self.request.GET["term"], **ctx}
 
 
-class FeedDetail(LoginRequiredMixin, DetailView):
+class FeedDetailView(LoginRequiredMixin, DetailView):
     model = Feed
     template_name = "feeds/detail.html"
 
 
-class EntryDetail(LoginRequiredMixin, View):
-    def dispatch(self, request, *args, **kwargs):
+class EntryOffloadView(LoginRequiredMixin, View):
+    def get(self, *args, **kwargs):
         entry = get_object_or_404(Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"])
-        entry.mark_read_by(request.user)
-        return redirect(entry.link)
+        entry.mark_read_by(self.request.user)
+        return HttpResponseRedirect(entry.link)
 
 
 class EntryPin(LoginRequiredMixin, View):
