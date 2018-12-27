@@ -23,6 +23,11 @@ def entry():
 
 
 @pytest.fixture()
+def entry_fill():
+    return mommy.make(Entry, _fill_optional=True)
+
+
+@pytest.fixture()
 def entry_factory(feed):
     def _make(**kwargs):
         return mommy.make(Entry, feed=feed, **kwargs)
