@@ -26,6 +26,9 @@ class Feed(SlugifiedMixin, models.Model):
             return False
         return not Feed.objects.filter(slug=text).exists()
 
+    def is_watched_by(self, user) -> bool:
+        return user in self.watched_by.all()
+
 
 class Author(models.Model):
     """An author of an entry."""

@@ -21,6 +21,15 @@ class TestFeedModel:
         feed_dup = mommy.make(Feed, title="This is only a test")
         assert feed_dup.slug == "this-is-only-a-test-1"
 
+    def test_is_watched_by(self, feed, user):
+        """If the user is watching the feed, return True."""
+        user.watch(feed)
+        assert feed.is_watched_by(user)
+
+    def test_is_watched_by_no_found(self, feed, user):
+        """Feeds are not watched by default"""
+        assert not feed.is_watched_by(user)
+
 
 @pytest.mark.django_db
 class TestEntryStateModel:

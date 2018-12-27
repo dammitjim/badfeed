@@ -1,7 +1,7 @@
 {% extends "layouts/fluid.html" %}
 {% load feed_tags %}
 {% block main %}
-    <h1>{{ object.title }}</h1>
+    <h1>{{ object.title }} <small>{% watch_button feed %}</small></h1>
     {% for entry in feed.entries.all %}
         <div class="card mb-3">
             <div class="card-body">
