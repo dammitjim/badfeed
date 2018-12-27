@@ -5,7 +5,7 @@ from django.urls import reverse
 import pytest
 
 from badfeed.feeds.models import EntryState
-from badfeed.feeds.views import EntryPin
+from badfeed.feeds.views import EntryPinToggleView, EntrySaveToggleView
 
 
 @pytest.mark.django_db
@@ -99,7 +99,7 @@ class TestEntryOffloadView:
 
 
 @pytest.mark.django_db
-class TestEntryPin:
+class TestEntryPinToggleView:
     def _get_pin_url(self, entry):
         return reverse("feeds:entry_pin", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
 
@@ -109,7 +109,7 @@ class TestEntryPin:
     def test_required_kwargs(self):
         """The view requires the `should_pin` kwarg."""
         with pytest.raises(ImproperlyConfigured):
-            EntryPin()
+            EntryPinToggleView()
 
     def test_requires_login(self, client, entry):
         """Must require an authenticated session to access."""
@@ -156,7 +156,7 @@ class TestEntryPin:
 
 
 @pytest.mark.django_db
-class TestEntrySave:
+class TestEntrySaveToggleView:
     def _get_save_url(self, entry):
         return reverse("feeds:entry_save", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
 
@@ -166,7 +166,7 @@ class TestEntrySave:
     def test_required_kwargs(self):
         """The view requires the `should_save` kwarg."""
         with pytest.raises(ImproperlyConfigured):
-            EntryPin()
+            EntrySaveToggleView()
 
     def test_requires_login(self, client, entry):
         """Must require an authenticated session to access."""

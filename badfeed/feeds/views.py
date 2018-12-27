@@ -41,7 +41,7 @@ class EntryOffloadView(LoginRequiredMixin, View):
         return HttpResponseRedirect(entry.link)
 
 
-class EntryPin(LoginRequiredMixin, View):
+class EntryPinToggleView(LoginRequiredMixin, View):
     should_pin = False
 
     def __init__(self, *args, **kwargs):
@@ -52,7 +52,7 @@ class EntryPin(LoginRequiredMixin, View):
         """
         super().__init__(*args, **kwargs)
         if "should_pin" not in kwargs:
-            raise ImproperlyConfigured("should_save is a required parameter of EntryPin")
+            raise ImproperlyConfigured("should_save is a required parameter of EntryPinToggleView")
         self.should_pin = kwargs["should_pin"]
 
     def get(self, *args, **kwargs):
@@ -69,7 +69,7 @@ class EntryPin(LoginRequiredMixin, View):
         return redirect(redirect_url)
 
 
-class EntrySave(LoginRequiredMixin, View):
+class EntrySaveToggleView(LoginRequiredMixin, View):
     should_save = False
 
     def __init__(self, *args, **kwargs):
@@ -80,7 +80,7 @@ class EntrySave(LoginRequiredMixin, View):
         """
         super().__init__(*args, **kwargs)
         if "should_save" not in kwargs:
-            raise ImproperlyConfigured("should_save is a required parameter of EntrySave")
+            raise ImproperlyConfigured("should_save is a required parameter of EntrySaveToggleView")
         self.should_save = kwargs["should_save"]
 
     def get(self, *args, **kwargs):
