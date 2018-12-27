@@ -3,23 +3,6 @@
 {% block main %}
     <h1>{{ object.title }} <small>{% watch_button feed %}</small></h1>
     {% for entry in feed.entries.all %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title"><a
-                        href="{% url 'feeds:entry_read' feed_slug=feed.slug entry_slug=entry.slug %}">{{ entry.title }}</a>
-                </h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }}</h6>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item"><b>Date published: </b> {{ entry.slang_date_published }}</li>
-                {% if entry.author %}
-                    <li class="list-group-item"><b>Author: </b> {{ entry.author }}</li>
-                {% endif %}
-            </ul>
-            <div class="card-body">
-                {% pin_button entry %}
-                {% save_button entry %}
-            </div>
-        </div>
+        {% include "feeds/partials/entry_row.html" with entry=entry feed=feed %}
     {% endfor %}
 {% endblock %}

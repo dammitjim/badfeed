@@ -123,3 +123,15 @@ class EntrySaveToggleView(LoginRequiredMixin, View):
 
         redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
         return redirect(redirect_url)
+
+
+class MyEntriesListView(ListView):
+    paginate_by = 5
+    template_name = "feeds/my_entries.html"
+    model = Entry
+
+    def get_queryset(self):
+        """Load all entries for the the feeds watched by the user."""
+        feeds = Feed.objects.watched_by(self.request.user)
+        entries = Entry.objects.filter(feed__in=feeds).exclude(states__isnull=False)
+        return entries.order_by("-date_published")

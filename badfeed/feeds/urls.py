@@ -6,6 +6,7 @@ from badfeed.feeds import views
 
 app_name = "feeds"
 urlpatterns = [
+    path("", views.MyEntriesListView.as_view(), name="my_entries"),
     path("search/", views.FeedSearch.as_view(), name="search"),
     path("<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
     path("<slug:slug>/watch/", views.FeedWatchToggleView.as_view(should_watch=True), name="watch"),

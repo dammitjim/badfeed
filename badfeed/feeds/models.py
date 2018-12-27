@@ -6,6 +6,11 @@ from badfeed.core.models import SlugifiedMixin
 from badfeed.feeds.exceptions import InvalidStateException
 
 
+class FeedManager(models.Manager):
+    def watched_by(self, user):
+        return self.filter(watched_by=user)
+
+
 class Feed(SlugifiedMixin, models.Model):
     """A feed of content."""
 
@@ -15,6 +20,8 @@ class Feed(SlugifiedMixin, models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     date_last_scraped = models.DateTimeField(blank=True, null=True)
+
+    objects = FeedManager()
 
     def __str__(self):
         return self.title
