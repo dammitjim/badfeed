@@ -130,6 +130,19 @@ class Entry(SlugifiedMixin, models.Model):
             # TODO log attempt to delete?
             pass
 
+    def mark_deleted(self, user):
+        """Pin the entry for the user if not already deleted."""
+        EntryState.objects.get_or_create(state=EntryState.STATE_DELETED, entry=self, user=user)
+
+    def mark_undeleted(self, user):
+        """Undelete the entry for the user."""
+        try:
+            state = EntryState.objects.get(state=EntryState.STATE_DELETED, entry=self, user=user)
+            state.delete()
+        except EntryState.DoesNotExist:
+            # TODO log attempt to delete?
+            pass
+
     def mark_saved(self, user):
         """Saves the entry for the user if not already saved."""
         EntryState.objects.get_or_create(state=EntryState.STATE_SAVED, entry=self, user=user)
@@ -148,6 +161,9 @@ class Entry(SlugifiedMixin, models.Model):
 
     def is_saved_by(self, user) -> bool:
         return EntryState.objects.filter(state=EntryState.STATE_SAVED, entry=self, user=user).exists()
+
+    def is_deleted_by(self, user) -> bool:
+        return EntryState.objects.filter(state=EntryState.STATE_DELETED, entry=self, user=user).exists()
 
     @property
     def slang_date_published(self):

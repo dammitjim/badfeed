@@ -3,6 +3,8 @@ version: '3'
 services:
   db:
     image: postgres
+  redis:
+    image: redis
   web:
     build: .
     command: bash -c "python manage.py migrate && python manage.py gen_dummy_data && python manage.py runserver 0.0.0.0:8000"
@@ -15,3 +17,30 @@ services:
     environment:
       - DATABASE_HOST=db
       - DATABASE_NAME=postgres
+      - REDIS_HOST=redis
+  rq1:
+    build: .
+    command: bash -c "python manage.py rqworker"
+    volumes:
+    - .:/code
+    depends_on:
+    - db
+    - redis
+    - web
+    environment:
+    - DATABASE_HOST=db
+    - DATABASE_NAME=postgres
+    - REDIS_HOST=redis
+  rq2:
+    build: .
+    command: bash -c "python manage.py rqworker"
+    volumes:
+    - .:/code
+    depends_on:
+    - db
+    - redis
+    - web
+    environment:
+    - DATABASE_HOST=db
+    - DATABASE_NAME=postgres
+    - REDIS_HOST=redis

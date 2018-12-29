@@ -164,3 +164,28 @@ class TestEntryModel:
         """If the state does not exist, should fail silently."""
         entry.mark_unsaved(user)
         assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED).exists()
+
+    def test_mark_deleted_creates(self, entry, user):
+        """Should create a deleted state."""
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+
+    def test_mark_deleted_get(self, entry, user):
+        """Should reuse existing state if exists."""
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+
+    def test_mark_undeleted_deletes(self, entry, user):
+        """Should delete deleted state."""
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+        entry.mark_undeleted(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()
+
+    def test_mark_undeleted_allows_state_not_exists(self, entry, user):
+        """If the state does not exist, should fail silently."""
+        entry.mark_undeleted(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()

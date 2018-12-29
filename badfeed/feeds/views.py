@@ -41,88 +41,94 @@ class EntryOffloadView(LoginRequiredMixin, View):
         return HttpResponseRedirect(entry.link)
 
 
-class FeedWatchToggleView(LoginRequiredMixin, View):
-    should_watch = False
+class ObjectActionToggleView(LoginRequiredMixin, View):
+    """DRY base class for toggle flags on models on and off."""
+
+    should_toggle = False
+
+    def get_object(self, *args, **kwargs):
+        """Return a django model instance."""
+        raise NotImplementedError()
+
+    def get_success_url(self):
+        """Redirect target after action."""
+        return reverse("feeds:my_entries")
+
+    def toggle_on(self, obj):
+        """Positive, toggle "on" action"""
+        raise NotImplementedError()
+
+    def toggle_off(self, obj):
+        """Negative, toggle "off" action"""
+        raise NotImplementedError()
+
+    def get(self, *args, **kwargs):
+        """Load the object, perform appropriate toggle action and redirect."""
+        obj = self.get_object(*args, **kwargs)
+        if self.should_toggle:
+            self.toggle_on(obj)
+        else:
+            self.toggle_off(obj)
+        return redirect(self.get_success_url())
 
     def __init__(self, *args, **kwargs):
-        """Adds a flag signifying if this view should watch or unwatch the feed.
+        """Adds a flag signifying if this view toggle.
 
         This is done to allow the same view be used across two different URLs, with the
         difference being the business logic.
         """
         super().__init__(*args, **kwargs)
-        if "should_watch" not in kwargs:
-            raise ImproperlyConfigured("should_watch is a required parameter of FeedWatchToggleView")
-        self.should_watch = kwargs["should_watch"]
+        if "should_toggle" not in kwargs:
+            raise ImproperlyConfigured("should_toggle is a required parameter")
+        self.should_watch = kwargs["should_toggle"]
 
-    def get(self, *args, **kwargs):
-        """Pin or unpin the entry, redirect back to the feed,"""
+
+class EntryDeleteToggleView(ObjectActionToggleView):
+    def get_object(self, *args, **kwargs) -> Entry:
+        feed_slug = kwargs["feed_slug"]
+        return get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
+
+    def toggle_on(self, obj: Entry):
+        obj.mark_deleted(self.request.user)
+
+    def toggle_off(self, obj: Entry):
+        obj.mark_undeleted(self.request.user)
+
+
+class FeedWatchToggleView(ObjectActionToggleView):
+    def get_object(self, *args, **kwargs) -> Feed:
         feed_slug = kwargs["slug"]
-        feed = get_object_or_404(Feed, slug=feed_slug)
+        return get_object_or_404(Feed, slug=feed_slug)
 
-        if self.should_watch:
-            self.request.user.watch(feed)
-        else:
-            self.request.user.unwatch(feed)
+    def toggle_on(self, obj: Feed):
+        self.request.user.watch(obj)
 
-        redirect_url = reverse("feeds:my_entries")
-        return redirect(redirect_url)
+    def toggle_off(self, obj: Feed):
+        self.request.user.unwatch(obj)
 
 
-class EntryPinToggleView(LoginRequiredMixin, View):
-    should_pin = False
-
-    def __init__(self, *args, **kwargs):
-        """Adds a flag signifying if this view should pin or unpin the entry.
-
-        This is done to allow the same view be used across two different URLs, with the
-        difference being the business logic.
-        """
-        super().__init__(*args, **kwargs)
-        if "should_pin" not in kwargs:
-            raise ImproperlyConfigured("should_save is a required parameter of EntryPinToggleView")
-        self.should_pin = kwargs["should_pin"]
-
-    def get(self, *args, **kwargs):
-        """Pin or unpin the entry, redirect back to the feed,"""
+class EntryPinToggleView(ObjectActionToggleView):
+    def get_object(self, *args, **kwargs) -> Entry:
         feed_slug = kwargs["feed_slug"]
-        entry = get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
+        return get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
 
-        if self.should_pin:
-            entry.mark_pinned(self.request.user)
-        else:
-            entry.mark_unpinned(self.request.user)
+    def toggle_on(self, obj: Entry):
+        obj.mark_pinned(self.request.user)
 
-        redirect_url = reverse("feeds:my_entries")
-        return redirect(redirect_url)
+    def toggle_off(self, obj: Entry):
+        obj.mark_unpinned(self.request.user)
 
 
-class EntrySaveToggleView(LoginRequiredMixin, View):
-    should_save = False
-
-    def __init__(self, *args, **kwargs):
-        """Adds a flag signifying if this view should save or unsave the entry.
-
-        This is done to allow the same view be used across two different URLs, with the
-        difference being the business logic.
-        """
-        super().__init__(*args, **kwargs)
-        if "should_save" not in kwargs:
-            raise ImproperlyConfigured("should_save is a required parameter of EntrySaveToggleView")
-        self.should_save = kwargs["should_save"]
-
-    def get(self, *args, **kwargs):
-        """Save or unsave the entry, redirect back to the feed."""
+class EntrySaveToggleView(ObjectActionToggleView):
+    def get_object(self, *args, **kwargs) -> Entry:
         feed_slug = kwargs["feed_slug"]
-        entry = get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
+        return get_object_or_404(Entry, feed__slug=feed_slug, slug=kwargs["entry_slug"])
 
-        if self.should_save:
-            entry.mark_saved(self.request.user)
-        else:
-            entry.mark_unsaved(self.request.user)
+    def toggle_on(self, obj: Entry):
+        obj.mark_saved(self.request.user)
 
-        redirect_url = reverse("feeds:my_entries")
-        return redirect(redirect_url)
+    def toggle_off(self, obj: Entry):
+        obj.mark_unsaved(self.request.user)
 
 
 class MyEntriesListView(LoginRequiredMixin, ListView):

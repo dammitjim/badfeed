@@ -63,6 +63,35 @@ class TestSaveButton:
 
 
 @pytest.mark.django_db
+class TestDeleteButton:
+    def setup(self):
+        self.template = Template("{% load feed_tags %}{% delete_button entry %}")
+
+    @pytest.fixture()
+    def authenticated_request(self, user):
+        request = RequestFactory().get("/")
+        request.user = user
+        return request
+
+    def test_is_deleted(self, entry_factory, authenticated_request):
+        """If deleted, should have an option to undelete."""
+        entry = entry_factory()
+        entry.mark_deleted(authenticated_request.user)
+
+        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+
+        expected_url = reverse("feeds:entry_undelete", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        assert expected_url in output
+
+    def test_is_not_deleted(self, entry, authenticated_request):
+        """If not deleted, should have an option to delete."""
+        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+
+        expected_url = reverse("feeds:entry_delete", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        assert expected_url in output
+
+
+@pytest.mark.django_db
 class TestWatchButton:
     def setup(self):
         self.template = Template("{% load feed_tags %}{% watch_button feed %}")

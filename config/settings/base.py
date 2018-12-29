@@ -95,7 +95,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = env.str("DJANGO_STATIC_ROOT", default="")
 MEDIA_ROOT = env.str("DJANGO_MEDIA_ROOT", default="")
 
-RQ_ENABLED = env.bool("RQ_ENABLED", default=False)
+RQ_ENABLED = env.bool("RQ_ENABLED", default=True)
 RQ_QUEUES = {
     "default": {
         "HOST": env.str("REDIS_HOST", default="localhost"),
