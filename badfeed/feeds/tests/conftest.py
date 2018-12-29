@@ -1,7 +1,7 @@
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Feed, Entry, EntryState
 
 
 @pytest.fixture
@@ -35,5 +35,22 @@ def entry_factory(feed):
         else:
             attached_feed = feed
         return mommy.make(Entry, feed=attached_feed, **kwargs)
+
+    return _make
+
+
+@pytest.fixture()
+def entry_state():
+    return mommy.make(entry_state)
+
+
+@pytest.fixture()
+def entry_state_factory(user):
+    def _make(**kwargs):
+        if "user" in kwargs:
+            attached_user = kwargs.pop("user")
+        else:
+            attached_user = user
+        return mommy.make(EntryState, user=attached_user, **kwargs)
 
     return _make

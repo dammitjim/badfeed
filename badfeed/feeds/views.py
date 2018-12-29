@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views.generic import ListView, DetailView
 from django.views import View
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Feed, Entry, EntryState
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
@@ -141,3 +141,42 @@ class MyEntriesListView(LoginRequiredMixin, ListView):
         feeds = Feed.objects.watched_by(self.request.user)
         entries = Entry.objects.filter(feed__in=feeds).exclude(states__isnull=False)
         return entries.order_by("-date_published")
+
+
+class PinnedEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "feeds/my_entries.html"
+    model = Entry
+
+    def get_queryset(self):
+        """Load all pinned entries for the user."""
+        states = EntryState.objects.filter(user=self.request.user, state=EntryState.STATE_PINNED).order_by(
+            "-date_created"
+        )
+        return Entry.objects.filter(states__in=states).order_by("-states__date_created")
+
+
+class SavedEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "feeds/my_entries.html"
+    model = Entry
+
+    def get_queryset(self):
+        """Load all pinned entries for the user."""
+        states = EntryState.objects.filter(user=self.request.user, state=EntryState.STATE_SAVED).order_by(
+            "-date_created"
+        )
+        return Entry.objects.filter(states__in=states).order_by("-states__date_created")
+
+
+class ArchivedEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "feeds/my_entries.html"
+    model = Entry
+
+    def get_queryset(self):
+        """Load all pinned entries for the user."""
+        states = EntryState.objects.filter(user=self.request.user, state=EntryState.STATE_DELETED).order_by(
+            "-date_created"
+        )
+        return Entry.objects.filter(states__in=states).order_by("-states__date_created")
