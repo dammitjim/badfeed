@@ -132,7 +132,7 @@ class EntrySaveToggleView(ObjectActionToggleView):
 
 
 class MyEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = 5
+    paginate_by = 10
     template_name = "feeds/my_entries.html"
     model = Entry
 

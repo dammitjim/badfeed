@@ -5,15 +5,8 @@
                 href="{% url 'feeds:entry_read' feed_slug=feed.slug entry_slug=entry.slug %}"
                 target="_blank">{{ entry.title }}</a>
         </h5>
-        <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }}</h6>
-    </div>
-    <ul class="list-group list-group-flush">
-        <li class="list-group-item"><b>Date published: </b> {{ entry.slang_date_published }}</li>
-        {% if entry.author %}
-            <li class="list-group-item"><b>Author: </b> {{ entry.author }}</li>
-        {% endif %}
-    </ul>
-    <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }} - {{ entry.slang_date_published }}</h6>
+        <hr />
         {% pin_button entry %}
         {% save_button entry %}
         {% delete_button entry %}
