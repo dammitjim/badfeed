@@ -152,6 +152,8 @@ class Entry(SlugifiedMixin, models.Model):
     @property
     def slang_date_published(self):
         """Display a human readable, slang datetime."""
+        if not self.date_published:
+            return "?"
         maya_dt = maya.MayaDT.from_datetime(self.date_published)
         return maya_dt.slang_time()
 

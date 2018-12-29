@@ -125,7 +125,7 @@ class EntrySaveToggleView(LoginRequiredMixin, View):
         return redirect(redirect_url)
 
 
-class MyEntriesListView(ListView):
+class MyEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 5
     template_name = "feeds/my_entries.html"
     model = Entry

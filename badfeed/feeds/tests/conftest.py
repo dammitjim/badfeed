@@ -30,6 +30,10 @@ def entry_fill():
 @pytest.fixture()
 def entry_factory(feed):
     def _make(**kwargs):
-        return mommy.make(Entry, feed=feed, **kwargs)
+        if "feed" in kwargs:
+            attached_feed = kwargs.pop("feed")
+        else:
+            attached_feed = feed
+        return mommy.make(Entry, feed=attached_feed, **kwargs)
 
     return _make
