@@ -6,6 +6,14 @@ from badfeed.core.models import SlugifiedMixin
 from badfeed.feeds.exceptions import InvalidStateException
 
 
+class FeedManager(models.Manager):
+    """Custom manager for feed model, adds utility methods."""
+
+    def watched_by(self, user):
+        """Return feeds watched by the given user."""
+        return self.filter(watched_by=user)
+
+
 class Feed(SlugifiedMixin, models.Model):
     """A feed of content."""
 
@@ -15,6 +23,8 @@ class Feed(SlugifiedMixin, models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     date_last_scraped = models.DateTimeField(blank=True, null=True)
+
+    objects = FeedManager()
 
     def __str__(self):
         return self.title
@@ -142,6 +152,8 @@ class Entry(SlugifiedMixin, models.Model):
     @property
     def slang_date_published(self):
         """Display a human readable, slang datetime."""
+        if not self.date_published:
+            return "?"
         maya_dt = maya.MayaDT.from_datetime(self.date_published)
         return maya_dt.slang_time()
 

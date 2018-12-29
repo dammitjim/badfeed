@@ -2,7 +2,7 @@ from django.db.utils import IntegrityError
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry, EntryState
+from badfeed.feeds.models import Feed, Entry, EntryState, FeedManager
 
 
 @pytest.mark.django_db
@@ -29,6 +29,20 @@ class TestFeedModel:
     def test_is_watched_by_no_found(self, feed, user):
         """Feeds are not watched by default"""
         assert not feed.is_watched_by(user)
+
+    def test_uses_custom_manager(self):
+        """The feed model should use a custom manager, relied upon elsewhere in code."""
+        assert isinstance(Feed.objects, FeedManager)
+
+
+@pytest.mark.django_db
+class TestFeedManager:
+    def test_watched_by(self, feed_factory, user):
+        """Should return only feeds watched by the user."""
+        feeds = [feed_factory() for i in range(5)]
+        unwatched = feeds.pop()
+        [user.watch(feed) for feed in feeds]
+        assert unwatched not in Feed.objects.watched_by(user).all()
 
 
 @pytest.mark.django_db

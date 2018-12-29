@@ -152,7 +152,7 @@ class TestEntryPinToggleView:
         url = self._get_pin_url(entry)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:detail", kwargs={"slug": entry.feed.slug})
+        assert response.url == reverse("feeds:my_entries")
 
 
 @pytest.mark.django_db
@@ -205,7 +205,7 @@ class TestEntrySaveToggleView:
         url = self._get_save_url(entry)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:detail", kwargs={"slug": entry.feed.slug})
+        assert response.url == reverse("feeds:my_entries")
 
 
 @pytest.mark.django_db
@@ -257,4 +257,31 @@ class TestFeedWatchToggleView:
         url = self._get_watch_url(feed)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:detail", kwargs={"slug": feed.slug})
+        assert response.url == reverse("feeds:my_entries")
+
+
+@pytest.mark.django_db
+class TestMyEntriesListView:
+    def setup(self):
+        self.url = reverse("feeds:my_entries")
+
+    def test_renders(self, auth_client):
+        """The view should render."""
+        response = auth_client.get(self.url)
+        assert response.status_code == 200
+
+    def test_requires_login(self, client):
+        """The view requires the user be logged in."""
+        response = client.get(self.url)
+        assert response.status_code == 302
+        assert response.url == f"{settings.LOGIN_URL}?next={self.url}"
+
+    def test_only_returns_watched_feed_entries(self, auth_client, entry_factory, feed_factory, user):
+        """The view should only return entries for watched feeds."""
+        watched_feed = feed_factory()
+        user.watch(watched_feed)
+        unwatched_feed = feed_factory()
+        watched_entries = [entry_factory(feed=watched_feed) for _ in range(5)]
+        [entry_factory(feed=unwatched_feed) for _ in range(5)]
+        response = auth_client.get(self.url)
+        assert response.context["page_obj"].object_list == watched_entries

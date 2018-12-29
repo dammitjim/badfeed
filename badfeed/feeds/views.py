@@ -65,7 +65,7 @@ class FeedWatchToggleView(LoginRequiredMixin, View):
         else:
             self.request.user.unwatch(feed)
 
-        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        redirect_url = reverse("feeds:my_entries")
         return redirect(redirect_url)
 
 
@@ -93,7 +93,7 @@ class EntryPinToggleView(LoginRequiredMixin, View):
         else:
             entry.mark_unpinned(self.request.user)
 
-        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        redirect_url = reverse("feeds:my_entries")
         return redirect(redirect_url)
 
 
@@ -121,5 +121,17 @@ class EntrySaveToggleView(LoginRequiredMixin, View):
         else:
             entry.mark_unsaved(self.request.user)
 
-        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        redirect_url = reverse("feeds:my_entries")
         return redirect(redirect_url)
+
+
+class MyEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 5
+    template_name = "feeds/my_entries.html"
+    model = Entry
+
+    def get_queryset(self):
+        """Load all entries for the the feeds watched by the user."""
+        feeds = Feed.objects.watched_by(self.request.user)
+        entries = Entry.objects.filter(feed__in=feeds).exclude(states__isnull=False)
+        return entries.order_by("-date_published")
