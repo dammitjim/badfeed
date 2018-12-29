@@ -7,7 +7,10 @@ from badfeed.feeds.exceptions import InvalidStateException
 
 
 class FeedManager(models.Manager):
+    """Custom manager for feed model, adds utility methods."""
+
     def watched_by(self, user):
+        """Return feeds watched by the given user."""
         return self.filter(watched_by=user)
 
 
