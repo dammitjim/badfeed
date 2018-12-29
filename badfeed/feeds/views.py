@@ -65,7 +65,7 @@ class FeedWatchToggleView(LoginRequiredMixin, View):
         else:
             self.request.user.unwatch(feed)
 
-        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        redirect_url = reverse("feeds:my_entries")
         return redirect(redirect_url)
 
 
@@ -93,7 +93,7 @@ class EntryPinToggleView(LoginRequiredMixin, View):
         else:
             entry.mark_unpinned(self.request.user)
 
-        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        redirect_url = reverse("feeds:my_entries")
         return redirect(redirect_url)
 
 
@@ -121,7 +121,7 @@ class EntrySaveToggleView(LoginRequiredMixin, View):
         else:
             entry.mark_unsaved(self.request.user)
 
-        redirect_url = reverse("feeds:detail", kwargs={"slug": feed_slug})
+        redirect_url = reverse("feeds:my_entries")
         return redirect(redirect_url)
 
 
