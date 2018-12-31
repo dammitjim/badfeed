@@ -7,17 +7,15 @@ services:
     image: redis
   web:
     build: .
-    command: bash -c "python manage.py migrate && python manage.py gen_dummy_data && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py migrate && gunicorn -c config/gunicorn.py config.wsgi:application --reload"
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     depends_on:
       - db
-    environment:
-      - DATABASE_HOST=db
-      - DATABASE_NAME=postgres
-      - REDIS_HOST=redis
+    env_file:
+      - docker.env
   rq1:
     build: .
     command: bash -c "python manage.py rqworker"
@@ -27,10 +25,8 @@ services:
     - db
     - redis
     - web
-    environment:
-    - DATABASE_HOST=db
-    - DATABASE_NAME=postgres
-    - REDIS_HOST=redis
+    env_file:
+      - docker.env
   rq2:
     build: .
     command: bash -c "python manage.py rqworker"
@@ -40,7 +36,5 @@ services:
     - db
     - redis
     - web
-    environment:
-    - DATABASE_HOST=db
-    - DATABASE_NAME=postgres
-    - REDIS_HOST=redis
+    env_file:
+      - docker.env
