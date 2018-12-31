@@ -33,18 +33,5 @@ def user():
 
 
 @pytest.fixture
-def watched_feed(user):
-    feed = mommy.make(Feed, title="My Watched Feed!")
-    user.watching.add(feed)
-    user.save()
-    return feed
-
-
-@pytest.fixture
-def watched_entry(watched_feed):
-    return mommy.make(Entry, feed=watched_feed, title="My Amazing Entry!")
-
-
-@pytest.fixture
 def entry_state(watched_entry, user):
     return mommy.make(EntryState, entry=watched_entry, user=user)
