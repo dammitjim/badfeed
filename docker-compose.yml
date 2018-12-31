@@ -16,18 +16,7 @@ services:
       - db
     env_file:
       - docker.env
-  rq1:
-    build: .
-    command: bash -c "python manage.py rqworker"
-    volumes:
-    - .:/code
-    depends_on:
-    - db
-    - redis
-    - web
-    env_file:
-      - docker.env
-  rq2:
+  rq:
     build: .
     command: bash -c "python manage.py rqworker"
     volumes:
