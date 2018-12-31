@@ -7,6 +7,6 @@ COPY Pipfile /code/
 COPY Pipfile.lock /code/
 
 RUN pip install pipenv
-RUN pipenv install --dev --system --ignore-pipfile
+RUN pipenv install --system --ignore-pipfile
 
 COPY . /code/
