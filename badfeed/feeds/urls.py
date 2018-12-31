@@ -1,15 +1,49 @@
 from django.urls import path
 
-import badfeed.feeds.views as _views
+from badfeed.feeds import views
 
+# TODO these url patterns may need refactoring at some point
 
 app_name = "feeds"
 urlpatterns = [
-    path("", _views.FeedList.as_view(), name="feed_list"),
-    path("<int:pk>/", _views.FeedDetailByPK.as_view(), name="feed_detail_by_pk"),
-    path("<slug:slug>/", _views.FeedDetailBySlug.as_view(), name="feed_detail_by_slug"),
-    path("<int:feed_pk>/entries/", _views.EntryListByPK.as_view(), name="entry_list_by_pk"),
-    path("<slug:feed_slug>/entries/", _views.EntryListBySlug.as_view(), name="entry_list_by_slug"),
-    path("<int:feed_pk>/entries/<int:pk>/", _views.EntryDetailByPK.as_view(), name="entry_detail"),
-    path("<slug:feed_slug>/entries/<slug:entry_slug>/", _views.EntryDetailBySlug.as_view(), name="entry_detail"),
+    path("", views.MyEntriesListView.as_view(), name="my_entries"),
+    path("bulk/delete/<int:page>/", views.MyEntriesMassDeleteView.as_view(), name="my_entries_mass_delete"),
+    path("search/", views.FeedSearch.as_view(), name="search"),
+    path("pinned/", views.PinnedEntriesListView.as_view(), name="pinned_entries"),
+    path("saved/", views.SavedEntriesListView.as_view(), name="saved_entries"),
+    path("archived/", views.ArchivedEntriesListView.as_view(), name="archived_entries"),
+    path("f/<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
+    path("f/<slug:slug>/watch/", views.FeedWatchToggleView.as_view(should_toggle=True), name="watch"),
+    path("f/<slug:slug>/unwatch/", views.FeedWatchToggleView.as_view(should_toggle=False), name="unwatch"),
+    path("f/<slug:feed_slug>/<slug:entry_slug>/read/", views.EntryOffloadView.as_view(), name="entry_read"),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/pin/",
+        views.EntryPinToggleView.as_view(should_toggle=True),
+        name="entry_pin",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/unpin/",
+        views.EntryPinToggleView.as_view(should_toggle=False),
+        name="entry_unpin",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/save/",
+        views.EntrySaveToggleView.as_view(should_toggle=True),
+        name="entry_save",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/unsave/",
+        views.EntrySaveToggleView.as_view(should_toggle=False),
+        name="entry_unsave",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/delete/",
+        views.EntryDeleteToggleView.as_view(should_toggle=True),
+        name="entry_delete",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/undelete/",
+        views.EntryDeleteToggleView.as_view(should_toggle=False),
+        name="entry_undelete",
+    ),
 ]

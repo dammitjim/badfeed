@@ -1,9 +1,20 @@
 from django.conf import settings
-from rest_framework.test import APIClient
 from model_mommy import mommy
 import pytest
 
 from badfeed.feeds.models import Feed, Entry, EntryState
+
+
+@pytest.fixture()
+def registration_form_data():
+    """Valid by default."""
+    return {
+        "username": "user1",
+        "email": "user1@test.com",
+        "confirm_email": "user1@test.com",
+        "password1": "CoolPass!123",
+        "password2": "CoolPass!123",
+    }
 
 
 @pytest.fixture
@@ -22,30 +33,5 @@ def user():
 
 
 @pytest.fixture
-def watched_feed(user):
-    feed = mommy.make(Feed, title="My Watched Feed!")
-    user.watching.add(feed)
-    user.save()
-    return feed
-
-
-@pytest.fixture
-def watched_entry(watched_feed):
-    return mommy.make(Entry, feed=watched_feed, title="My Amazing Entry!")
-
-
-@pytest.fixture
 def entry_state(watched_entry, user):
     return mommy.make(EntryState, entry=watched_entry, user=user)
-
-
-@pytest.fixture
-def anon_client():
-    return APIClient()
-
-
-@pytest.fixture
-def auth_client(user):
-    client = APIClient()
-    client.force_authenticate(user)
-    return client

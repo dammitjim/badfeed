@@ -1,82 +1,80 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from django.contrib import messages
+from django.contrib.auth import views as auth_views
+from django.contrib.auth import login
+from django.views.generic import FormView
+from django.shortcuts import redirect
 
-from badfeed.core.utils import rest_message
-from badfeed.feeds.exceptions import InvalidStateException
-from badfeed.feeds.models import Feed, Entry
-from badfeed.feeds.serializers import MyFeedSerializer, EntrySerializer, MyEntryDetailSerializer
-
-
-class MyFeedList(ListAPIView):
-
-    serializer_class = MyFeedSerializer
-
-    def get_queryset(self):
-        return Feed.objects.filter(watched_by=self.request.user)
-
-    def patch(self, request, *args, **kwargs):
-        feed = get_object_or_404(Feed, pk=request.data.get("feed", None))
-        self.request.user.watch(feed, commit=True)
-        return rest_message(f"You are now watching {feed.title}", status.HTTP_201_CREATED)
+from badfeed.users.forms import RegistrationForm, ExtendedAuthenticationForm
 
 
-class MyFeedDetail(RetrieveAPIView):
-    serializer_class = MyFeedSerializer
+class PasswordResetView(auth_views.PasswordResetView):
+    """Custom reset view as we don't want a dedicated reset done page."""
 
-    def get_object(self):
-        return get_object_or_404(Feed, slug=self.kwargs["slug"], watched_by=self.request.user)
+    # TODO replace with dashboard when it's been made
+    success_url = "/"
+    template_name = "users/reset_password.html"
 
-    def delete(self, request, *args, **kwargs):
-        """Delete stops the feed being watched."""
-        feed = self.get_object()
-        request.user.unwatch(feed, commit=True)
-        return rest_message(f"You are no longer watching {feed.title}", status.HTTP_200_OK)
+    def form_valid(self, form):
+        """Post a message stating success."""
+        messages.success(self.request, self.Messages.RESET_SUCCESS_MESSAGE)
+        return super().form_valid(form)
 
-
-class MyFeedEntryList(ListAPIView):
-    serializer_class = EntrySerializer
-
-    def get_queryset(self):
-        return Entry.objects.filter(feed__slug=self.kwargs["feed_slug"], feed__watched_by=self.request.user)
+    class Messages:
+        RESET_SUCCESS_MESSAGE = "Your password has been successfully reset."
 
 
-class MyFeedEntryDetail(RetrieveAPIView):
-    serializer_class = MyEntryDetailSerializer
+class PasswordChangeView(auth_views.PasswordChangeView):
+    """Custom password change view as we don't want a dedicated change done page."""
 
-    def get_object(self):
-        return get_object_or_404(
-            Entry, slug=self.kwargs["slug"], feed__slug=self.kwargs["feed_slug"], feed__watched_by=self.request.user
-        )
+    # TODO replace with dashboard when it's been made
+    success_url = "/"
+    template_name = "users/change_password.html"
 
-    def post(self, request, *args, **kwargs):
-        """Add to the user state of the entry."""
-        entry = self.get_object()
-        state = request.data.get("state", None)
-        try:
-            entry.add_state(state, self.request.user)
-        except InvalidStateException:
-            return rest_message(f"{state} is not a valid entry state.", status.HTTP_400_BAD_REQUEST)
-        response = self.get(request, *args, **kwargs)
-        response.status_code = status.HTTP_201_CREATED
-        return response
+    def form_valid(self, form):
+        """Post a message stating success."""
+        messages.success(self.request, self.Messages.CHANGE_SUCCESS_MESSAGE)
+        return super().form_valid(form)
 
-    def delete(self, request, *args, **kwargs):
-        """Delete a entry state.
-
-        TODO this shouldn't really be here, should be nested resource
-        """
-        entry = self.get_object()
-        state = request.data.get("state", None)
-        try:
-            entry.remove_state(state, self.request.user)
-        except InvalidStateException:
-            return rest_message(f"{state} is not a valid entry state.", status.HTTP_400_BAD_REQUEST)
-        return rest_message(f"State modified for {entry.title}", status.HTTP_200_OK)
+    class Messages:
+        CHANGE_SUCCESS_MESSAGE = "Your password has been successfully changed."
 
 
-class MyEntryList(ListAPIView):
-    serializer_class = EntrySerializer
+class LoginView(auth_views.LoginView):
+    template_name = "users/login.html"
+    form_class = ExtendedAuthenticationForm
 
-    def get_queryset(self):
-        return Entry.objects.filter(feed__watched_by=self.request.user).order_by("-date_published")
+    def dispatch(self, request, *args, **kwargs):
+        """Redirect already logged in users if they try to be cheeky."""
+        if request.user.is_authenticated:
+            messages.info(request, self.Messages.ALREADY_LOGGED_IN)
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    class Messages:
+        ALREADY_LOGGED_IN = "You are already logged in."
+
+
+class LogoutView(auth_views.LogoutView):
+    next_page = "/"
+
+
+class RegisterView(FormView):
+    template_name = "users/register.html"
+    form_class = RegistrationForm
+    success_url = "/"
+
+    def dispatch(self, request, *args, **kwargs):
+        """Redirect already logged in users if they try to be cheeky."""
+        if request.user.is_authenticated:
+            messages.info(request, self.Messages.ALREADY_REGISTERED)
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Save the form and log in the user as the new account."""
+        user = form.save()
+        login(self.request, user)
+        return super().form_valid(form)
+
+    class Messages:
+        ALREADY_REGISTERED = "You are already registered."

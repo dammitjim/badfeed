@@ -1,4 +1,3 @@
-from rest_framework.exceptions import ParseError
 import pytest
 
 from badfeed.users.models import BadFeedUser
@@ -26,5 +25,5 @@ class TestBadFeedUserModel:
     def test_watch_existing_feed_raises(self, user, feed):
         """The watch method should raise if the user is already watching the feed."""
         user.watch(feed, commit=True)
-        with pytest.raises(ParseError):
+        with pytest.raises(ValueError):
             user.watch(feed, commit=True)

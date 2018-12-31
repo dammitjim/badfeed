@@ -1,5 +1,4 @@
 import os
-from datetime import timedelta
 
 from envparse import env
 
@@ -18,8 +17,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # third party
-    "corsheaders",
-    "rest_framework",
     "django_rq",
     # internal
     "badfeed.users",
@@ -27,7 +24,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -42,7 +38,7 @@ ROOT_URLCONF = "badfeed.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "..", "badfeed", "core", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -50,6 +46,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "badfeed.core.context_processors.search_term_processor",
             ]
         },
     }
@@ -60,7 +57,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": env.str("DATABASE_NAME", default="badfeed_api"),
+        "NAME": env.str("DATABASE_NAME", default="badfeed_dev"),
         "USER": env.str("DATABASE_USER", default="postgres"),
         "PASSWORD": env.str("DATABASE_PASSWORD", default=""),
         "HOST": env.str("DATABASE_HOST", default="localhost"),
@@ -99,7 +96,7 @@ STATIC_URL = "/static/"
 STATIC_ROOT = env.str("DJANGO_STATIC_ROOT", default="")
 MEDIA_ROOT = env.str("DJANGO_MEDIA_ROOT", default="")
 
-RQ_ENABLED = env.bool("RQ_ENABLED", default=False)
+RQ_ENABLED = env.bool("RQ_ENABLED", default=True)
 RQ_QUEUES = {
     "default": {
         "HOST": env.str("REDIS_HOST", default="localhost"),
@@ -109,16 +106,3 @@ RQ_QUEUES = {
         "DEFAULT_TIMEOUT": 360,
     }
 }
-
-REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
-    ],
-    "EXCEPTION_HANDLER": "badfeed.core.exceptions.status_code_exception_handler",
-    "PAGE_SIZE": 10,
-}
-
-JWT_AUTH = {"JWT_EXPIRATION_DELTA": timedelta(hours=1), "JWT_ALLOW_REFRESH": True}

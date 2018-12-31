@@ -1,13 +1,13 @@
 import logging
 
-from dateutil import parser
 from django_rq import job
 from django.utils import timezone
+import maya
 import feedparser
 
-from badfeed.feeds.exceptions import ContentErrorException
 from badfeed.feeds.models import Entry, Enclosure, Tag, Author
-from badfeed.feeds.utils import clean_item_content, clean_content
+from badfeed.ingest.exceptions import ContentErrorException
+from badfeed.ingest.utils import clean_item_content, clean_content
 
 
 log = logging.getLogger("rq.worker")
@@ -19,7 +19,7 @@ class EntryIngest:
         self._ingest_entry = None
 
     def get_date_published(self):
-        return parser.parse(self._ingest_entry.published)
+        return maya.parse(self._ingest_entry.published).datetime()
 
     def get_content(self):
         if hasattr(self._ingest_entry, "content"):

@@ -1,40 +1,35 @@
 from django.db import models
-from django.core.exceptions import FieldError
-from slugify import slugify
+from slugify import UniqueSlugify
 
 
-class Slugified(models.Model):
-    # TODO: much of this can be removed for UniqueSlugify in awesome-slugify
-    SLUG_SOURCE_ATTR = "slugify_source"
+class SlugifiedMixin(models.Model):
+    """Adds a slug field to the subclassed model."""
 
     slug = models.SlugField(blank=True, max_length=200)
 
-    def __init__(self, *args, **kwargs):
-        """Check for presence of slugify_source."""
-        super().__init__(*args, **kwargs)
-        if not hasattr(self, self.SLUG_SOURCE_ATTR):
-            raise FieldError(f"{self.__class__} requires {self.SLUG_SOURCE_ATTR} to use Slugified abstract class.")
-
     def save(self, *args, **kwargs):
-        """Use the lookup result from self.slugify_source to load our slug."""
+        """Override save method to populate slug field on class."""
+        # TODO change slug if title changes?
         if not self.slug:
-            slug_attr = getattr(self, self.SLUG_SOURCE_ATTR)
-            slug_source = getattr(self, slug_attr)
-            self.slug = self.generate_slug(slug_source[:200])
-        super().save(*args, **kwargs)
+            checker = UniqueSlugify(unique_check=self.slug_uniqueness_check, to_lower=True, max_length=200)
+            self.slug = checker(self.get_slug_attr(), uids=self.get_initial_slug_uids())
+        return super().save(*args, **kwargs)
 
-    def get_additional_slug_filters(self):
-        return {}
+    def get_slug_attr(self):
+        """Get the attribute to use as the base for the slug.
 
-    def generate_slug(self, slug_source, extra=0):
-        """Generate slug from slug source defined on concrete class."""
-        # TODO can replace this with unique slugify
-        append = f"-{extra}" if extra > 0 else ""
-        slug = slugify(slug_source, to_lower=True) + append
-        while type(self).objects.filter(slug=slug, **self.get_additional_slug_filters()).exists():
-            # OH BABY
-            return self.generate_slug(slug_source, extra=extra + 1)
-        return slug
+        Defaults to title as that is most commonly used in the codebase.
+        """
+        return self.title
+
+    def get_initial_slug_uids(self):
+        """Populate a list of unique values for the slugify function to start from."""
+        return []
+
+    @staticmethod
+    def slug_uniqueness_check(text, uids):
+        """Default uniqueness check."""
+        return text not in uids
 
     class Meta:
         abstract = True

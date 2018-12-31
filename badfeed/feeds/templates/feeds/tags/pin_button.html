@@ -1,0 +1,5 @@
+{% if is_pinned %}
+    <a href="{% url 'feeds:entry_unpin' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Unpin</a>
+{% else %}
+    <a href="{% url 'feeds:entry_pin' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Pin</a>
+{% endif %}

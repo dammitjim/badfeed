@@ -1,0 +1,5 @@
+{% if is_deleted %}
+    <a href="{% url 'feeds:entry_undelete' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Restore</a>
+{% else %}
+    <a href="{% url 'feeds:entry_delete' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Delete</a>
+{% endif %}

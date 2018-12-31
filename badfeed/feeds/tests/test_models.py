@@ -1,24 +1,8 @@
-from django.conf import settings
 from django.db.utils import IntegrityError
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry, EntryState
-
-
-@pytest.fixture
-def feed():
-    return mommy.make(Feed, title="My Amazing Feed!")
-
-
-@pytest.fixture
-def entry():
-    return mommy.make(Entry, title="My Amazing Entry!", _fill_optional=True)
-
-
-@pytest.fixture
-def user():
-    return mommy.make(settings.AUTH_USER_MODEL)
+from badfeed.feeds.models import Feed, Entry, EntryState, FeedManager
 
 
 @pytest.mark.django_db
@@ -30,6 +14,35 @@ class TestFeedModel:
     def test_generated_slug(self, feed):
         """The model should generate an appropriate slug."""
         assert feed.slug == "my-amazing-feed"
+
+    def test_handles_duplicated_slug(self):
+        """The model should generate an appropriate slug if a duplicate is found."""
+        mommy.make(Feed, title="This is only a test")
+        feed_dup = mommy.make(Feed, title="This is only a test")
+        assert feed_dup.slug == "this-is-only-a-test-1"
+
+    def test_is_watched_by(self, feed, user):
+        """If the user is watching the feed, return True."""
+        user.watch(feed)
+        assert feed.is_watched_by(user)
+
+    def test_is_watched_by_no_found(self, feed, user):
+        """Feeds are not watched by default"""
+        assert not feed.is_watched_by(user)
+
+    def test_uses_custom_manager(self):
+        """The feed model should use a custom manager, relied upon elsewhere in code."""
+        assert isinstance(Feed.objects, FeedManager)
+
+
+@pytest.mark.django_db
+class TestFeedManager:
+    def test_watched_by(self, feed_factory, user):
+        """Should return only feeds watched by the user."""
+        feeds = [feed_factory() for i in range(5)]
+        unwatched = feeds.pop()
+        [user.watch(feed) for feed in feeds]
+        assert unwatched not in Feed.objects.watched_by(user).all()
 
 
 @pytest.mark.django_db
@@ -83,8 +96,96 @@ class TestEntryModel:
         with pytest.raises(Entry.DoesNotExist):
             entry.refresh_from_db()
 
-    def test_author_deletion_sets_null(self, entry):
+    def test_author_deletion_sets_null(self, entry_fill):
         """Entry should be preserved when an associated Author is deleted."""
-        entry.author.delete()
-        entry.refresh_from_db()
-        assert entry.author is None
+        entry_fill.author.delete()
+        entry_fill.refresh_from_db()
+        assert entry_fill.author is None
+
+    def test_mark_read_by_creates(self, entry, user):
+        """Should create a read by state."""
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_READ).exists()
+        entry.mark_read_by(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_READ)) == 1
+
+    def test_mark_read_by_get(self, entry, user):
+        """Should reuse existing state if exists."""
+        entry.mark_read_by(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_READ)) == 1
+        entry.mark_read_by(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_READ)) == 1
+
+    def test_mark_pinned_creates(self, entry, user):
+        """Should create a pinned state."""
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED).exists()
+        entry.mark_pinned(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 1
+
+    def test_mark_pinned_get(self, entry, user):
+        """Should reuse existing state if exists."""
+        entry.mark_pinned(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 1
+        entry.mark_pinned(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 1
+
+    def test_mark_unpinned_deletes(self, entry, user):
+        """Should delete pinned state."""
+        entry.mark_pinned(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 1
+        entry.mark_unpinned(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED).exists()
+
+    def test_mark_unpinned_allows_state_not_exists(self, entry, user):
+        """If the state does not exist, should fail silently."""
+        entry.mark_unpinned(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED).exists()
+
+    def test_mark_saved_creates(self, entry, user):
+        """Should create a saved state."""
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED).exists()
+        entry.mark_saved(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED)) == 1
+
+    def test_mark_saved_get(self, entry, user):
+        """Should reuse existing state if exists."""
+        entry.mark_saved(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED)) == 1
+        entry.mark_saved(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED)) == 1
+
+    def test_mark_unsaved_deletes(self, entry, user):
+        """Should delete saved state."""
+        entry.mark_saved(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED)) == 1
+        entry.mark_unsaved(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED).exists()
+
+    def test_mark_unsaved_allows_state_not_exists(self, entry, user):
+        """If the state does not exist, should fail silently."""
+        entry.mark_unsaved(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED).exists()
+
+    def test_mark_deleted_creates(self, entry, user):
+        """Should create a deleted state."""
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+
+    def test_mark_deleted_get(self, entry, user):
+        """Should reuse existing state if exists."""
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+
+    def test_mark_undeleted_deletes(self, entry, user):
+        """Should delete deleted state."""
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED)) == 1
+        entry.mark_undeleted(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()
+
+    def test_mark_undeleted_allows_state_not_exists(self, entry, user):
+        """If the state does not exist, should fail silently."""
+        entry.mark_undeleted(user)
+        assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()

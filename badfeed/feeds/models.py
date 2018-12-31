@@ -1,14 +1,20 @@
 from django.conf import settings
 from django.db import models
+import maya
 
-from badfeed.core.models import Slugified
-from badfeed.feeds.exceptions import InvalidStateException
+from badfeed.core.models import SlugifiedMixin
 
 
-class Feed(Slugified, models.Model):
+class FeedManager(models.Manager):
+    """Custom manager for feed model, adds utility methods."""
+
+    def watched_by(self, user):
+        """Return feeds watched by the given user."""
+        return self.filter(watched_by=user)
+
+
+class Feed(SlugifiedMixin, models.Model):
     """A feed of content."""
-
-    slugify_source = "title"
 
     title = models.CharField(max_length=255)
     link = models.CharField(max_length=1000, unique=True)
@@ -17,8 +23,20 @@ class Feed(Slugified, models.Model):
     date_modified = models.DateTimeField(auto_now=True)
     date_last_scraped = models.DateTimeField(blank=True, null=True)
 
+    objects = FeedManager()
+
     def __str__(self):
         return self.title
+
+    @staticmethod
+    def slug_uniqueness_check(text, uids):
+        """Check for other feeds with this slug."""
+        if text in uids:
+            return False
+        return not Feed.objects.filter(slug=text).exists()
+
+    def is_watched_by(self, user) -> bool:
+        return user in self.watched_by.all()
 
 
 class Author(models.Model):
@@ -47,10 +65,28 @@ class Tag(models.Model):
         return self.term
 
 
-class Entry(Slugified, models.Model):
-    """An entry into a Feed."""
+class EntryUserStateManager(models.Manager):
+    def unread(self, user):
+        """Get all entries that haven't been read by the user yet."""
+        feeds = Feed.objects.watched_by(user)
+        entries = self.filter(feed__in=feeds).exclude(states__isnull=False)
+        return entries.order_by("-date_published")
 
-    slugify_source = "title"
+    def saved(self, user):
+        """Get all entries that have been saved."""
+        return self.filter(states__state=EntryState.STATE_SAVED, states__user=user)
+
+    def pinned(self, user):
+        """Get all entries that have been pinned."""
+        return self.filter(states__state=EntryState.STATE_PINNED, states__user=user)
+
+    def deleted(self, user):
+        """Get all entries that have been deleted."""
+        return self.filter(states__state=EntryState.STATE_DELETED, states__user=user)
+
+
+class Entry(SlugifiedMixin, models.Model):
+    """An entry into a Feed."""
 
     title = models.CharField(max_length=1000)
     link = models.CharField(max_length=1000)
@@ -65,26 +101,86 @@ class Entry(Slugified, models.Model):
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
 
     author = models.ForeignKey(Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries")
-    contributors = models.ManyToManyField(Author, related_name="contributed_to")
+    contributors = models.ManyToManyField(Author, related_name="contributed_to", blank=True)
 
-    tags = models.ManyToManyField(Tag, related_name="entries")
+    tags = models.ManyToManyField(Tag, related_name="entries", blank=True)
 
-    def get_additional_slug_filters(self):
-        """Used by Slugified to help generate the slug by uniqueness."""
-        return {"feed": self.feed}
+    objects = models.Manager()
+    user_state = EntryUserStateManager()
 
-    def add_state(self, state, user):
-        """Mark the entry as the given state for user."""
-        if not EntryState.is_valid_state(state):
-            raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
-        return EntryState.objects.create(entry=self, user=user, state=state)
+    def get_initial_slug_uids(self):
+        """Prepopulate slug uids with titles for entries in this feed.
 
-    def remove_state(self, state, user):
-        """Remove the given state for user."""
-        if not EntryState.is_valid_state(state):
-            raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
-        entry_state = EntryState.objects.get(entry=self, user=user, state=state)
-        entry_state.delete()
+        This is required due to the `unique_together` constraint of the model.
+        """
+        return [entry.title for entry in Entry.objects.filter(feed=self.feed).only("title")]
+
+    @staticmethod
+    def slug_uniqueness_check(text, uids) -> bool:
+        """Ensure no other entries with this slug exist."""
+        if text in uids:
+            return False
+        return not Entry.objects.filter(slug=text).exists()
+
+    def mark_read_by(self, user):
+        """Create an entrystate object marking this entry as having been read."""
+        return EntryState.objects.get_or_create(state=EntryState.STATE_READ, entry=self, user=user)
+
+    def mark_pinned(self, user):
+        """Pin the entry for the user if not already pinned."""
+        return EntryState.objects.get_or_create(state=EntryState.STATE_PINNED, entry=self, user=user)
+
+    def mark_unpinned(self, user):
+        """Unpin the entry for the user."""
+        try:
+            state = EntryState.objects.get(state=EntryState.STATE_PINNED, entry=self, user=user)
+            state.delete()
+        except EntryState.DoesNotExist:
+            # TODO log attempt to delete?
+            pass
+
+    def mark_deleted(self, user):
+        """Pin the entry for the user if not already deleted."""
+        return EntryState.objects.get_or_create(state=EntryState.STATE_DELETED, entry=self, user=user)
+
+    def mark_undeleted(self, user):
+        """Undelete the entry for the user."""
+        try:
+            state = EntryState.objects.get(state=EntryState.STATE_DELETED, entry=self, user=user)
+            state.delete()
+        except EntryState.DoesNotExist:
+            # TODO log attempt to delete?
+            pass
+
+    def mark_saved(self, user):
+        """Saves the entry for the user if not already saved."""
+        return EntryState.objects.get_or_create(state=EntryState.STATE_SAVED, entry=self, user=user)
+
+    def mark_unsaved(self, user):
+        """Removes the saved state of an entry."""
+        try:
+            state = EntryState.objects.get(state=EntryState.STATE_SAVED, entry=self, user=user)
+            state.delete()
+        except EntryState.DoesNotExist:
+            # TODO log attempt to delete?
+            pass
+
+    def is_pinned_by(self, user) -> bool:
+        return EntryState.objects.filter(state=EntryState.STATE_PINNED, entry=self, user=user).exists()
+
+    def is_saved_by(self, user) -> bool:
+        return EntryState.objects.filter(state=EntryState.STATE_SAVED, entry=self, user=user).exists()
+
+    def is_deleted_by(self, user) -> bool:
+        return EntryState.objects.filter(state=EntryState.STATE_DELETED, entry=self, user=user).exists()
+
+    @property
+    def slang_date_published(self):
+        """Display a human readable, slang datetime."""
+        if not self.date_published:
+            return "?"
+        maya_dt = maya.MayaDT.from_datetime(self.date_published)
+        return maya_dt.slang_time()
 
     def __str__(self):
         return self.title

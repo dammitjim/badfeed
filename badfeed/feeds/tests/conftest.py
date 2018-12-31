@@ -1,9 +1,7 @@
-from django.conf import settings
-from rest_framework.test import APIClient
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed
+from badfeed.feeds.models import Feed, Entry, EntryState
 
 
 @pytest.fixture
@@ -12,17 +10,47 @@ def feed():
 
 
 @pytest.fixture
-def user():
-    return mommy.make(settings.AUTH_USER_MODEL, username="BadUser")
+def feed_factory():
+    def _make(**kwargs):
+        return mommy.make(Feed, **kwargs)
+
+    return _make
 
 
-@pytest.fixture
-def anon_client():
-    return APIClient()
+@pytest.fixture()
+def entry():
+    return mommy.make(Entry)
 
 
-@pytest.fixture
-def auth_client(user):
-    client = APIClient()
-    client.force_authenticate(user)
-    return client
+@pytest.fixture()
+def entry_fill():
+    return mommy.make(Entry, _fill_optional=True)
+
+
+@pytest.fixture()
+def entry_factory(feed):
+    def _make(**kwargs):
+        if "feed" in kwargs:
+            attached_feed = kwargs.pop("feed")
+        else:
+            attached_feed = feed
+        return mommy.make(Entry, feed=attached_feed, **kwargs)
+
+    return _make
+
+
+@pytest.fixture()
+def entry_state():
+    return mommy.make(entry_state)
+
+
+@pytest.fixture()
+def entry_state_factory(user):
+    def _make(**kwargs):
+        if "user" in kwargs:
+            attached_user = kwargs.pop("user")
+        else:
+            attached_user = user
+        return mommy.make(EntryState, user=attached_user, **kwargs)
+
+    return _make

@@ -1,28 +1,16 @@
-from collections import namedtuple
+from typing import List
 
-from bleach import clean
-from django.utils.text import Truncator
-
-CleanedContent = namedtuple("CleanedContent", ["teaser", "article"])
+from badfeed.feeds.models import Entry
+from badfeed.users.models import BadFeedUser
 
 
-def clean_content(content):
-    cleaned_full_content = clean(
-        content,
-        strip=True,
-        tags=["b", "i", "a", "img", "p", "div"],
-        attributes={"a": ["href", "title"], "img": ["src"]},
-        styles=[],
-    )
-
-    cleaned_teaser_content = clean(content, strip=True)
-    truncator = Truncator(cleaned_teaser_content)
-    teaser = truncator.words(100)
-    return CleanedContent(teaser=teaser.strip(), article=cleaned_full_content.strip())
+def delete_entries_for_user(entries: List[Entry], user: BadFeedUser):
+    return [entry.mark_deleted(user) for entry in entries]
 
 
-def clean_item_content(item_content):
-    content = ""
-    for section in item_content:
-        content += section.value
-    return clean_content(content)
+def pin_entries_for_user(entries: List[Entry], user: BadFeedUser):
+    return [entry.mark_pinned(user) for entry in entries]
+
+
+def save_entries_for_user(entries: List[Entry], user: BadFeedUser):
+    return [entry.mark_saved(user) for entry in entries]
