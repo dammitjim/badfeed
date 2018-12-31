@@ -1,4 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
+from django.core.paginator import Paginator
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
@@ -6,7 +8,8 @@ from django.urls import reverse
 from django.views.generic import ListView, DetailView
 from django.views import View
 
-from badfeed.feeds.models import Feed, Entry, EntryState
+from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.utils import delete_entries_for_user
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
@@ -131,16 +134,33 @@ class EntrySaveToggleView(ObjectActionToggleView):
         obj.mark_unsaved(self.request.user)
 
 
+MY_ENTRIES_PAGINATE_BY = 10
+
+
 class MyEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = 10
+    paginate_by = MY_ENTRIES_PAGINATE_BY
     template_name = "feeds/my_entries.html"
     model = Entry
 
     def get_queryset(self):
         """Load all entries for the the feeds watched by the user."""
-        feeds = Feed.objects.watched_by(self.request.user)
-        entries = Entry.objects.filter(feed__in=feeds).exclude(states__isnull=False)
-        return entries.order_by("-date_published")
+        return Entry.user_state.unread(self.request.user)
+
+
+class MyEntriesMassDeleteView(LoginRequiredMixin, View):
+    def get_target_entries(self, page):
+        """Paginate the total queryset based on the page."""
+        queryset = Entry.user_state.unread(self.request.user)
+        paginator = Paginator(queryset, MY_ENTRIES_PAGINATE_BY)
+        return paginator.page(page)
+
+    def get(self, *args, **kwargs):
+        """Loads the appropriate set of entries, creates deletion states for them."""
+        entries = self.get_target_entries(kwargs["page"])
+        delete_entries_for_user(entries, self.request.user)
+        # TODO maybe put in the numbers here?
+        messages.info(self.request, "Entries deleted")
+        return redirect(reverse("feeds:my_entries"))
 
 
 class PinnedEntriesListView(LoginRequiredMixin, ListView):
@@ -150,10 +170,7 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        states = EntryState.objects.filter(user=self.request.user, state=EntryState.STATE_PINNED).order_by(
-            "-date_created"
-        )
-        return Entry.objects.filter(states__in=states).order_by("-states__date_created")
+        return Entry.user_state.pinned(self.request.user).order_by("-states__date_created")
 
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
@@ -163,10 +180,7 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        states = EntryState.objects.filter(user=self.request.user, state=EntryState.STATE_SAVED).order_by(
-            "-date_created"
-        )
-        return Entry.objects.filter(states__in=states).order_by("-states__date_created")
+        return Entry.user_state.saved(self.request.user).order_by("-states__date_created")
 
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
@@ -176,7 +190,4 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        states = EntryState.objects.filter(user=self.request.user, state=EntryState.STATE_DELETED).order_by(
-            "-date_created"
-        )
-        return Entry.objects.filter(states__in=states).order_by("-states__date_created")
+        return Entry.user_state.deleted(self.request.user).order_by("-states__date_created")
