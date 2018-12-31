@@ -7,7 +7,7 @@ services:
     image: redis
   web:
     build: .
-    command: bash -c "python manage.py migrate && gunicorn -c config/gunicorn.py config.wsgi:application --reload"
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/code
     ports:
