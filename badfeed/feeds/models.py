@@ -3,7 +3,6 @@ from django.db import models
 import maya
 
 from badfeed.core.models import SlugifiedMixin
-from badfeed.feeds.exceptions import InvalidStateException
 
 
 class FeedManager(models.Manager):
@@ -66,6 +65,26 @@ class Tag(models.Model):
         return self.term
 
 
+class EntryUserStateManager(models.Manager):
+    def unread(self, user):
+        """Get all entries that haven't been read by the user yet."""
+        feeds = Feed.objects.watched_by(user)
+        entries = self.filter(feed__in=feeds).exclude(states__isnull=False)
+        return entries.order_by("-date_published")
+
+    def saved(self, user):
+        """Get all entries that have been saved."""
+        return self.filter(states__state=EntryState.STATE_SAVED, states__user=user)
+
+    def pinned(self, user):
+        """Get all entries that have been pinned."""
+        return self.filter(states__state=EntryState.STATE_PINNED, states__user=user)
+
+    def deleted(self, user):
+        """Get all entries that have been deleted."""
+        return self.filter(states__state=EntryState.STATE_DELETED, states__user=user)
+
+
 class Entry(SlugifiedMixin, models.Model):
     """An entry into a Feed."""
 
@@ -86,6 +105,9 @@ class Entry(SlugifiedMixin, models.Model):
 
     tags = models.ManyToManyField(Tag, related_name="entries", blank=True)
 
+    objects = models.Manager()
+    user_state = EntryUserStateManager()
+
     def get_initial_slug_uids(self):
         """Prepopulate slug uids with titles for entries in this feed.
 
@@ -100,26 +122,13 @@ class Entry(SlugifiedMixin, models.Model):
             return False
         return not Entry.objects.filter(slug=text).exists()
 
-    def add_state(self, state, user):
-        """Mark the entry as the given state for user."""
-        if not EntryState.is_valid_state(state):
-            raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
-        return EntryState.objects.create(entry=self, user=user, state=state)
-
-    def remove_state(self, state, user):
-        """Remove the given state for user."""
-        if not EntryState.is_valid_state(state):
-            raise InvalidStateException(f"Invalid state {state} when attempting to update entry state")
-        entry_state = EntryState.objects.get(entry=self, user=user, state=state)
-        entry_state.delete()
-
     def mark_read_by(self, user):
         """Create an entrystate object marking this entry as having been read."""
-        EntryState.objects.get_or_create(state=EntryState.STATE_READ, entry=self, user=user)
+        return EntryState.objects.get_or_create(state=EntryState.STATE_READ, entry=self, user=user)
 
     def mark_pinned(self, user):
         """Pin the entry for the user if not already pinned."""
-        EntryState.objects.get_or_create(state=EntryState.STATE_PINNED, entry=self, user=user)
+        return EntryState.objects.get_or_create(state=EntryState.STATE_PINNED, entry=self, user=user)
 
     def mark_unpinned(self, user):
         """Unpin the entry for the user."""
@@ -132,7 +141,7 @@ class Entry(SlugifiedMixin, models.Model):
 
     def mark_deleted(self, user):
         """Pin the entry for the user if not already deleted."""
-        EntryState.objects.get_or_create(state=EntryState.STATE_DELETED, entry=self, user=user)
+        return EntryState.objects.get_or_create(state=EntryState.STATE_DELETED, entry=self, user=user)
 
     def mark_undeleted(self, user):
         """Undelete the entry for the user."""
@@ -145,7 +154,7 @@ class Entry(SlugifiedMixin, models.Model):
 
     def mark_saved(self, user):
         """Saves the entry for the user if not already saved."""
-        EntryState.objects.get_or_create(state=EntryState.STATE_SAVED, entry=self, user=user)
+        return EntryState.objects.get_or_create(state=EntryState.STATE_SAVED, entry=self, user=user)
 
     def mark_unsaved(self, user):
         """Removes the saved state of an entry."""
