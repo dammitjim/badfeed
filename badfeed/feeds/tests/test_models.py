@@ -189,3 +189,24 @@ class TestEntryModel:
         """If the state does not exist, should fail silently."""
         entry.mark_undeleted(user)
         assert not EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_DELETED).exists()
+
+    def test_mark_deleted_removes_pinned_states(self, entry, user):
+        """If the entry is also pinned, remove pinned state on deletion."""
+        entry.mark_pinned(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 1
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 0
+
+    def test_mark_deleted_removed_saved_states(self, entry, user):
+        """If the entry is also saved, remove saved state on deletion."""
+        entry.mark_saved(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED)) == 1
+        entry.mark_deleted(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_SAVED)) == 0
+
+    def test_mark_saved_deletes_pinned_states(self, entry, user):
+        """If the entry is also pinned, remove pinned state on save."""
+        entry.mark_pinned(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 1
+        entry.mark_saved(user)
+        assert len(EntryState.objects.filter(entry=entry, user=user, state=EntryState.STATE_PINNED)) == 0
