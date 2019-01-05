@@ -22,7 +22,7 @@ maya = "*"
 model-mommy = "*"
 pytest = "*"
 pytest-django = "*"
-black = "==18.5b0"
+black = "==18.9b0"
 pre-commit = "*"
 pydocstyle = "*"
 
