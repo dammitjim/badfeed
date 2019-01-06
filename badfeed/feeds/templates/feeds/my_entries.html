@@ -2,7 +2,7 @@
 {% load feed_tags %}
 {% block main %}
     {% for entry in page_obj %}
-        {% include "feeds/partials/entry_row.html" with entry=entry feed=entry.feed %}
+        {% include "feeds/partials/entry_row.html" with entry=entry feed=entry.feed counter=forloop.counter %}
     {% endfor %}
     <nav aria-label="Page navigation example">
         <ul class="pagination">
