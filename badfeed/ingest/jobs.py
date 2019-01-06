@@ -153,7 +153,7 @@ class EntryIngest:
         try:
             entry.full_clean()
         except ValidationError as e:
-            log.exception(f"{self.get_title} for {self.feed} failed clean.", exc_info=e)
+            log.exception(f"Entry for feed {self.feed} failed clean.", exc_info=e)
             return
 
         if commit:
@@ -185,7 +185,13 @@ def pull_feed(feed, save=True):
             continue
 
         log.info(f"pulling {entry.link}")
-        EntryIngest(feed).ingest(entry, commit=save)
+        try:
+            EntryIngest(feed).ingest(entry, commit=save)
+        # catch all exceptions are generally not great
+        # TODO clean this file to the point where we don't need this?
+        except Exception as e:
+            log.exception(f"Generic failure for entry in feed {feed}", exc_info=e)
+            continue
 
     if not save:
         return
