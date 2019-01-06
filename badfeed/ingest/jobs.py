@@ -1,6 +1,7 @@
 import logging
 
 from django_rq import job
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 import maya
 import feedparser
@@ -149,7 +150,11 @@ class EntryIngest:
             feed=self.feed,
             author=self.get_author(commit=commit),
         )
-        entry.full_clean()
+        try:
+            entry.full_clean()
+        except ValidationError as e:
+            log.exception(f"Entry for feed {self.feed} failed clean.", exc_info=e)
+            return
 
         if commit:
             entry.save()
@@ -180,7 +185,13 @@ def pull_feed(feed, save=True):
             continue
 
         log.info(f"pulling {entry.link}")
-        EntryIngest(feed).ingest(entry, commit=save)
+        try:
+            EntryIngest(feed).ingest(entry, commit=save)
+        # catch all exceptions are generally not great
+        # TODO clean this file to the point where we don't need this?
+        except Exception as e:
+            log.exception(f"Generic failure for entry in feed {feed}", exc_info=e)
+            continue
 
     if not save:
         return
