@@ -1,7 +1,9 @@
 from .base import *  # noqa
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.rq import RqIntegration
 from envparse import env
 
 
-INSTALLED_APPS += ("raven.contrib.django.raven_compat",)
-RAVEN_CONFIG = {"dsn": env.str("SENTRY_DSN", default="")}
+sentry_sdk.init(dsn=env.str("SENTRY_DSN", default=""), integrations=[DjangoIntegration(), RqIntegration()])

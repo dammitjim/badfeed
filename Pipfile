@@ -14,8 +14,8 @@ feedparser = "*"
 rq = "*"
 django-rq = "*"
 gunicorn = "*"
-raven = "*"
 maya = "*"
+sentry-sdk = "*"
 
 [dev-packages]
 "flake8" = "*"
