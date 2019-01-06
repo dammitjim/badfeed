@@ -1,6 +1,7 @@
 import logging
 
 from django_rq import job
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 import maya
 import feedparser
@@ -149,7 +150,11 @@ class EntryIngest:
             feed=self.feed,
             author=self.get_author(commit=commit),
         )
-        entry.full_clean()
+        try:
+            entry.full_clean()
+        except ValidationError as e:
+            log.exception(f"{self.get_title} for {self.feed} failed clean.", exc_info=e)
+            return
 
         if commit:
             entry.save()
