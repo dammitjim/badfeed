@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # TODO: limit to ones due for update when development is further
-        for feed in Feed.objects.all():
+        for feed in Feed.objects.filter(scraping_enabled=True):
             if settings.RQ_ENABLED:
                 pull_feed.delay(feed)
             else:
