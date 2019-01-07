@@ -34,6 +34,10 @@ class TestFeedModel:
         """The feed model should use a custom manager, relied upon elsewhere in code."""
         assert isinstance(Feed.objects, FeedManager)
 
+    def test_scraping_defaults_to_true(self):
+        """The feed model should default to scraping."""
+        assert Feed._meta.get_field("scraping_enabled").default is True
+
 
 @pytest.mark.django_db
 class TestFeedManager:
