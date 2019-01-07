@@ -19,6 +19,8 @@ class Feed(SlugifiedMixin, models.Model):
     title = models.CharField(max_length=255)
     link = models.CharField(max_length=1000, unique=True)
 
+    scraping_enabled = models.BooleanField(default=True)
+
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
     date_last_scraped = models.DateTimeField(blank=True, null=True)
