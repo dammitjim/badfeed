@@ -58,11 +58,16 @@ class OAuthCallback(LoginRequiredMixin, ConsumerKeyMixin, View):
         creds = Pocket.get_access_token(self.consumer_key, code)
         return creds
 
-    def get(self, *args, **kwargs):
+    def _set_access_token_to_user(self):
+        """Get the access token from pocket, store it associated to request user."""
         code = self.request.COOKIES[self.CODE_COOKIE_KEY]
         access_token = self._get_access_token(code)
-        print(access_token)
-        # TODO save access token to database
+        self.request.user.store_pocket_token(access_token)
+
+    def get(self, *args, **kwargs):
+        """Retrieve an access token from pocket, save to user, redirect."""
+        self._set_access_token_to_user()
+
         response = HttpResponseRedirect(self.success_url)
         response.delete_cookie(self.STATE_COOKIE_KEY)
         response.delete_cookie(self.CODE_COOKIE_KEY)

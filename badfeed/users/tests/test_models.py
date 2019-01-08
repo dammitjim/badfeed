@@ -1,6 +1,7 @@
 import pytest
+from django.db.utils import IntegrityError
 
-from badfeed.users.models import BadFeedUser
+from badfeed.users.models import BadFeedUser, ThirdPartyTokens
 
 
 @pytest.mark.django_db
@@ -27,3 +28,38 @@ class TestBadFeedUserModel:
         user.watch(feed, commit=True)
         with pytest.raises(ValueError):
             user.watch(feed, commit=True)
+
+    def test_store_pocket_token_creates_object(self, user):
+        """The method should create a new ThirdPartyToken object."""
+        assert not ThirdPartyTokens.objects.filter(user=user, provider=ThirdPartyTokens.PROVIDER_POCKET).exists()
+        user.store_pocket_token("123")
+        assert ThirdPartyTokens.objects.filter(user=user, provider=ThirdPartyTokens.PROVIDER_POCKET).exists()
+
+    def test_store_pocket_token_replaces_existing_token(self, user):
+        """If a token already exists for this provider, replace it."""
+        user.store_pocket_token("123")
+        user.store_pocket_token("456")
+        assert ThirdPartyTokens.objects.get(user=user, provider=ThirdPartyTokens.PROVIDER_POCKET).code == "456"
+
+
+@pytest.mark.django_db
+class TestThirdPartyTokensModel:
+    def setup(self):
+        """Load some non-instance test data."""
+        self.model = ThirdPartyTokens
+
+    def test_code_required(self):
+        """The code field should be required."""
+        assert not self.model._meta.get_field("code").blank
+        assert not self.model._meta.get_field("code").null
+
+    def test_provider_required(self):
+        """The provider field should be required."""
+        assert not self.model._meta.get_field("provider").blank
+        assert not self.model._meta.get_field("provider").null
+
+    def test_provider_user_are_unique_together(self, third_party_token_factory):
+        """The user cannot have more than 1 token per provider."""
+        token = third_party_token_factory()
+        with pytest.raises(IntegrityError):
+            third_party_token_factory(user=token.user, provider=token.provider)
