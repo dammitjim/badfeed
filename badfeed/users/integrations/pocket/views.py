@@ -1,10 +1,11 @@
 from uuid import uuid4
 
-import requests
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
+from django.urls import reverse
 from django.views import View
+from pocket import Pocket
 
 
 class ConsumerKeyMixin:
@@ -18,42 +19,51 @@ class ConsumerKeyMixin:
 
 
 class OAuthEntry(LoginRequiredMixin, ConsumerKeyMixin, View):
-    OAUTH_REQUEST_URL = "https://getpocket.com/v3/oauth/request"
+    http_method_names = ["get"]
 
-    http_method_names = ["GET"]
+    def __init__(self, *args, **kwargs):
+        """Load the state for cross-request validation into instance of class."""
+        super().__init__(*args, **kwargs)
+        self.state = uuid4()
+
+    def _get_redirect_url(self):
+        redirect = reverse("users:pocket:oauth_callback")
+        return self.request.build_absolute_uri(redirect)
+
+    def _get_request_token(self) -> str:
+        """Retrieve a oauth token from Pocket."""
+        return Pocket.get_request_token(
+            consumer_key=self.consumer_key, redirect_uri=self._get_redirect_url(), state=self.state
+        )
+
+    def _get_auth_url(self, token) -> str:
+        """Retrieve the auth url for the token."""
+        return Pocket.get_auth_url(code=token, redirect_uri=self._get_redirect_url())
 
     def get(self, *args, **kwargs):
-        state = uuid4()
-        redirect_uri = ""
-        pkt_response = requests.post(
-            self.OAUTH_REQUEST_URL,
-            json={"consumer_key": self.consumer_key, "redirect_uri": redirect_uri, "state": state},
-        )
-        pkt_json = pkt_response.json()
-        request_token = pkt_json["code"]
-        user_auth_url = (
-            f"https://getpocket.com/auth/authorize?request_token={request_token}&redirect_uri={redirect_uri}"
-        )
-        response = HttpResponseRedirect(user_auth_url)
-        response.set_cookie(self.STATE_COOKIE_KEY, state)
-        response.set_cookie(self.CODE_COOKIE_KEY, request_token)
+        """Initialise the OAuth flow for pocket."""
+        token = self._get_request_token()
+        response = HttpResponseRedirect(self._get_auth_url(token))
+        response.set_cookie(self.STATE_COOKIE_KEY, self.state)
+        response.set_cookie(self.CODE_COOKIE_KEY, token)
         return response
 
 
 class OAuthCallback(LoginRequiredMixin, ConsumerKeyMixin, View):
-    OAUTH_AUTHORIZE_URL = "https://getpocket.com/v3/oauth/authorize"
+    http_method_names = ["get"]
+    success_url = "/"
 
-    http_method_names = ["GET"]
+    def _get_access_token(self, code) -> str:
+        """Retrieve the user credentials from pocket."""
+        creds = Pocket.get_access_token(self.consumer_key, code)
+        return creds
 
-    # TODO consider having a confirm login to pocket screen on GET instead
     def get(self, *args, **kwargs):
-        state = self.request.COOKIES[self.STATE_COOKIE_KEY]
-        # TODO do we get this back in the GET params instead
-        code = self.request.CODE_COOKIE_KEY[self.CODE_COOKIE_KEY]
-        pkt_resp = requests.post(self.OAUTH_AUTHORIZE_URL, json={"consumer_key": self.consumer_key, "code": code})
-        pkt_body = pkt_resp.json()
-        access_token = pkt_body["access_token"]
+        code = self.request.COOKIES[self.CODE_COOKIE_KEY]
+        access_token = self._get_access_token(code)
         print(access_token)
-        print(state)
-        # TODO delete cookies
         # TODO save access token to database
+        response = HttpResponseRedirect(self.success_url)
+        response.delete_cookie(self.STATE_COOKIE_KEY)
+        response.delete_cookie(self.CODE_COOKIE_KEY)
+        return response

@@ -16,6 +16,7 @@ django-rq = "*"
 gunicorn = "*"
 maya = "*"
 sentry-sdk = "*"
+pocket = "*"
 
 [dev-packages]
 "flake8" = "*"

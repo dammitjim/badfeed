@@ -108,3 +108,5 @@ RQ_QUEUES = {
 }
 
 LOGIN_URL = "/login"
+
+POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY", default="")
