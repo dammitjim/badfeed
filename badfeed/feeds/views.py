@@ -55,7 +55,7 @@ class ObjectActionToggleView(LoginRequiredMixin, View):
 
     def get_success_url(self):
         """Redirect target after action."""
-        return reverse("feeds:my_entries")
+        return self.request.META.get("HTTP_REFERER", "/")
 
     def toggle_on(self, obj):
         """Positive, toggle "on" action"""
