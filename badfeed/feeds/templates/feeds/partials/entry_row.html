@@ -15,5 +15,6 @@
         {% pin_button entry %}
         {% save_button entry %}
         {% delete_button entry %}
+        <a href="{% url 'feeds:entry_pocket' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Save To Pocket</a>
     </div>
 </div>
