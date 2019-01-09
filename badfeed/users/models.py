@@ -20,6 +20,10 @@ class BadFeedUser(AbstractUser):
         """Assign a new pocket token to the user."""
         return self._store_third_party_token(ThirdPartyTokens.PROVIDER_POCKET, code)
 
+    @property
+    def pocket_token(self):
+        return self.third_party_tokens.get(provider=ThirdPartyTokens.PROVIDER_POCKET).code
+
     def watch(self, feed, commit=False):
         """Watch feed if possible."""
         if self.watching.filter(pk=feed.pk).exists():

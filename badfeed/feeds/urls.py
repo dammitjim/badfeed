@@ -46,4 +46,5 @@ urlpatterns = [
         views.EntryDeleteToggleView.as_view(should_toggle=False),
         name="entry_undelete",
     ),
+    path("f/<slug:feed_slug>/<slug:entry_slug>/pocket/", views.SaveEntryToPocketView.as_view(), name="entry_pocket"),
 ]
