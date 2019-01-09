@@ -10,5 +10,4 @@ class BadFeedUser(admin.ModelAdmin):
 
 @admin.register(ThirdPartyTokens)
 class ThirdPartyTokensAdmin(admin.ModelAdmin):
-    pass
-    # exclude = ("code", )
+    exclude = ("code",)
