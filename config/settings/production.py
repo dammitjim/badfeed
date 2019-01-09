@@ -7,3 +7,5 @@ from envparse import env
 
 
 sentry_sdk.init(dsn=env.str("SENTRY_DSN", default=""), integrations=[DjangoIntegration(), RqIntegration()])
+
+POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY")

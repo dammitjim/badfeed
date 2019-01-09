@@ -16,6 +16,7 @@ django-rq = "*"
 gunicorn = "*"
 maya = "*"
 sentry-sdk = "*"
+pocket = "*"
 
 [dev-packages]
 "flake8" = "*"
@@ -25,6 +26,7 @@ pytest-django = "*"
 black = "==18.9b0"
 pre-commit = "*"
 pydocstyle = "*"
+pytest-mock = "*"
 
 [requires]
 python_version = "3.6"

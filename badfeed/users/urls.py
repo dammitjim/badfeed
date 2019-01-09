@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from badfeed.users import views
 
@@ -10,4 +10,5 @@ urlpatterns = [
     path("reset-password/", views.PasswordResetView.as_view(), name="password_reset"),
     path("change-password/", views.PasswordChangeView.as_view(), name="password_change"),
     path("register/", views.RegisterView.as_view(), name="register"),
+    path("integrations/pocket/", include("badfeed.users.integrations.pocket.urls")),
 ]
