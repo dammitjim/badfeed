@@ -1,5 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 from django.core.paginator import Paginator
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
@@ -7,6 +8,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.views.generic import ListView, DetailView
 from django.views import View
+from pocket import Pocket
 
 from badfeed.feeds.models import Feed, Entry
 from badfeed.feeds.utils import delete_entries_for_user
@@ -191,3 +193,13 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         """Load all pinned entries for the user."""
         return Entry.user_state.deleted(self.request.user).order_by("-states__date_created")
+
+
+class SaveEntryToPocketView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        entry = get_object_or_404(Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"])
+        print(self.request.user.pocket_token)
+        pocket = Pocket(settings.POCKET_CONSUMER_KEY, self.request.user.pocket_token)
+        response, headers = pocket.add(entry.link, wait=False)
+        print(response)
+        print(headers)
