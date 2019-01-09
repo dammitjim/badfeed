@@ -4,6 +4,7 @@ from model_mommy import mommy
 import pytest
 
 from badfeed.feeds.models import Feed, Entry
+from badfeed.users.models import ThirdPartyTokens
 
 
 @pytest.fixture
@@ -23,6 +24,17 @@ def auth_client(user):
     return client
 
 
+@pytest.fixture()
+def client_factory():
+    def _make(user=None):
+        client = Client()
+        if user:
+            client.force_login(user)
+        return client
+
+    return _make
+
+
 @pytest.fixture
 def watched_feed(user):
     feed = mommy.make(Feed, title="My Watched Feed!")
@@ -34,3 +46,8 @@ def watched_feed(user):
 @pytest.fixture
 def watched_entry(watched_feed):
     return mommy.make(Entry, feed=watched_feed, title="My Amazing Entry!")
+
+
+@pytest.fixture
+def pocket_token(user):
+    return mommy.make(ThirdPartyTokens, provider=ThirdPartyTokens.PROVIDER_POCKET)

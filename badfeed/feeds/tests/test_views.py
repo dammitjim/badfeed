@@ -418,10 +418,12 @@ class TestPinnedEntriesListView:
     def test_only_returns_pinned_entries(self, auth_client, entry_state_factory, user):
         """The view should only return entries for pinned feeds."""
         pinned_entries = [entry_state_factory(user=user, state=EntryState.STATE_PINNED).entry for _ in range(5)]
-        [entry_state_factory(user=user, state=EntryState.STATE_SAVED).entry for _ in range(5)]
+        other_entries = [entry_state_factory(user=user, state=EntryState.STATE_SAVED).entry for _ in range(5)]
         response = auth_client.get(self.url)
         for entry in pinned_entries:
             assert entry in response.context["page_obj"].object_list
+        for entry in other_entries:
+            assert entry not in response.context["page_obj"].object_list
 
 
 @pytest.mark.django_db
@@ -443,10 +445,12 @@ class TestSavedEntriesListView:
     def test_only_returns_saved_entries(self, auth_client, entry_state_factory, user):
         """The view should only return entries for saved feeds."""
         saved_entries = [entry_state_factory(user=user, state=EntryState.STATE_SAVED).entry for _ in range(5)]
-        [entry_state_factory(user=user, state=EntryState.STATE_DELETED).entry for _ in range(5)]
+        other_entries = [entry_state_factory(user=user, state=EntryState.STATE_DELETED).entry for _ in range(5)]
         response = auth_client.get(self.url)
         for entry in saved_entries:
             assert entry in response.context["page_obj"].object_list
+        for entry in other_entries:
+            assert entry not in response.context["page_obj"].object_list
 
 
 @pytest.mark.django_db
@@ -468,7 +472,51 @@ class TestArchivedEntriesListView:
     def test_only_returns_archived_entries(self, auth_client, entry_state_factory, user):
         """The view should only return entries for archived feeds."""
         archived_entries = [entry_state_factory(user=user, state=EntryState.STATE_DELETED).entry for _ in range(5)]
-        [entry_state_factory(user=user, state=EntryState.STATE_SAVED).entry for _ in range(5)]
+        other_entries = [entry_state_factory(user=user, state=EntryState.STATE_SAVED).entry for _ in range(5)]
         response = auth_client.get(self.url)
         for entry in archived_entries:
             assert entry in response.context["page_obj"].object_list
+        for entry in other_entries:
+            assert entry not in response.context["page_obj"].object_list
+
+
+@pytest.mark.django_db
+class TestSaveEntryToPocketView:
+    @staticmethod
+    def _get_url(entry):
+        return reverse("feeds:entry_pocket", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+
+    def test_redirect_when_no_pocket_auth(self, auth_client, entry):
+        """If the user hasn't authd with pocket, redirect them to."""
+        response = auth_client.get(self._get_url(entry))
+        assert response.status_code == 302
+        assert response.url == reverse("users:pocket:oauth_entry")
+
+    def test_requires_login(self, client, entry):
+        """The view should require a logged in user."""
+        url = self._get_url(entry)
+        response = client.get(url)
+        assert response.status_code == 302
+        assert response.url == f"{settings.LOGIN_URL}?next={url}"
+
+    def test_404_if_no_entry(self, client_factory, pocket_token, entry):
+        """The view should 404 if no entry matches the url kwargs."""
+        url = self._get_url(entry)
+        entry.delete()
+        client = client_factory(user=pocket_token.user)
+        response = client.get(url)
+        assert response.status_code == 404
+
+    def test_calls_pocket_api(self, mocker, client_factory, pocket_token, entry):
+        """The view should add the entry link to pocket."""
+        mocked_fn = mocker.patch("badfeed.feeds.views.Pocket.add")
+        client = client_factory(user=pocket_token.user)
+        client.get(self._get_url(entry))
+        assert mocked_fn.call_count == 1
+
+    def test_also_marks_as_saved_in_app(self, mocker, client_factory, pocket_token, entry):
+        """The view should also mark the entry as saved."""
+        mocker.patch("badfeed.feeds.views.Pocket.add")
+        client = client_factory(user=pocket_token.user)
+        client.get(self._get_url(entry))
+        assert entry.is_saved_by(pocket_token.user)

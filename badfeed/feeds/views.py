@@ -12,6 +12,7 @@ from pocket import Pocket
 
 from badfeed.feeds.models import Feed, Entry
 from badfeed.feeds.utils import delete_entries_for_user
+from badfeed.users.models import ThirdPartyTokens
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
@@ -197,9 +198,13 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
 
 class SaveEntryToPocketView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        """Save the given entry to the request user's pocket account."""
+        try:
+            pocket = Pocket(settings.POCKET_CONSUMER_KEY, request.user.pocket_token)
+        except ThirdPartyTokens.DoesNotExist:
+            return redirect(reverse("users:pocket:oauth_entry"))
         entry = get_object_or_404(Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"])
-        print(self.request.user.pocket_token)
-        pocket = Pocket(settings.POCKET_CONSUMER_KEY, self.request.user.pocket_token)
-        response, headers = pocket.add(entry.link, wait=False)
-        print(response)
-        print(headers)
+        # TODO handle pocket errors for fault tolerance
+        pocket.add(entry.link, wait=False)
+        entry.mark_saved(request.user)
+        return redirect(request.META.get("HTTP_REFERER", "/"))
