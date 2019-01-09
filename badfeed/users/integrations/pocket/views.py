@@ -55,8 +55,7 @@ class OAuthCallback(LoginRequiredMixin, ConsumerKeyMixin, View):
 
     def _get_access_token(self, code) -> str:
         """Retrieve the user credentials from pocket."""
-        creds = Pocket.get_access_token(self.consumer_key, code)
-        return creds
+        return Pocket.get_access_token(self.consumer_key, code)
 
     def _set_access_token_to_user(self):
         """Get the access token from pocket, store it associated to request user."""
