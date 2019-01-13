@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third party
     "django_rq",
+    "rest_framework",
     # internal
     "badfeed.users",
     "badfeed.feeds",
@@ -110,3 +111,9 @@ RQ_QUEUES = {
 LOGIN_URL = "/login"
 
 POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY", default="")
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 10,
+}
