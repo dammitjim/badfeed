@@ -6,9 +6,6 @@
          <app></app>
      </div>
     {% render_bundle 'app' %}
-    {% for entry in page_obj %}
-        {% include "feeds/partials/entry_row.html" with entry=entry feed=entry.feed counter=forloop.counter %}
-    {% endfor %}
     <nav aria-label="Page navigation example">
         <ul class="pagination">
             {% if page_obj.has_previous %}

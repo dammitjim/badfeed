@@ -19,7 +19,7 @@ class UnreadEntryList(generics.ListAPIView):
 class EntryStateManagerView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = EntrySerializer
 
-    def get_queryset(self):
+    def get_object(self):
         return get_object_or_404(Entry, pk=self.kwargs["pk"])
 
     def update(self, request, *args, **kwargs):

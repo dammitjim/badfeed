@@ -1,5 +1,6 @@
 <template>
     <div>
+        <button class="card-link" v-on:click="done(entries)">Done</button>
         <div v-bind:key="entry.id" v-for="entry in entries" class="card mb-3">
             <div class="card-body">
                 <h5 class="card-title">
@@ -25,6 +26,9 @@
 import Vue from 'vue'
 import axios from 'axios';
 
+axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+axios.defaults.xsrfCookieName = "csrftoken";
+
 export default Vue.extend({
     name: "EntryBlock",
     props: {
@@ -35,17 +39,20 @@ export default Vue.extend({
         };
     },
     mounted () {
-        axios.get("/api/v1/feeds/entries/unread/")
-            .then(response => {
-                let iter = 1;
-                this.entries = response.data.results.map(entry => {
-                    entry.iterator = iter;
-                    iter += 1;
-                    return entry;
-                })
-            });
+        this.loadEntries();
     },
     methods: {
+        loadEntries: function () {
+            axios.get("/api/v1/feeds/entries/unread/")
+                .then(response => {
+                    let iter = 1;
+                    this.entries = response.data.results.map(entry => {
+                        entry.iterator = iter;
+                        iter += 1;
+                        return entry;
+                    })
+                });
+        },
         save: function (entry) {
             console.log("save");
             console.log(entry);
@@ -61,11 +68,19 @@ export default Vue.extend({
             });
         },
         archive: function (entry) {
-            console.log("archive");
-            console.log(entry);
             this.entries = this.entries.filter(blockEntry => {
                 return blockEntry.id != entry.id;
             });
+
+            axios.delete(`/api/v1/feeds/entries/${entry.id}/`, {withCredentials: true});
+        },
+        done: function (entries) {
+            axios.all(this.entries.map(entry => {
+                return axios.delete(`/api/v1/feeds/entries/${entry.id}/`, {withCredentials: true});
+            }))
+            .then(axios.spread((acct, perms) => {
+                this.loadEntries();
+            }));
         }
     }
 });
