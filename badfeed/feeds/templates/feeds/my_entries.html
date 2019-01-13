@@ -1,6 +1,11 @@
 {% extends "layouts/contained.html" %}
 {% load feed_tags %}
+{% load render_bundle from webpack_loader %}
 {% block main %}
+    <div id="app">
+         <app></app>
+     </div>
+    {% render_bundle 'app' %}
     {% for entry in page_obj %}
         {% include "feeds/partials/entry_row.html" with entry=entry feed=entry.feed counter=forloop.counter %}
     {% endfor %}

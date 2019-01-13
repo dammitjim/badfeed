@@ -18,6 +18,7 @@ maya = "*"
 sentry-sdk = "*"
 pocket = "*"
 djangorestframework = "*"
+django-webpack-loader = "*"
 
 [dev-packages]
 "flake8" = "*"
