@@ -13,7 +13,10 @@ class UnreadEntryList(generics.ListAPIView):
 
     def get_queryset(self):
         """Load all unread entries to be served."""
-        return Entry.user_state.unread(self.request.user)
+        qs = Entry.user_state.unread(self.request.user)
+        if "after" in self.request.GET:
+            qs = qs.filter(pk__lte=self.request.GET["after"])
+        return qs
 
 
 class EntryStateManagerView(generics.RetrieveUpdateDestroyAPIView):

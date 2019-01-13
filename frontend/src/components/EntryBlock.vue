@@ -29,10 +29,18 @@ import axios from 'axios';
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 axios.defaults.xsrfCookieName = "csrftoken";
 
+const removeEntry = (id, entries): [] => {
+    return entries.filter(entry => {
+        return id != entry.id;
+    });
+};
+
+const buildStateURL = (id): [] => {
+    return `/api/v1/feeds/entries/${id}/`;
+}
+
 export default Vue.extend({
     name: "EntryBlock",
-    props: {
-    },
     data () {
         return {
             entries: []
@@ -53,30 +61,29 @@ export default Vue.extend({
                     })
                 });
         },
+        patchEntryState: function (id, state) {
+            this.entries = removeEntry(id, this.entries);
+            const url = buildStateURL(id);
+            axios.patch(url, {state}, {withCredentials: true});
+        },
         save: function (entry) {
-            console.log("save");
-            console.log(entry);
-            this.entries = this.entries.filter(blockEntry => {
-                return blockEntry.id != entry.id;
-            });
+            this.patchEntryState(entry.id, "save");
         },
         pin: function (entry) {
-            console.log("pin");
-            console.log(entry);
-            this.entries = this.entries.filter(blockEntry => {
-                return blockEntry.id != entry.id;
-            });
+            this.patchEntryState(entry.id, "pin");
         },
         archive: function (entry) {
             this.entries = this.entries.filter(blockEntry => {
                 return blockEntry.id != entry.id;
             });
 
-            axios.delete(`/api/v1/feeds/entries/${entry.id}/`, {withCredentials: true});
+            const url = buildStateURL(entry.id);
+            axios.delete(url, {withCredentials: true});
         },
         done: function (entries) {
             axios.all(this.entries.map(entry => {
-                return axios.delete(`/api/v1/feeds/entries/${entry.id}/`, {withCredentials: true});
+                const url = buildStateURL(entry.id);
+                return axios.delete(url, {withCredentials: true});
             }))
             .then(axios.spread((acct, perms) => {
                 this.loadEntries();
