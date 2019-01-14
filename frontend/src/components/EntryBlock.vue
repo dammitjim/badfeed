@@ -1,24 +1,30 @@
 <template>
     <div>
-        <button class="card-link" v-on:click="done(entries)">Done</button>
+        <div class="text-right mb-3">
+            <button class="card-link" v-on:click="done(entries)">Done</button>
+        </div>
         <div v-bind:key="entry.id" v-for="entry in entries" class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <a
-                        :href="entry.link"
-                        target="_blank"
-                    >
-                        #{{ entry.iterator }}
-                        {{ entry.title }}
-                    </a>
-                </h5>
-                <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }}</h6>
-                <hr />
-                <button href="#" class="card-link" v-on:click="pin(entry)">Pin</button>
-                <button href="#" class="card-link" v-on:click="save(entry)">Save</button>
-                <button href="#" class="card-link" v-on:click="archive(entry)">Archive</button>
+            <div class="card-body d-flex justify-content-between">
+                <div>
+                    <h5 class="card-title">
+                        <a
+                            :href="entry.link"
+                            target="_blank"
+                        >
+                            #{{ entry.iterator }}
+                            {{ entry.title }}
+                        </a>
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }}</h6>
+                </div>
+                <div class="card-actions">
+                    <button class="card-link" v-on:click="pin(entry)">Pin</button>
+                    <button class="card-link" v-on:click="save(entry)">Save</button>
+                    <button class="card-link" v-on:click="archive(entry)">Archive</button>
+                </div>
             </div>
         </div>
+        <hr />
     </div>
 </template>
 
