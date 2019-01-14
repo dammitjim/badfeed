@@ -1,26 +1,38 @@
 <template>
     <div>
         <div class="text-right mb-3">
-            <button class="card-link" v-on:click="done(entries)">Done</button>
+            <button class="btn btn-success" v-on:click="done(entries)">
+                Done
+            </button>
         </div>
         <div v-bind:key="entry.id" v-for="entry in entries" class="card mb-3">
             <div class="card-body d-flex justify-content-between">
                 <div>
                     <h5 class="card-title">
-                        <a
-                            :href="entry.link"
-                            target="_blank"
-                        >
-                            #{{ entry.iterator }}
-                            {{ entry.title }}
+                        <a :href="entry.link" target="_blank">
+                            #{{ entry.iterator }} {{ entry.title }}
                         </a>
                     </h5>
-                    <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        {{ entry.feed.title }}
+                    </h6>
                 </div>
                 <div class="card-actions">
-                    <button class="card-link" v-on:click="pin(entry)">Pin</button>
-                    <button class="card-link" v-on:click="save(entry)">Save</button>
-                    <button class="card-link" v-on:click="archive(entry)">Archive</button>
+                    <button
+                        class="btn btn-primary mr-2"
+                        v-on:click="pin(entry)"
+                    >
+                        Pin
+                    </button>
+                    <button
+                        class="btn btn-primary mr-2"
+                        v-on:click="save(entry)"
+                    >
+                        Save
+                    </button>
+                    <button class="btn btn-success" v-on:click="archive(entry)">
+                        Done
+                    </button>
                 </div>
             </div>
         </div>
@@ -29,72 +41,84 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import axios from 'axios';
+import Vue from "vue";
+import axios from "axios";
 
-axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
-axios.defaults.xsrfCookieName = "csrftoken";
+import { IEntry } from "../models";
 
-const removeEntry = (id, entries): [] => {
+const removeEntry = (id: number, entries: IEntryExtended[]): IEntryExtended[] => {
     return entries.filter(entry => {
-        return id != entry.id;
+        return id !== entry.id;
     });
 };
 
-const buildStateURL = (id): [] => {
+const buildStateURL = (id: number): string => {
     return `/api/v1/feeds/entries/${id}/`;
+};
+
+interface IEntryExtended extends IEntry {
+    iterator: number;
+}
+
+interface IData {
+    entries: IEntryExtended[];
 }
 
 export default Vue.extend({
     name: "EntryBlock",
-    data () {
+    data(): IData {
         return {
-            entries: []
+            entries: [],
         };
     },
-    mounted () {
+    mounted() {
         this.loadEntries();
     },
     methods: {
-        loadEntries: function () {
-            axios.get("/api/v1/feeds/entries/unread/")
-                .then(response => {
-                    let iter = 1;
-                    this.entries = response.data.results.map(entry => {
-                        entry.iterator = iter;
-                        iter += 1;
-                        return entry;
-                    })
+        loadEntries() {
+            axios.get("/api/v1/feeds/entries/unread/").then(response => {
+                let iter = 1;
+                this.entries = response.data.results.map((entry: IEntryExtended) => {
+                    entry.iterator = iter;
+                    iter += 1;
+                    return entry;
                 });
+            });
         },
-        patchEntryState: function (id, state) {
+        patchEntryState(id: number, state: string) {
             this.entries = removeEntry(id, this.entries);
             const url = buildStateURL(id);
-            axios.patch(url, {state}, {withCredentials: true});
+            return axios.patch(url, { state }, { withCredentials: true });
         },
-        save: function (entry) {
+        save(entry: IEntry) {
             this.patchEntryState(entry.id, "save");
         },
-        pin: function (entry) {
-            this.patchEntryState(entry.id, "pin");
+        pin(entry: IEntry) {
+            this.entries = removeEntry(entry.id, this.entries);
+            this.$store.dispatch("pinEntry", entry);
         },
-        archive: function (entry) {
+        archive(entry: IEntry) {
             this.entries = this.entries.filter(blockEntry => {
-                return blockEntry.id != entry.id;
+                return blockEntry.id !== entry.id;
             });
 
             const url = buildStateURL(entry.id);
-            axios.delete(url, {withCredentials: true});
+            axios.delete(url, { withCredentials: true });
         },
-        done: function (entries) {
-            axios.all(this.entries.map(entry => {
-                const url = buildStateURL(entry.id);
-                return axios.delete(url, {withCredentials: true});
-            }))
-            .then(axios.spread((acct, perms) => {
-                this.loadEntries();
-            }));
-        }
-    }
+        done(entries: IEntry[]) {
+            axios
+                .all(
+                    this.entries.map(entry => {
+                        const url = buildStateURL(entry.id);
+                        return axios.delete(url, { withCredentials: true });
+                    })
+                )
+                .then(
+                    axios.spread((acct, perms) => {
+                        this.loadEntries();
+                    })
+                );
+        },
+    },
 });
 </script>
