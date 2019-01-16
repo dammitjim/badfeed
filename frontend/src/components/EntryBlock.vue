@@ -37,6 +37,7 @@
             </div>
         </div>
         <hr />
+        {{ remaining }} left to address.
     </div>
 </template>
 
@@ -62,6 +63,7 @@ interface IEntryExtended extends IEntry {
 
 interface IData {
     entries: IEntryExtended[];
+    remaining: number;
 }
 
 export default Vue.extend({
@@ -69,6 +71,7 @@ export default Vue.extend({
     data(): IData {
         return {
             entries: [],
+            remaining: 0,
         };
     },
     mounted() {
@@ -83,6 +86,7 @@ export default Vue.extend({
                     iter += 1;
                     return entry;
                 });
+                this.remaining = response.data.count;
             });
         },
         patchEntryState(id: number, state: string) {
