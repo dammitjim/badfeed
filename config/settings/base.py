@@ -4,6 +4,7 @@ from envparse import env
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY", default="wlk9!mepu*mp$^yj-bo2on4)4fj60#(zbzw+@te54xu((b(dfp")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
@@ -18,6 +19,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # third party
     "django_rq",
+    "rest_framework",
+    "webpack_loader",
     # internal
     "badfeed.users",
     "badfeed.feeds",
@@ -110,3 +113,17 @@ RQ_QUEUES = {
 LOGIN_URL = "/login"
 
 POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY", default="")
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 5,
+}
+
+WEBPACK_LOADER = {
+    "DEFAULT": {
+        "CACHE": DEBUG,
+        "BUNDLE_DIR_NAME": "/bundles/",  # must end with slash
+        "STATS_FILE": os.path.join(FRONTEND_DIR, "webpack-stats.json"),
+    }
+}

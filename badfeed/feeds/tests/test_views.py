@@ -348,7 +348,8 @@ class TestMyEntriesListView:
         watched_entries = [entry_factory(feed=watched_feed) for _ in range(5)]
         [entry_factory(feed=unwatched_feed) for _ in range(5)]
         response = auth_client.get(self.url)
-        assert response.context["page_obj"].object_list == watched_entries
+        for entry in response.context["page_obj"].object_list:
+            assert entry in watched_entries
 
 
 @pytest.mark.django_db

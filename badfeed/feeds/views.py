@@ -149,6 +149,11 @@ class MyEntriesListView(LoginRequiredMixin, ListView):
         """Load all entries for the the feeds watched by the user."""
         return Entry.user_state.unread(self.request.user)
 
+    def get_context_data(self, **kwargs):
+        """Load the template in single page application mode."""
+        ctx = super().get_context_data(**kwargs)
+        return {"spa": True, **ctx}
+
 
 class MyEntriesMassDeleteView(LoginRequiredMixin, View):
     def get_target_entries(self, page):
