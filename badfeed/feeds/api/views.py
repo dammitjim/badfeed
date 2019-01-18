@@ -1,15 +1,36 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
-from rest_framework.exceptions import ParseError
+from rest_framework.views import APIView
+from rest_framework.renderers import JSONRenderer
 
-from badfeed.feeds.models import Entry
-from badfeed.feeds.api.serializers import EntrySerializer
+from badfeed.feeds.models import Entry, Feed
+from badfeed.feeds.api.serializers import EntryDetailSerializer, FeedEntrySerializer
+
+
+class FeedDashboardView(APIView):
+    def get(self, request, *args, **kwargs):
+        feeds = Feed.objects.watched_by(request.user).order_by("entries__date_published")
+        feeds = feeds[:5]
+
+        output = []
+        for feed in feeds:
+            serializer = FeedEntrySerializer(
+                instance={"feed": feed, "entries": feed.entries.order_by("date_published")[:5]}
+            )
+            output.append(serializer.data)
+
+        renderer = JSONRenderer()
+        return renderer.render(output)
+
+    def destroy(self, request, *args, **kwargs):
+        pass
 
 
 class UnreadEntryList(generics.ListAPIView):
-    serializer_class = EntrySerializer
+    serializer_class = EntryDetailSerializer
 
     def get_queryset(self):
         """Load all unread entries to be served."""
@@ -20,7 +41,7 @@ class UnreadEntryList(generics.ListAPIView):
 
 
 class EntryStateManagerView(generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = EntrySerializer
+    serializer_class = EntryDetailSerializer
 
     def get_object(self):
         return get_object_or_404(Entry, pk=self.kwargs["pk"])
