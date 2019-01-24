@@ -4,7 +4,6 @@ from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
-from rest_framework.renderers import JSONRenderer
 
 from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.api.serializers import EntryDetailSerializer, FeedEntrySerializer
@@ -17,13 +16,13 @@ class FeedDashboardView(APIView):
 
         output = []
         for feed in feeds:
-            serializer = FeedEntrySerializer(
-                instance={"feed": feed, "entries": feed.entries.order_by("date_published")[:5]}
-            )
+            # get top 5 unread entries, ordered by date published for this feed
+            unread_entries = feed.entries(manager="user_state").unread(request.user).order_by("date_published")
+            unread_entries = unread_entries[:5]
+            serializer = FeedEntrySerializer(instance={"feed": feed, "entries": unread_entries})
             output.append(serializer.data)
 
-        renderer = JSONRenderer()
-        return renderer.render(output)
+        return Response(data=output)
 
     def destroy(self, request, *args, **kwargs):
         pass
