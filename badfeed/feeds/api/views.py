@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 
@@ -34,6 +35,38 @@ class FeedDashboardView(APIView):
 
     def destroy(self, request, *args, **kwargs):
         pass
+
+
+class GenericFeedDashboardView(generics.ListAPIView):
+    serializer_class = FeedEntrySerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        """Load watched feeds, ordered by when their entries were last published."""
+        return Feed.objects.watched_by(self.request.user).order_by(
+            "entries__date_published"
+        )
+
+    def get_serializer_instance(self, feed):
+        """Load the 5 latest unread entries for the given feed into a serializer instance."""
+        unread_entries = (
+            feed.entries(manager="user_state")
+            .unread(self.request.user)
+            .order_by("date_published")
+        )
+        unread_entries = unread_entries[:5]
+        return FeedEntrySerializer(
+            instance={"feed": feed, "entries": unread_entries},
+            context=self.get_serializer_context(),
+        )
+
+    def list(self, request, *args, **kwargs):
+        """Render a paginated list of watched feeds, with 5 unread entries each."""
+        self.request = request
+        queryset = self.get_queryset()
+        queryset = self.paginate_queryset(queryset)
+        data = [self._get_serializer_instance(feed).data for feed in queryset]
+        return self.get_paginated_response(data)
 
 
 class UnreadEntryList(generics.ListAPIView):
