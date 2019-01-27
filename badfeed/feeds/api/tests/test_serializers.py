@@ -28,3 +28,21 @@ class TestEntrySerializer:
         srl = serializers.EntrySerializer(entry)
         assert field in srl.data
         assert srl.data[field] == getattr(entry, field)
+
+    def test_serializes_feed(self, entry):
+        """Should serialize the associated feed."""
+        srl = serializers.EntrySerializer(entry)
+        feed = srl.data["feed"]
+        assert entry.feed.title == feed["title"]
+
+
+@pytest.mark.django_db
+class TestFeedEntrySerializer:
+    def test_omits_nested_feed_serialization(self, feed, entry_factory):
+        """Should not serialize the feed nested in entry as we have it at top level."""
+        entry_1 = entry_factory(feed=feed)
+        entry_2 = entry_factory(feed=feed)
+        srl = serializers.FeedEntrySerializer(
+            {"feed": feed, "entries": [entry_1, entry_2]}
+        )
+        assert "feed" not in srl.data["entries"][0]

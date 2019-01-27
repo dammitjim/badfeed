@@ -7,13 +7,25 @@ from rest_framework.serializers import (
 from badfeed.feeds.models import Entry, Feed, EntryState
 
 
+class OmitMixin:
+    def __init__(self, *args, **kwargs):
+        """Optional kwarg to omit fields from the serialized result."""
+        omit = kwargs.pop("omit", None)
+        super(OmitMixin, self).__init__(*args, **kwargs)
+        if omit is not None:
+            # Drop any fields that are not specified in the `fields` argument.
+            for field in set(self.fields):
+                if field in omit:
+                    self.fields.pop(field)
+
+
 class FeedSerializer(ModelSerializer):
     class Meta:
         model = Feed
         fields = ["title", "link"]
 
 
-class EntrySerializer(ModelSerializer):
+class EntrySerializer(OmitMixin, ModelSerializer):
     feed = FeedSerializer()
     states = SerializerMethodField()
 
@@ -54,4 +66,4 @@ class EntryDetailSerializer(EntrySerializer):
 
 class FeedEntrySerializer(Serializer):
     feed = FeedSerializer()
-    entries = EntrySerializer(many=True)
+    entries = EntrySerializer(many=True, omit=["feed"])
