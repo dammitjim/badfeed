@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
@@ -42,9 +43,25 @@ class GenericFeedDashboardView(generics.ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        """Load watched feeds, ordered by when their entries were last published."""
-        return Feed.objects.watched_by(self.request.user).order_by(
-            "entries__date_published"
+        """Load watched feeds, ordered by when their entries were last published.
+
+        The query we return must match the following conditions:
+
+        * The feed must have 1 or more entries
+        * The feed must have 1 or more unread entries for this user
+            where an unread entry is one without a state
+        * The entries must be ordered by date published
+        * Fully actioned feeds must not be returned.
+
+        TODO there is probably a nicer way of writing this queryset chain
+        """
+        return (
+            Feed.objects.watched_by(self.request.user)
+            .filter(entries__gt=0)
+            .filter(entries__states__isnull=True)
+            .annotate(entry_states=Count("entries__states"))
+            .filter(entry_states__gte=0)
+            .order_by("entries__date_published")
         )
 
     def get_serializer_instance(self, feed):
@@ -65,7 +82,7 @@ class GenericFeedDashboardView(generics.ListAPIView):
         self.request = request
         queryset = self.get_queryset()
         queryset = self.paginate_queryset(queryset)
-        data = [self._get_serializer_instance(feed).data for feed in queryset]
+        data = [self.get_serializer_instance(feed).data for feed in queryset]
         return self.get_paginated_response(data)
 
 

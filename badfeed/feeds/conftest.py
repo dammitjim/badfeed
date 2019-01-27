@@ -12,9 +12,10 @@ def feed():
 @pytest.fixture
 def feed_factory():
     def _make(**kwargs):
+        watched_by = kwargs.pop("watched_by", None)
         feed = mommy.make(Feed, **kwargs)
-        if "watched_by" in kwargs:
-            kwargs["watched_by"].watch(feed)
+        if watched_by:
+            watched_by.watch(feed)
         return feed
 
     return _make
