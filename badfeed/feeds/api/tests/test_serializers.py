@@ -1,5 +1,5 @@
-from django.urls import reverse
 from django.test import RequestFactory
+from django.urls import reverse
 import pytest
 
 from badfeed.feeds.api import serializers

@@ -22,7 +22,9 @@ class BadFeedUser(AbstractUser):
 
     @property
     def pocket_token(self):
-        return self.third_party_tokens.get(provider=ThirdPartyTokens.PROVIDER_POCKET).code
+        return self.third_party_tokens.get(
+            provider=ThirdPartyTokens.PROVIDER_POCKET
+        ).code
 
     def watch(self, feed, commit=False):
         """Watch feed if possible."""
@@ -50,7 +52,9 @@ class ThirdPartyTokens(models.Model):
     code = models.CharField(max_length=255)
     provider = models.CharField(max_length=50, choices=PROVIDER_CHOICES)
     metadata = JSONField(blank=True, null=True)
-    user = models.ForeignKey(BadFeedUser, related_name="third_party_tokens", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        BadFeedUser, related_name="third_party_tokens", on_delete=models.CASCADE
+    )
 
     class Meta:
         unique_together = (("provider", "user"),)

@@ -1,10 +1,10 @@
 from django.contrib import messages
-from django.contrib.auth import views as auth_views
 from django.contrib.auth import login
-from django.views.generic import FormView
+from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
+from django.views.generic import FormView
 
-from badfeed.users.forms import RegistrationForm, ExtendedAuthenticationForm
+from badfeed.users.forms import ExtendedAuthenticationForm, RegistrationForm
 
 
 class PasswordResetView(auth_views.PasswordResetView):

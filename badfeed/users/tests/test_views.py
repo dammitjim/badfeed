@@ -56,7 +56,9 @@ class TestLoginView:
         """Logged in users should not be able to log in again."""
         response = auth_client.get(self.url)
         assert response.status_code == 302
-        str_msg = [m.message for m in get_messages(response.wsgi_request)._queued_messages]
+        str_msg = [
+            m.message for m in get_messages(response.wsgi_request)._queued_messages
+        ]
         assert views.LoginView.Messages.ALREADY_LOGGED_IN in str_msg
 
     def test_renders(self, client):

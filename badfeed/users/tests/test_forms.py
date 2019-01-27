@@ -11,7 +11,9 @@ class TestRegistrationForm:
         form = RegistrationForm(registration_form_data)
         assert form.is_valid()
 
-    @pytest.mark.parametrize("field", ["email", "confirm_email", "username", "password1", "password2"])
+    @pytest.mark.parametrize(
+        "field", ["email", "confirm_email", "username", "password1", "password2"]
+    )
     def test_required_fields(self, field):
         """Test the appropriate fields are required."""
         form = RegistrationForm()
@@ -36,7 +38,8 @@ class TestRegistrationForm:
         form = RegistrationForm(data=registration_form_data)
         form.save()
         assert BadFeedUser.objects.filter(
-            username=registration_form_data["username"], email=registration_form_data["email"]
+            username=registration_form_data["username"],
+            email=registration_form_data["email"],
         ).exists()
 
     def test_email_taken(self, registration_form_data, user):

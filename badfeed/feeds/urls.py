@@ -7,15 +7,31 @@ from badfeed.feeds import views
 app_name = "feeds"
 urlpatterns = [
     path("", views.MyEntriesListView.as_view(), name="my_entries"),
-    path("bulk/delete/<int:page>/", views.MyEntriesMassDeleteView.as_view(), name="my_entries_mass_delete"),
+    path(
+        "bulk/delete/<int:page>/",
+        views.MyEntriesMassDeleteView.as_view(),
+        name="my_entries_mass_delete",
+    ),
     path("search/", views.FeedSearch.as_view(), name="search"),
     path("pinned/", views.PinnedEntriesListView.as_view(), name="pinned_entries"),
     path("saved/", views.SavedEntriesListView.as_view(), name="saved_entries"),
     path("archived/", views.ArchivedEntriesListView.as_view(), name="archived_entries"),
     path("f/<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
-    path("f/<slug:slug>/watch/", views.FeedWatchToggleView.as_view(should_toggle=True), name="watch"),
-    path("f/<slug:slug>/unwatch/", views.FeedWatchToggleView.as_view(should_toggle=False), name="unwatch"),
-    path("f/<slug:feed_slug>/<slug:entry_slug>/read/", views.EntryOffloadView.as_view(), name="entry_read"),
+    path(
+        "f/<slug:slug>/watch/",
+        views.FeedWatchToggleView.as_view(should_toggle=True),
+        name="watch",
+    ),
+    path(
+        "f/<slug:slug>/unwatch/",
+        views.FeedWatchToggleView.as_view(should_toggle=False),
+        name="unwatch",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/read/",
+        views.EntryOffloadView.as_view(),
+        name="entry_read",
+    ),
     path(
         "f/<slug:feed_slug>/<slug:entry_slug>/pin/",
         views.EntryPinToggleView.as_view(should_toggle=True),
@@ -46,5 +62,9 @@ urlpatterns = [
         views.EntryDeleteToggleView.as_view(should_toggle=False),
         name="entry_undelete",
     ),
-    path("f/<slug:feed_slug>/<slug:entry_slug>/pocket/", views.SaveEntryToPocketView.as_view(), name="entry_pocket"),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/pocket/",
+        views.SaveEntryToPocketView.as_view(),
+        name="entry_pocket",
+    ),
 ]

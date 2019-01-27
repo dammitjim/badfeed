@@ -1,18 +1,24 @@
-import pytest
-
 # from django.contrib.auth import get_user
 from django.urls import reverse
+import pytest
 
 
 @pytest.mark.django_db
 class TestGenericFeedDashboardView:
     def setup(self):
+        """Set up common variables."""
         self.url = reverse("api_feeds:dash")
 
     def test_only_watched_feeds(self):
+        """Should only return feeds which are watched by the user."""
         pass
 
-    def test_orders_by_entry_publishing(self):
+    def test_orders_entries_by_entry_publishing(self):
+        """Entries should be ordered by publish date."""
+        pass
+
+    def test_orders_feeds_by_entry_publishing(self):
+        """Feeds should be ordered by publish date of entries."""
         pass
 
     def test_data_paginated(self, auth_api_client):
@@ -24,12 +30,15 @@ class TestGenericFeedDashboardView:
         assert "results" in response.data
 
     def test_data_respects_pagination(self):
+        """Should be paginateable."""
         pass
 
     def test_only_unread_entries(self):
+        """Only unread entries should be present in a feed."""
         pass
 
     def test_only_feeds_with_unread_entries(self):
+        """Feeds with only read entries should be hidden."""
         pass
 
     def test_no_unread_empty_list(self, auth_api_client, feed_factory):

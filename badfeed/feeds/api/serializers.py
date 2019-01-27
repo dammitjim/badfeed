@@ -1,10 +1,10 @@
 from rest_framework.serializers import (
     ModelSerializer,
-    SerializerMethodField,
     Serializer,
+    SerializerMethodField,
 )
 
-from badfeed.feeds.models import Entry, Feed, EntryState
+from badfeed.feeds.models import Entry, EntryState, Feed
 
 
 class OmitMixin:

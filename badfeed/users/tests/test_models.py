@@ -1,5 +1,5 @@
-import pytest
 from django.db.utils import IntegrityError
+import pytest
 
 from badfeed.users.models import BadFeedUser, ThirdPartyTokens
 
@@ -31,15 +31,24 @@ class TestBadFeedUserModel:
 
     def test_store_pocket_token_creates_object(self, user):
         """The method should create a new ThirdPartyToken object."""
-        assert not ThirdPartyTokens.objects.filter(user=user, provider=ThirdPartyTokens.PROVIDER_POCKET).exists()
+        assert not ThirdPartyTokens.objects.filter(
+            user=user, provider=ThirdPartyTokens.PROVIDER_POCKET
+        ).exists()
         user.store_pocket_token("123")
-        assert ThirdPartyTokens.objects.filter(user=user, provider=ThirdPartyTokens.PROVIDER_POCKET).exists()
+        assert ThirdPartyTokens.objects.filter(
+            user=user, provider=ThirdPartyTokens.PROVIDER_POCKET
+        ).exists()
 
     def test_store_pocket_token_replaces_existing_token(self, user):
         """If a token already exists for this provider, replace it."""
         user.store_pocket_token("123")
         user.store_pocket_token("456")
-        assert ThirdPartyTokens.objects.get(user=user, provider=ThirdPartyTokens.PROVIDER_POCKET).code == "456"
+        assert (
+            ThirdPartyTokens.objects.get(
+                user=user, provider=ThirdPartyTokens.PROVIDER_POCKET
+            ).code
+            == "456"
+        )
 
 
 @pytest.mark.django_db

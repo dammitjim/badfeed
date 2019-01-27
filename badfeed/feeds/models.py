@@ -105,8 +105,12 @@ class Entry(SlugifiedMixin, models.Model):
 
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="entries")
 
-    author = models.ForeignKey(Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries")
-    contributors = models.ManyToManyField(Author, related_name="contributed_to", blank=True)
+    author = models.ForeignKey(
+        Author, on_delete=models.SET_NULL, blank=True, null=True, related_name="entries"
+    )
+    contributors = models.ManyToManyField(
+        Author, related_name="contributed_to", blank=True
+    )
 
     tags = models.ManyToManyField(Tag, related_name="entries", blank=True)
 
@@ -118,7 +122,9 @@ class Entry(SlugifiedMixin, models.Model):
 
         This is required due to the `unique_together` constraint of the model.
         """
-        return [entry.title for entry in Entry.objects.filter(feed=self.feed).only("title")]
+        return [
+            entry.title for entry in Entry.objects.filter(feed=self.feed).only("title")
+        ]
 
     @staticmethod
     def slug_uniqueness_check(text, uids) -> bool:
@@ -129,16 +135,22 @@ class Entry(SlugifiedMixin, models.Model):
 
     def mark_read_by(self, user):
         """Create an entrystate object marking this entry as having been read."""
-        return EntryState.objects.get_or_create(state=EntryState.STATE_READ, entry=self, user=user)
+        return EntryState.objects.get_or_create(
+            state=EntryState.STATE_READ, entry=self, user=user
+        )
 
     def mark_pinned(self, user):
         """Pin the entry for the user if not already pinned."""
-        return EntryState.objects.get_or_create(state=EntryState.STATE_PINNED, entry=self, user=user)
+        return EntryState.objects.get_or_create(
+            state=EntryState.STATE_PINNED, entry=self, user=user
+        )
 
     def mark_unpinned(self, user):
         """Unpin the entry for the user."""
         try:
-            state = EntryState.objects.get(state=EntryState.STATE_PINNED, entry=self, user=user)
+            state = EntryState.objects.get(
+                state=EntryState.STATE_PINNED, entry=self, user=user
+            )
             state.delete()
         except EntryState.DoesNotExist:
             # TODO log attempt to delete?
@@ -151,15 +163,23 @@ class Entry(SlugifiedMixin, models.Model):
         TODO consider moving this to the entry state model?
         """
         if self.is_pinned_by(user):
-            EntryState.objects.filter(state=EntryState.STATE_PINNED, entry=self, user=user).delete()
+            EntryState.objects.filter(
+                state=EntryState.STATE_PINNED, entry=self, user=user
+            ).delete()
         if self.is_saved_by(user):
-            EntryState.objects.filter(state=EntryState.STATE_SAVED, entry=self, user=user).delete()
-        return EntryState.objects.get_or_create(state=EntryState.STATE_DELETED, entry=self, user=user)
+            EntryState.objects.filter(
+                state=EntryState.STATE_SAVED, entry=self, user=user
+            ).delete()
+        return EntryState.objects.get_or_create(
+            state=EntryState.STATE_DELETED, entry=self, user=user
+        )
 
     def mark_undeleted(self, user):
         """Undelete the entry for the user."""
         try:
-            state = EntryState.objects.get(state=EntryState.STATE_DELETED, entry=self, user=user)
+            state = EntryState.objects.get(
+                state=EntryState.STATE_DELETED, entry=self, user=user
+            )
             state.delete()
         except EntryState.DoesNotExist:
             # TODO log attempt to delete?
@@ -172,13 +192,19 @@ class Entry(SlugifiedMixin, models.Model):
         TODO consider moving this to the entry state model?
         """
         if self.is_pinned_by(user):
-            EntryState.objects.filter(state=EntryState.STATE_PINNED, entry=self, user=user).delete()
-        return EntryState.objects.get_or_create(state=EntryState.STATE_SAVED, entry=self, user=user)
+            EntryState.objects.filter(
+                state=EntryState.STATE_PINNED, entry=self, user=user
+            ).delete()
+        return EntryState.objects.get_or_create(
+            state=EntryState.STATE_SAVED, entry=self, user=user
+        )
 
     def mark_unsaved(self, user):
         """Remove the saved state of an entry."""
         try:
-            state = EntryState.objects.get(state=EntryState.STATE_SAVED, entry=self, user=user)
+            state = EntryState.objects.get(
+                state=EntryState.STATE_SAVED, entry=self, user=user
+            )
             state.delete()
         except EntryState.DoesNotExist:
             # TODO log attempt to delete?
@@ -186,15 +212,21 @@ class Entry(SlugifiedMixin, models.Model):
 
     def is_pinned_by(self, user) -> bool:
         """Check if the given entry has been pinned by the given user."""
-        return EntryState.objects.filter(state=EntryState.STATE_PINNED, entry=self, user=user).exists()
+        return EntryState.objects.filter(
+            state=EntryState.STATE_PINNED, entry=self, user=user
+        ).exists()
 
     def is_saved_by(self, user) -> bool:
         """Check if the given entry has been saved by the given user."""
-        return EntryState.objects.filter(state=EntryState.STATE_SAVED, entry=self, user=user).exists()
+        return EntryState.objects.filter(
+            state=EntryState.STATE_SAVED, entry=self, user=user
+        ).exists()
 
     def is_deleted_by(self, user) -> bool:
         """Check if the given entry has been deleted by the given user."""
-        return EntryState.objects.filter(state=EntryState.STATE_DELETED, entry=self, user=user).exists()
+        return EntryState.objects.filter(
+            state=EntryState.STATE_DELETED, entry=self, user=user
+        ).exists()
 
     @property
     def slang_date_published(self):
@@ -238,7 +270,9 @@ class EntryState(models.Model):
     date_modified = models.DateTimeField(auto_now=True)
 
     entry = models.ForeignKey(Entry, related_name="states", on_delete=models.CASCADE)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="entry_states", on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="entry_states", on_delete=models.CASCADE
+    )
 
     @staticmethod
     def is_valid_state(state):
@@ -257,7 +291,9 @@ class Enclosure(models.Model):
     # TODO this seems dirty but I'm not sure of the best way to handle this
     length = models.TextField()
 
-    entry = models.ForeignKey(Entry, on_delete=models.CASCADE, related_name="enclosures")
+    entry = models.ForeignKey(
+        Entry, on_delete=models.CASCADE, related_name="enclosures"
+    )
 
     def __str__(self):
         """Str representation of enclosure."""

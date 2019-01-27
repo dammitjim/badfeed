@@ -1,10 +1,10 @@
 from django.conf import settings
 from django.test import Client
 from model_mommy import mommy
-from rest_framework.test import APIClient
 import pytest
+from rest_framework.test import APIClient
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Entry, Feed
 from badfeed.users.models import ThirdPartyTokens
 
 
