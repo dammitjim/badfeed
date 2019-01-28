@@ -10,7 +10,7 @@ from badfeed.feeds.models import EntryState
 class TestEntrySerializer:
     def test_loads_user_states(self, entry, entry_state_factory, user):
         """If logged in, should include the entry states for the user."""
-        request = RequestFactory().get(reverse("api_feeds:feeds"))
+        request = RequestFactory().get(reverse("api_feeds:dash"))
         request.user = user
         entry_state_factory(entry=entry, state=EntryState.STATE_PINNED)
         srl = serializers.EntrySerializer(entry, context={"request": request})

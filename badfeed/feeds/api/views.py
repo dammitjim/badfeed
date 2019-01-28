@@ -5,37 +5,9 @@ from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
-from rest_framework.views import APIView
 
 from badfeed.feeds.api.serializers import EntryDetailSerializer, FeedEntrySerializer
 from badfeed.feeds.models import Entry, Feed
-
-
-class FeedDashboardView(APIView):
-    def get(self, request, *args, **kwargs):
-        feeds = Feed.objects.watched_by(request.user).order_by(
-            "entries__date_published"
-        )
-        feeds = feeds[:5]
-
-        output = []
-        for feed in feeds:
-            # get top 5 unread entries, ordered by date published for this feed
-            unread_entries = (
-                feed.entries(manager="user_state")
-                .unread(request.user)
-                .order_by("date_published")
-            )
-            unread_entries = unread_entries[:5]
-            serializer = FeedEntrySerializer(
-                instance={"feed": feed, "entries": unread_entries}
-            )
-            output.append(serializer.data)
-
-        return Response(data=output)
-
-    def destroy(self, request, *args, **kwargs):
-        pass
 
 
 class GenericFeedDashboardView(generics.ListAPIView):

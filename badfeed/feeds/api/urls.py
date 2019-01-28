@@ -11,7 +11,6 @@ urlpatterns = [
         views.EntryStateManagerView.as_view(),
         name="entries_state_manager",
     ),
-    path("feeds/", views.FeedDashboardView.as_view(), name="feeds"),
     path("dash/", views.GenericFeedDashboardView.as_view(), name="dash"),
 ]
 
