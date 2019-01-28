@@ -33,7 +33,6 @@ class TestGenericFeedDashboardView:
     ):
         """Entries should be ordered by publish date."""
         user = self._get_user(auth_api_client)
-        # partially actioned entries
         feed = feed_factory(watched_by=user)
         oldest_entry = entry_factory(
             feed=feed, date_published=maya.now().subtract(days=3).datetime()
@@ -80,11 +79,28 @@ class TestGenericFeedDashboardView:
 
     def test_data_respects_pagination(self):
         """Should be paginateable."""
+        # TODO implement this when you come around to figuring out how this will work.
         pass
 
-    def test_only_unread_entries(self):
+    def test_only_unread_entries(
+        self, auth_api_client, feed_factory, entry_factory, entry_state_factory
+    ):
         """Only unread entries should be present in a feed."""
-        pass
+        user = self._get_user(auth_api_client)
+        feed = feed_factory(watched_by=user)
+        entry1 = entry_factory(feed=feed)
+        entry_state_factory(user=user, entry=entry1, state=EntryState.STATE_PINNED)
+        entry2 = entry_factory(
+            feed=feed, date_published=maya.now().subtract(days=1).datetime()
+        )
+        entry3 = entry_factory(
+            feed=feed, date_published=maya.now().subtract(days=2).datetime()
+        )
+
+        response = auth_api_client.get(self.url)
+        entry_ids = [entry["id"] for entry in response.data["results"][0]["entries"]]
+        assert entry_ids == [entry2.id, entry3.id]
+        assert len(entry_ids) == 2
 
     def test_actioned_feeds_ignored(
         self, auth_api_client, feed_factory, entry_factory, entry_state_factory
