@@ -22,7 +22,7 @@ class OmitMixin:
 class FeedSerializer(ModelSerializer):
     class Meta:
         model = Feed
-        fields = ["title", "link"]
+        fields = ["id", "title", "link"]
 
 
 class EntrySerializer(OmitMixin, ModelSerializer):

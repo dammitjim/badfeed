@@ -61,7 +61,7 @@ class GenericFeedDashboardView(generics.ListAPIView):
             .filter(entries__states__isnull=True)
             .annotate(entry_states=Count("entries__states"))
             .filter(entry_states__gte=0)
-            .order_by("entries__date_published")
+            .order_by("-entries__date_published")
         )
 
     def get_serializer_instance(self, feed):
@@ -69,7 +69,7 @@ class GenericFeedDashboardView(generics.ListAPIView):
         unread_entries = (
             feed.entries(manager="user_state")
             .unread(self.request.user)
-            .order_by("date_published")
+            .order_by("-date_published")
         )
         unread_entries = unread_entries[:5]
         return FeedEntrySerializer(

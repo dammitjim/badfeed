@@ -1,4 +1,5 @@
 from django.urls import reverse
+import maya
 import pytest
 
 from badfeed.feeds.models import EntryState
@@ -15,17 +16,59 @@ class TestGenericFeedDashboardView:
         #      I tried the typical get_user to no avail
         return client.handler._force_user
 
-    def test_only_watched_feeds(self):
+    def test_only_watched_feeds(self, auth_api_client, feed_factory, entry_factory):
         """Should only return feeds which are watched by the user."""
-        pass
+        user = self._get_user(auth_api_client)
+        # partially actioned entries
+        feed = feed_factory(watched_by=user)
+        entry_factory(feed=feed)
+        feed2 = feed_factory()
+        entry_factory(feed=feed2)
 
-    def test_orders_entries_by_entry_publishing(self):
+        response = auth_api_client.get(self.url)
+        assert response.data["count"] == 1
+
+    def test_orders_entries_by_entry_publishing(
+        self, auth_api_client, feed_factory, entry_factory
+    ):
         """Entries should be ordered by publish date."""
-        pass
+        user = self._get_user(auth_api_client)
+        # partially actioned entries
+        feed = feed_factory(watched_by=user)
+        oldest_entry = entry_factory(
+            feed=feed, date_published=maya.now().subtract(days=3).datetime()
+        )
+        mid_entry = entry_factory(
+            feed=feed, date_published=maya.now().subtract(days=2).datetime()
+        )
+        newest_entry = entry_factory(
+            feed=feed, date_published=maya.now().subtract(days=1).datetime()
+        )
 
-    def test_orders_feeds_by_entry_publishing(self):
+        response = auth_api_client.get(self.url)
+        entries = response.data["results"][0]["entries"]
+        assert [entry["id"] for entry in entries] == [
+            newest_entry.id,
+            mid_entry.id,
+            oldest_entry.id,
+        ]
+
+    def test_orders_feeds_by_entry_publishing(
+        self, auth_api_client, feed_factory, entry_factory
+    ):
         """Feeds should be ordered by publish date of entries."""
-        pass
+        user = self._get_user(auth_api_client)
+        feed1 = feed_factory(watched_by=user)
+        feed2 = feed_factory(watched_by=user)
+        feed3 = feed_factory(watched_by=user)
+
+        entry_factory(feed=feed1, date_published=maya.now().subtract(days=3).datetime())
+        entry_factory(feed=feed2, date_published=maya.now().subtract(days=2).datetime())
+        entry_factory(feed=feed3, date_published=maya.now().subtract(days=1).datetime())
+
+        response = auth_api_client.get(self.url)
+        feeds = [feed["feed"]["id"] for feed in response.data["results"]]
+        assert feeds == [feed3.id, feed2.id, feed1.id]
 
     def test_data_paginated(self, auth_api_client):
         """Should respond with a paginated format."""
@@ -131,12 +174,6 @@ class TestGenericFeedDashboardView:
         feed_factory(watched_by=user)
         response = auth_api_client.get(self.url)
         assert response.data["results"] == []
-
-    def test_partial_unread_only_returns_feeds_with_unread(
-        self, auth_api_client, feed_factory, entry_factory, entry_state_factory
-    ):
-        """If only X have unread entries out of watched, only return X."""
-        pass
 
     def test_responds(self, auth_api_client):
         """Should respond at the most basic level to a logged in user."""
