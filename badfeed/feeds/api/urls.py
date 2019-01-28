@@ -12,6 +12,7 @@ urlpatterns = [
         name="entries_state_manager",
     ),
     path("dash/", views.GenericFeedDashboardView.as_view(), name="dash"),
+    path("state/", views.EntryStateCreationView.as_view(), name="state"),
 ]
 
 # get unread feeds, 5 per

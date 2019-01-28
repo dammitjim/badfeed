@@ -4,10 +4,16 @@ from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.request import Request
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
+from rest_framework.views import APIView
 
-from badfeed.feeds.api.serializers import EntryDetailSerializer, FeedEntrySerializer
-from badfeed.feeds.models import Entry, Feed
+from badfeed.feeds.api.serializers import (
+    EntryDetailSerializer,
+    EntrySerializer,
+    FeedEntrySerializer,
+)
+from badfeed.feeds.models import Entry, EntryState, Feed
 
 
 class GenericFeedDashboardView(generics.ListAPIView):
@@ -56,6 +62,63 @@ class GenericFeedDashboardView(generics.ListAPIView):
         queryset = self.paginate_queryset(queryset)
         data = [self.get_serializer_instance(feed).data for feed in queryset]
         return self.get_paginated_response(data)
+
+
+class EntryListView(generics.ListAPIView):
+    serializer_class = EntrySerializer
+
+    def get_queryset(self):
+        """Present unread objects first, ordered by date published."""
+        return (
+            Entry.objects.filter(feed__pk=self.kwargs["feed_pk"])
+            .annotate(unread=Count("states"))
+            .order_by("-unread", "-date_published")
+        )
+
+
+class EntryStateCreationView(APIView):
+    """Manage multiple state amends simultaneously.
+
+    This view in general could be generalised, and could use serializers.
+    This will do for now.
+
+    """
+
+    permission_classes = (IsAuthenticated,)
+
+    def _apply(self, state: dict):
+        """Validate, then apply state change against matched entry."""
+        if "state" not in state:
+            raise ParseError("state is a required parameter of each entry")
+        if "entry_id" not in state:
+            raise ParseError("entry_id is a required parameter of each entry")
+
+        try:
+            entry = Entry.objects.get(pk=state["entry_id"])
+        except Entry.DoesNotExist:
+            # TODO log?
+            return
+
+        # TODO refactor with a state map to appropriate function dict or something?
+        desired = state["state"]
+        if desired == EntryState.STATE_READ:
+            entry.mark_read_by(self.request.user)
+        elif desired == EntryState.STATE_SAVED:
+            entry.mark_saved(self.request.user)
+        elif desired == EntryState.STATE_PINNED:
+            entry.mark_pinned(self.request.user)
+        elif desired == EntryState.STATE_DELETED:
+            entry.mark_deleted(self.request.user)
+        else:
+            raise ParseError("invalid state provided")
+
+    def post(self, request: Request, format=None):
+        """Accept an array of state changes."""
+        # TODO is this line needed
+        self.request = request
+        for state in request.data:
+            self._apply(state)
+        return Response(status=200)
 
 
 class UnreadEntryList(generics.ListAPIView):

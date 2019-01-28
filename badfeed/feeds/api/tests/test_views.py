@@ -200,3 +200,18 @@ class TestGenericFeedDashboardView:
         """The api should only respond to logged in users."""
         response = api_client.get(self.url)
         assert response.status_code == 403
+
+
+@pytest.mark.django_db
+class TestEntryStateCreationView:
+    def test_blank_body_raises_400(self):
+        """A blank POST body should raise a 400 error."""
+        pass
+
+    def test_state_required(self):
+        """The state attribute is required."""
+        pass
+
+    def test_entry_id_required(self):
+        """The entry_id attribute is required."""
+        pass
