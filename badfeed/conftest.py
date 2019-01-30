@@ -2,8 +2,9 @@ from django.conf import settings
 from django.test import Client
 from model_mommy import mommy
 import pytest
+from rest_framework.test import APIClient
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Entry, Feed
 from badfeed.users.models import ThirdPartyTokens
 
 
@@ -15,6 +16,18 @@ def user():
 @pytest.fixture
 def client():
     return Client()
+
+
+@pytest.fixture
+def api_client():
+    return APIClient()
+
+
+@pytest.fixture
+def auth_api_client(user):
+    client = APIClient()
+    client.force_authenticate(user=user)
+    return client
 
 
 @pytest.fixture()

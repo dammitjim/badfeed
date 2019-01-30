@@ -11,7 +11,9 @@ class SlugifiedMixin(models.Model):
         """Override save method to populate slug field on class."""
         # TODO change slug if title changes?
         if not self.slug:
-            checker = UniqueSlugify(unique_check=self.slug_uniqueness_check, to_lower=True, max_length=200)
+            checker = UniqueSlugify(
+                unique_check=self.slug_uniqueness_check, to_lower=True, max_length=200
+            )
             self.slug = checker(self.get_slug_attr(), uids=self.get_initial_slug_uids())
         return super().save(*args, **kwargs)
 

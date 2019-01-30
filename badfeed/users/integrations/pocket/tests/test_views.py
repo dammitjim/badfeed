@@ -1,11 +1,15 @@
-import pytest
 from django.conf import settings
 from django.contrib.auth import get_user
-from django.test import RequestFactory, override_settings
+from django.test import override_settings, RequestFactory
 from django.urls import reverse
+import pytest
 
+from badfeed.users.integrations.pocket.views import (
+    ConsumerKeyMixin,
+    OAuthCallback,
+    OAuthEntry,
+)
 from badfeed.users.models import ThirdPartyTokens
-from badfeed.users.integrations.pocket.views import ConsumerKeyMixin, OAuthEntry, OAuthCallback
 
 
 @pytest.mark.django_db
@@ -16,9 +20,13 @@ class TestOAuthEntry:
 
     def test_sets_state_cookie(self, mocker, auth_client):
         """The view should set a state cookie in the response."""
-        token_fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthEntry._get_request_token")
+        token_fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthEntry._get_request_token"
+        )
         token_fn.return_value = "123"
-        auth_fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthEntry._get_auth_url")
+        auth_fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthEntry._get_auth_url"
+        )
         auth_fn.return_value = "/my-cool-redirect"
         uuid_fn = mocker.patch("badfeed.users.integrations.pocket.views.uuid4")
         uuid_fn.return_value = "456"
@@ -28,9 +36,13 @@ class TestOAuthEntry:
 
     def test_sets_code_cookie_to_pocket_value(self, mocker, auth_client):
         """The view should set the code cookie to the pocket token."""
-        token_fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthEntry._get_request_token")
+        token_fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthEntry._get_request_token"
+        )
         token_fn.return_value = "123"
-        auth_fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthEntry._get_auth_url")
+        auth_fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthEntry._get_auth_url"
+        )
         auth_fn.return_value = "/my-cool-redirect"
 
         auth_client.get(self.url)
@@ -38,8 +50,12 @@ class TestOAuthEntry:
 
     def test_redirects_to_pocket(self, mocker, auth_client):
         """Should redirect to the value provided by pocket auth."""
-        mocker.patch("badfeed.users.integrations.pocket.views.OAuthEntry._get_request_token")
-        auth_fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthEntry._get_auth_url")
+        mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthEntry._get_request_token"
+        )
+        auth_fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthEntry._get_auth_url"
+        )
         auth_fn.return_value = "/my-cool-redirect"
 
         response = auth_client.get(self.url)
@@ -86,7 +102,9 @@ class TestOAuthCallback:
 
     def test_deletes_state_cookie(self, mocker, auth_client):
         """Once we have done the callback, delete the state cookie."""
-        mocker.patch("badfeed.users.integrations.pocket.views.OAuthCallback._set_access_token_to_user")
+        mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthCallback._set_access_token_to_user"
+        )
         auth_client.cookies[ConsumerKeyMixin.STATE_COOKIE_KEY] = "123"
         assert auth_client.cookies.get(ConsumerKeyMixin.STATE_COOKIE_KEY).value == "123"
         auth_client.get(self.url)
@@ -94,7 +112,9 @@ class TestOAuthCallback:
 
     def test_deletes_code_cookie(self, mocker, auth_client):
         """Once we have done the callback, delete the code cookie."""
-        mocker.patch("badfeed.users.integrations.pocket.views.OAuthCallback._set_access_token_to_user")
+        mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthCallback._set_access_token_to_user"
+        )
         auth_client.cookies[ConsumerKeyMixin.CODE_COOKIE_KEY] = "123"
         assert auth_client.cookies.get(ConsumerKeyMixin.CODE_COOKIE_KEY).value == "123"
         auth_client.get(self.url)
@@ -102,7 +122,9 @@ class TestOAuthCallback:
 
     def test_loads_code_from_cookie(self, mocker, auth_client):
         """We should be sending the code from the cookie to pocket."""
-        fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthCallback._get_access_token")
+        fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthCallback._get_access_token"
+        )
         fn.return_value = "456"
         auth_client.cookies[ConsumerKeyMixin.CODE_COOKIE_KEY] = "123"
         auth_client.get(self.url)
@@ -110,17 +132,23 @@ class TestOAuthCallback:
 
     def test_creates_access_token_object(self, mocker, auth_client):
         """On all success, create a ThirdPartyToken object on the user."""
-        fn = mocker.patch("badfeed.users.integrations.pocket.views.OAuthCallback._get_access_token")
+        fn = mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthCallback._get_access_token"
+        )
         fn.return_value = "456"
         auth_client.cookies[ConsumerKeyMixin.CODE_COOKIE_KEY] = "123"
         auth_client.get(self.url)
         assert ThirdPartyTokens.objects.filter(
-            user=get_user(auth_client), provider=ThirdPartyTokens.PROVIDER_POCKET, code="456"
+            user=get_user(auth_client),
+            provider=ThirdPartyTokens.PROVIDER_POCKET,
+            code="456",
         ).exists()
 
     def test_redirects_to_success_url(self, mocker, auth_client):
         """On success, redirect to the given success url property."""
-        mocker.patch("badfeed.users.integrations.pocket.views.OAuthCallback._set_access_token_to_user")
+        mocker.patch(
+            "badfeed.users.integrations.pocket.views.OAuthCallback._set_access_token_to_user"
+        )
         response = auth_client.get(self.url)
         assert response.status_code == 302
         assert response.url == OAuthCallback.success_url

@@ -8,15 +8,23 @@ class Migration(migrations.Migration):
     dependencies = [("feeds", "0005_auto_20180613_1613")]
 
     operations = [
-        migrations.AddField(model_name="feed", name="scraping_enabled", field=models.BooleanField(default=True)),
+        migrations.AddField(
+            model_name="feed",
+            name="scraping_enabled",
+            field=models.BooleanField(default=True),
+        ),
         migrations.AlterField(
             model_name="entry",
             name="contributors",
-            field=models.ManyToManyField(blank=True, related_name="contributed_to", to="feeds.Author"),
+            field=models.ManyToManyField(
+                blank=True, related_name="contributed_to", to="feeds.Author"
+            ),
         ),
         migrations.AlterField(
             model_name="entry",
             name="tags",
-            field=models.ManyToManyField(blank=True, related_name="entries", to="feeds.Tag"),
+            field=models.ManyToManyField(
+                blank=True, related_name="entries", to="feeds.Tag"
+            ),
         ),
     ]

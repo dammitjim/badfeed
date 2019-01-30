@@ -14,10 +14,26 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="ThirdPartyTokens",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 ("code", models.CharField(max_length=255)),
-                ("provider", models.CharField(choices=[("pocket", "Pocket")], max_length=50)),
-                ("metadata", django.contrib.postgres.fields.jsonb.JSONField(blank=True, null=True)),
+                (
+                    "provider",
+                    models.CharField(choices=[("pocket", "Pocket")], max_length=50),
+                ),
+                (
+                    "metadata",
+                    django.contrib.postgres.fields.jsonb.JSONField(
+                        blank=True, null=True
+                    ),
+                ),
                 (
                     "user",
                     models.ForeignKey(
@@ -28,5 +44,7 @@ class Migration(migrations.Migration):
                 ),
             ],
         ),
-        migrations.AlterUniqueTogether(name="thirdpartytokens", unique_together={("provider", "user")}),
+        migrations.AlterUniqueTogether(
+            name="thirdpartytokens", unique_together={("provider", "user")}
+        ),
     ]

@@ -33,7 +33,9 @@ class OAuthEntry(LoginRequiredMixin, ConsumerKeyMixin, View):
     def _get_request_token(self) -> str:
         """Retrieve a oauth token from Pocket."""
         return Pocket.get_request_token(
-            consumer_key=self.consumer_key, redirect_uri=self._get_redirect_url(), state=self.state
+            consumer_key=self.consumer_key,
+            redirect_uri=self._get_redirect_url(),
+            state=self.state,
         )
 
     def _get_auth_url(self, token) -> str:

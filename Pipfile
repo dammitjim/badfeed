@@ -30,6 +30,7 @@ pre-commit = "*"
 pydocstyle = "*"
 pytest-mock = "*"
 django-cors-headers = "*"
+flake8-import-order = "*"
 
 [requires]
 python_version = "3.6"

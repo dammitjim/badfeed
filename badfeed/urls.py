@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
 
 
 api_urlpatterns = [path("feeds/", include("badfeed.feeds.api.urls"))]

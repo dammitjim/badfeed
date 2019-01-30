@@ -2,7 +2,7 @@ from django.conf import settings
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry, EntryState
+from badfeed.feeds.models import Entry, EntryState, Feed
 from badfeed.users.models import ThirdPartyTokens
 
 

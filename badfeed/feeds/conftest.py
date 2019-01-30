@@ -1,7 +1,7 @@
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry, EntryState
+from badfeed.feeds.models import Entry, EntryState, Feed
 
 
 @pytest.fixture
@@ -12,7 +12,11 @@ def feed():
 @pytest.fixture
 def feed_factory():
     def _make(**kwargs):
-        return mommy.make(Feed, **kwargs)
+        watched_by = kwargs.pop("watched_by", None)
+        feed = mommy.make(Feed, **kwargs)
+        if watched_by:
+            watched_by.watch(feed)
+        return feed
 
     return _make
 
