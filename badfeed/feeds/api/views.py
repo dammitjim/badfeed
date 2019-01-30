@@ -86,21 +86,21 @@ class EntryStateCreationView(APIView):
 
     permission_classes = (IsAuthenticated,)
 
-    def _apply(self, state: dict):
+    def _apply(self, action: dict):
         """Validate, then apply state change against matched entry."""
-        if "state" not in state:
-            raise ParseError("state is a required parameter of each entry")
-        if "entry_id" not in state:
-            raise ParseError("entry_id is a required parameter of each entry")
+        if "state" not in action:
+            raise ParseError("state is a required parameter of each action")
+        if "entry_id" not in action:
+            raise ParseError("entry_id is a required parameter of each action")
 
         try:
-            entry = Entry.objects.get(pk=state["entry_id"])
+            entry = Entry.objects.get(pk=action["entry_id"])
         except Entry.DoesNotExist:
             # TODO log?
             return
 
         # TODO refactor with a state map to appropriate function dict or something?
-        desired = state["state"]
+        desired = action["state"]
         if desired == EntryState.STATE_READ:
             entry.mark_read_by(self.request.user)
         elif desired == EntryState.STATE_SAVED:
@@ -115,9 +115,15 @@ class EntryStateCreationView(APIView):
     def post(self, request: Request, format=None):
         """Accept an array of state changes."""
         # TODO is this line needed
-        self.request = request
-        for state in request.data:
-            self._apply(state)
+        if not request.data:
+            raise ParseError("Blank body supplied")
+
+        if "actions" not in request.data:
+            raise ParseError("No actions supplied")
+
+        for action in request.data["actions"]:
+            self._apply(action)
+
         return Response(status=200)
 
 
