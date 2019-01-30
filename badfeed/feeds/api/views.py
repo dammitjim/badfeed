@@ -57,7 +57,6 @@ class GenericFeedDashboardView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         """Render a paginated list of watched feeds, with 5 unread entries each."""
-        self.request = request
         queryset = self.get_queryset()
         queryset = self.paginate_queryset(queryset)
         data = [self.get_serializer_instance(feed).data for feed in queryset]
@@ -114,10 +113,6 @@ class EntryStateCreationView(APIView):
 
     def post(self, request: Request, format=None):
         """Accept an array of state changes."""
-        # TODO is this line needed
-        if not request.data:
-            raise ParseError("Blank body supplied")
-
         if "actions" not in request.data:
             raise ParseError("No actions supplied")
 
