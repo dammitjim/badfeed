@@ -98,7 +98,6 @@ class EntryStateCreationView(APIView):
             # TODO log?
             return
 
-        # TODO refactor with a state map to appropriate function dict or something?
         desired = action["state"]
         if desired == EntryState.STATE_READ:
             entry.mark_read_by(self.request.user)
