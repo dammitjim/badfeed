@@ -1,19 +1,33 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import Author, Feed, Entry, Enclosure, Tag, EntryState
+from .models import Author, Enclosure, Entry, EntryState, Feed, Tag
 
 
 @admin.register(Feed)
 class FeedAdmin(admin.ModelAdmin):
-    list_display = ("title", "slug", "link", "date_last_scraped", "date_created", "date_modified")
+    list_display = (
+        "title",
+        "slug",
+        "link",
+        "date_last_scraped",
+        "date_created",
+        "date_modified",
+    )
     list_filter = ("date_created", "date_modified", "date_last_scraped")
     search_fields = ("title",)
 
 
 @admin.register(Entry)
 class EntryAdmin(admin.ModelAdmin):
-    list_display = ("title", "link", "feed", "date_published", "date_created", "date_modified")
+    list_display = (
+        "title",
+        "link",
+        "feed",
+        "date_published",
+        "date_created",
+        "date_modified",
+    )
     list_filter = ("date_created", "date_modified", "date_published", "feed")
     search_fields = ("title",)
     ordering = ("-date_published",)

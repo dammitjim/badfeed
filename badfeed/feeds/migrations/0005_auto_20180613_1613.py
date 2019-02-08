@@ -6,6 +6,13 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL), ("feeds", "0004_auto_20180613_1604")]
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ("feeds", "0004_auto_20180613_1604"),
+    ]
 
-    operations = [migrations.AlterUniqueTogether(name="entrystate", unique_together={("state", "user", "entry")})]
+    operations = [
+        migrations.AlterUniqueTogether(
+            name="entrystate", unique_together={("state", "user", "entry")}
+        )
+    ]

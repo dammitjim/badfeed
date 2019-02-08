@@ -11,6 +11,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="badfeeduser",
             name="watching",
-            field=models.ManyToManyField(blank=True, related_name="watched_by", to="feeds.Feed"),
+            field=models.ManyToManyField(
+                blank=True, related_name="watched_by", to="feeds.Feed"
+            ),
         )
     ]

@@ -1,14 +1,20 @@
 {% load feed_tags %}
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title"><a
+        <h5 class="card-title">
+            <a
                 href="{% url 'feeds:entry_read' feed_slug=feed.slug entry_slug=entry.slug %}"
-                target="_blank">{{ entry.title }}</a>
+                target="_blank"
+            >
+                #{{ counter }}
+                {{ entry.title }}
+            </a>
         </h5>
         <h6 class="card-subtitle mb-2 text-muted">{{ entry.feed.title }} - {{ entry.slang_date_published }}</h6>
         <hr />
         {% pin_button entry %}
         {% save_button entry %}
         {% delete_button entry %}
+        <a href="{% url 'feeds:entry_pocket' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Save To Pocket</a>
     </div>
 </div>

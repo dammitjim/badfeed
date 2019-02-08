@@ -1,13 +1,14 @@
 import logging
 
-from django_rq import job
+from django.core.exceptions import ValidationError
 from django.utils import timezone
-import maya
+from django_rq import job
 import feedparser
+import maya
 
-from badfeed.feeds.models import Entry, Enclosure, Tag, Author
+from badfeed.feeds.models import Author, Enclosure, Entry, Tag
 from badfeed.ingest.exceptions import ContentErrorException
-from badfeed.ingest.utils import clean_item_content, clean_content
+from badfeed.ingest.utils import clean_content, clean_item_content
 
 
 log = logging.getLogger("rq.worker")
@@ -59,10 +60,12 @@ class EntryIngest:
         return self._ingest_entry.link
 
     def get_author(self, commit=True):
-        # TODO: some feeds have comma separated author fields, check if a comma is present and split on it
+        # TODO: some feeds have comma separated author fields, check if a comma is present and split
         if hasattr(self._ingest_entry, "author_detail"):
             try:
-                db_author = Author.objects.get(name=self._ingest_entry.author_detail.name, feed=self.feed)
+                db_author = Author.objects.get(
+                    name=self._ingest_entry.author_detail.name, feed=self.feed
+                )
             except Author.DoesNotExist:
                 db_author = Author(
                     name=self._ingest_entry.author_detail.name,
@@ -76,7 +79,9 @@ class EntryIngest:
 
         if hasattr(self._ingest_entry, "author"):
             try:
-                db_author = Author.objects.get(name=self._ingest_entry.author, feed=self.feed)
+                db_author = Author.objects.get(
+                    name=self._ingest_entry.author, feed=self.feed
+                )
             except Author.DoesNotExist:
                 db_author = Author(name=self._ingest_entry.author, feed=self.feed)
                 if commit:
@@ -115,7 +120,12 @@ class EntryIngest:
             try:
                 db_tag = Tag.objects.get(term=term, feed=self.feed)
             except Tag.DoesNotExist:
-                db_tag = Tag(term=term, scheme=tag.get("scheme", ""), label=tag.get("label", ""), feed=self.feed)
+                db_tag = Tag(
+                    term=term,
+                    scheme=tag.get("scheme", ""),
+                    label=tag.get("label", ""),
+                    feed=self.feed,
+                )
                 if commit:
                     db_tag.save()
             tags.append(db_tag)
@@ -126,7 +136,12 @@ class EntryIngest:
             return None
 
         enclosures = [
-            Enclosure(href=enclosure.href, length=enclosure.length, file_type=enclosure.type, entry=entry)
+            Enclosure(
+                href=enclosure.href,
+                length=enclosure.length,
+                file_type=enclosure.type,
+                entry=entry,
+            )
             for enclosure in self._ingest_entry.enclosures
         ]
 
@@ -149,7 +164,11 @@ class EntryIngest:
             feed=self.feed,
             author=self.get_author(commit=commit),
         )
-        entry.full_clean()
+        try:
+            entry.full_clean()
+        except ValidationError as e:
+            log.exception(f"Entry for feed {self.feed} failed clean.", exc_info=e)
+            return
 
         if commit:
             entry.save()
@@ -180,7 +199,13 @@ def pull_feed(feed, save=True):
             continue
 
         log.info(f"pulling {entry.link}")
-        EntryIngest(feed).ingest(entry, commit=save)
+        try:
+            EntryIngest(feed).ingest(entry, commit=save)
+        # catch all exceptions are generally not great
+        # TODO clean this file to the point where we don't need this?
+        except Exception as e:
+            log.exception(f"Generic failure for entry in feed {feed}", exc_info=e)
+            continue
 
     if not save:
         return

@@ -2,7 +2,8 @@ from django.conf import settings
 from model_mommy import mommy
 import pytest
 
-from badfeed.feeds.models import Feed, Entry, EntryState
+from badfeed.feeds.models import Entry, EntryState, Feed
+from badfeed.users.models import ThirdPartyTokens
 
 
 @pytest.fixture()
@@ -35,3 +36,18 @@ def user():
 @pytest.fixture
 def entry_state(watched_entry, user):
     return mommy.make(EntryState, entry=watched_entry, user=user)
+
+
+@pytest.fixture
+def third_party_token():
+    return mommy.make(ThirdPartyTokens)
+
+
+@pytest.fixture
+def third_party_token_factory(user):
+    def _make(**kwargs):
+        if "user" not in kwargs:
+            kwargs["user"] = user
+        return mommy.make(ThirdPartyTokens, **kwargs)
+
+    return _make

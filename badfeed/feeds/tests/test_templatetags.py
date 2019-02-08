@@ -1,5 +1,5 @@
+from django.template import Context, Template
 from django.test import RequestFactory
-from django.template import Template, Context
 from django.urls import reverse
 import pytest
 
@@ -20,16 +20,26 @@ class TestPinButton:
         entry = entry_factory()
         entry.mark_pinned(authenticated_request.user)
 
-        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "entry": entry})
+        )
 
-        expected_url = reverse("feeds:entry_unpin", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        expected_url = reverse(
+            "feeds:entry_unpin",
+            kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug},
+        )
         assert expected_url in output
 
     def test_is_not_pinned(self, entry, authenticated_request):
         """If not pinned, should have an option to pin."""
-        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "entry": entry})
+        )
 
-        expected_url = reverse("feeds:entry_pin", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        expected_url = reverse(
+            "feeds:entry_pin",
+            kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug},
+        )
         assert expected_url in output
 
 
@@ -49,16 +59,26 @@ class TestSaveButton:
         entry = entry_factory()
         entry.mark_saved(authenticated_request.user)
 
-        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "entry": entry})
+        )
 
-        expected_url = reverse("feeds:entry_unsave", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        expected_url = reverse(
+            "feeds:entry_unsave",
+            kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug},
+        )
         assert expected_url in output
 
     def test_is_not_saved(self, entry, authenticated_request):
         """If not saved, should have an option to pin."""
-        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "entry": entry})
+        )
 
-        expected_url = reverse("feeds:entry_save", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        expected_url = reverse(
+            "feeds:entry_save",
+            kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug},
+        )
         assert expected_url in output
 
 
@@ -78,16 +98,26 @@ class TestDeleteButton:
         entry = entry_factory()
         entry.mark_deleted(authenticated_request.user)
 
-        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "entry": entry})
+        )
 
-        expected_url = reverse("feeds:entry_undelete", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        expected_url = reverse(
+            "feeds:entry_undelete",
+            kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug},
+        )
         assert expected_url in output
 
     def test_is_not_deleted(self, entry, authenticated_request):
         """If not deleted, should have an option to delete."""
-        output = self.template.render(Context({"request": authenticated_request, "entry": entry}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "entry": entry})
+        )
 
-        expected_url = reverse("feeds:entry_delete", kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug})
+        expected_url = reverse(
+            "feeds:entry_delete",
+            kwargs={"feed_slug": entry.feed.slug, "entry_slug": entry.slug},
+        )
         assert expected_url in output
 
 
@@ -107,13 +137,17 @@ class TestWatchButton:
         feed = feed_factory()
         authenticated_request.user.watch(feed)
 
-        output = self.template.render(Context({"request": authenticated_request, "feed": feed}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "feed": feed})
+        )
 
         expected_url = reverse("feeds:unwatch", kwargs={"slug": feed.slug})
         assert expected_url in output
 
     def test_is_not_watched(self, feed, authenticated_request):
         """If not watched, should have an option to pin."""
-        output = self.template.render(Context({"request": authenticated_request, "feed": feed}))
+        output = self.template.render(
+            Context({"request": authenticated_request, "feed": feed})
+        )
         expected_url = reverse("feeds:watch", kwargs={"slug": feed.slug})
         assert expected_url in output

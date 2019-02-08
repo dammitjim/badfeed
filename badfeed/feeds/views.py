@@ -1,15 +1,18 @@
-from django.core.exceptions import ImproperlyConfigured
-from django.core.paginator import Paginator
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ImproperlyConfigured
+from django.core.paginator import Paginator
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import ListView, DetailView
 from django.views import View
+from django.views.generic import DetailView, ListView
+from pocket import Pocket
 
-from badfeed.feeds.models import Feed, Entry
+from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import delete_entries_for_user
+from badfeed.users.models import ThirdPartyTokens
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
@@ -39,7 +42,9 @@ class FeedDetailView(LoginRequiredMixin, DetailView):
 class EntryOffloadView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         """Mark the entry as read, then offload to the corresponding link."""
-        entry = get_object_or_404(Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"])
+        entry = get_object_or_404(
+            Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"]
+        )
         entry.mark_read_by(self.request.user)
         return HttpResponseRedirect(entry.link)
 
@@ -55,7 +60,7 @@ class ObjectActionToggleView(LoginRequiredMixin, View):
 
     def get_success_url(self):
         """Redirect target after action."""
-        return reverse("feeds:my_entries")
+        return self.request.META.get("HTTP_REFERER", "/")
 
     def toggle_on(self, obj):
         """Positive, toggle "on" action"""
@@ -146,6 +151,11 @@ class MyEntriesListView(LoginRequiredMixin, ListView):
         """Load all entries for the the feeds watched by the user."""
         return Entry.user_state.unread(self.request.user)
 
+    def get_context_data(self, **kwargs):
+        """Load the template in single page application mode."""
+        ctx = super().get_context_data(**kwargs)
+        return {"spa": True, **ctx}
+
 
 class MyEntriesMassDeleteView(LoginRequiredMixin, View):
     def get_target_entries(self, page):
@@ -170,7 +180,9 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.pinned(self.request.user).order_by("-states__date_created")
+        return Entry.user_state.pinned(self.request.user).order_by(
+            "-states__date_created"
+        )
 
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
@@ -180,7 +192,9 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.saved(self.request.user).order_by("-states__date_created")
+        return Entry.user_state.saved(self.request.user).order_by(
+            "-states__date_created"
+        )
 
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
@@ -190,4 +204,22 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.deleted(self.request.user).order_by("-states__date_created")
+        return Entry.user_state.deleted(self.request.user).order_by(
+            "-states__date_created"
+        )
+
+
+class SaveEntryToPocketView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        """Save the given entry to the request user's pocket account."""
+        try:
+            pocket = Pocket(settings.POCKET_CONSUMER_KEY, request.user.pocket_token)
+        except ThirdPartyTokens.DoesNotExist:
+            return redirect(reverse("users:pocket:oauth_entry"))
+        entry = get_object_or_404(
+            Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"]
+        )
+        # TODO handle pocket errors for fault tolerance
+        pocket.add(entry.link, wait=False)
+        entry.mark_saved(request.user)
+        return redirect(request.META.get("HTTP_REFERER", "/"))

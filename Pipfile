@@ -14,8 +14,11 @@ feedparser = "*"
 rq = "*"
 django-rq = "*"
 gunicorn = "*"
-raven = "*"
 maya = "*"
+sentry-sdk = "*"
+pocket = "*"
+djangorestframework = "*"
+django-webpack-loader = "*"
 
 [dev-packages]
 "flake8" = "*"
@@ -25,6 +28,9 @@ pytest-django = "*"
 black = "==18.9b0"
 pre-commit = "*"
 pydocstyle = "*"
+pytest-mock = "*"
+django-cors-headers = "*"
+flake8-import-order = "*"
 
 [requires]
 python_version = "3.6"

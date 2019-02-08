@@ -7,17 +7,33 @@ import django.db.models.deletion
 
 class Migration(migrations.Migration):
 
-    dependencies = [migrations.swappable_dependency(settings.AUTH_USER_MODEL), ("feeds", "0002_auto_20180603_1122")]
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ("feeds", "0002_auto_20180603_1122"),
+    ]
 
     operations = [
         migrations.CreateModel(
             name="EntryState",
             fields=[
-                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
                 (
                     "state",
                     models.CharField(
-                        choices=[("unread", "Unread"), ("read", "Read"), ("saved", "Saved"), ("deleted", "Deleted")],
+                        choices=[
+                            ("unread", "Unread"),
+                            ("read", "Read"),
+                            ("saved", "Saved"),
+                            ("deleted", "Deleted"),
+                        ],
                         max_length=50,
                     ),
                 ),
@@ -26,7 +42,9 @@ class Migration(migrations.Migration):
                 (
                     "entry",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, related_name="states", to="feeds.Entry"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="states",
+                        to="feeds.Entry",
                     ),
                 ),
                 (
