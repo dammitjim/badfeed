@@ -11,5 +11,11 @@ export interface IEntry {
     content: string;
     summary: string;
     date_published: string;
-    states: string[];
+    states: EntryState[];
+}
+
+export enum EntryState {
+    Saved = "saved",
+    Deleted = "deleted",
+    Pinned = "pinned",
 }
