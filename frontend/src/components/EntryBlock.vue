@@ -39,10 +39,6 @@ const removeEntry = (
     });
 };
 
-const buildStateURL = (id: number): string => {
-    return `/api/v1/feeds/entries/${id}/`;
-};
-
 interface IEntryExtended extends IEntry {
     iterator: number;
 }

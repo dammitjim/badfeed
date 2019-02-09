@@ -1,15 +1,15 @@
 <template>
-    <div id="app"><EntryBlock /></div>
+    <div id="app"><BlockManager /></div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import EntryBlock from "./components/EntryBlock.vue";
+import BlockManager from "./components/BlockManager.vue";
 
 export default Vue.extend({
     name: "app",
     components: {
-        EntryBlock,
+        BlockManager,
     },
 });
 </script>
