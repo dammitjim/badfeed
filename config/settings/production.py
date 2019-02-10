@@ -13,7 +13,6 @@ sentry_init(
 
 POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY")
 
-STATICFILES_DIRS = [os.path.join(FRONTEND_DIR, "dist", "entry-widget")]
 WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": DEBUG,
