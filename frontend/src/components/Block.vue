@@ -40,7 +40,7 @@ export default Vue.extend({
             this.$store.dispatch("pinEntry", { entry, feed: this.$props.feed });
         },
         archive(entry: IEntry) {
-            this.$store.dispatch("archiveEntry", {entry, feed: this.$props.feed})
+            this.$store.dispatch("archiveEntry", {entry, feed: this.$props.feed});
         },
         done(entries: IEntry[]) {
             this.$store.dispatch("deleteEntries", {entries: this.$props.entries, feed: this.$props.feed});

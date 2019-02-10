@@ -1,8 +1,15 @@
 import Vue from "vue";
 import Vuex from "vuex";
+import { Dispatch } from "vuex";
 import axios from "axios";
 
-import { apiDeleteEntries, apiDeleteEntry, apiPinEntry, apiSaveEntry } from "./api";
+import {
+    apiDeleteEntries,
+    apiDeleteEntry,
+    apiPinEntry,
+    apiSaveEntry,
+    apiGetDashboard
+} from "./api";
 import { IEntry, IFeed } from "./models";
 
 axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
@@ -23,6 +30,7 @@ export interface IState {
 export default new Vuex.Store({
     state: {
         pinned: [],
+        // TODO this may be more appropriate as an object with feed ID as the key
         blocks: []
     },
     mutations: {
@@ -32,7 +40,7 @@ export default new Vuex.Store({
         addBlock(state: IState, newBlock: IBlock) {
             state.blocks.push(newBlock);
         },
-        removeEntry(state: IState, {feed, entry}) {
+        removeEntry(state: IState, { feed, entry, callback }) {
             const wantedBlock = state.blocks.find(existing => {
                 return existing.feed.id === feed.id;
             });
@@ -40,8 +48,11 @@ export default new Vuex.Store({
                 wantedBlock.entries = wantedBlock.entries.filter(existing => {
                     return existing.id !== entry.id;
                 });
+                if (callback) {
+                    callback(wantedBlock);
+                }
             }
-        },
+        }
     },
     actions: {
         addBlock({ commit, state }, block: IBlock) {
@@ -53,23 +64,45 @@ export default new Vuex.Store({
                 commit("addBlock", block);
             }
         },
-        async archiveEntry({ commit }, { entry, feed }) {
+        async archiveEntry({ commit, dispatch }, { entry, feed }) {
             await apiDeleteEntry(entry.id);
-            commit("removeEntry", {feed, entry});
+            commit("removeEntry", { feed, entry, callback: (block: IBlock) => {
+                if (block.entries.length === 0) {
+                    dispatch("syncBlocks");
+                }
+            }});
         },
-        async pinEntry({ commit }, { entry, feed}) {
+        async pinEntry({ commit, dispatch }, { entry, feed }) {
             await apiPinEntry(entry.id);
             commit("pinEntry", entry);
-            commit("removeEntry", { entry, feed });
+            commit("removeEntry", { feed, entry, callback: (block: IBlock) => {
+                if (block.entries.length === 0) {
+                    dispatch("syncBlocks");
+                }
+            }});
         },
-        async saveEntry({ commit }, { entry, feed}) {
+        async saveEntry({ commit, dispatch }, { entry, feed }) {
             await apiSaveEntry(entry.id);
-            commit("removeEntry", { entry, feed });
+            commit("removeEntry", { feed, entry, callback: (block: IBlock) => {
+                if (block.entries.length === 0) {
+                    dispatch("syncBlocks");
+                }
+            }});
         },
-        async deleteEntries({ commit }, { entries, feed }) {
+        async deleteEntries({ commit, dispatch }, { entries, feed }) {
             await apiDeleteEntries(entries.map((entry: IEntry) => entry.id));
             for (const entry of entries) {
-                commit("removeEntry", { entry, feed });
+                commit("removeEntry", { feed, entry, callback: (block: IBlock) => {
+                    if (block.entries.length === 0) {
+                        dispatch("syncBlocks");
+                    }
+                }});
+            }
+        },
+        async syncBlocks({ dispatch }) {
+            const results = await apiGetDashboard();
+            for (const result of results) {
+                dispatch("addBlock", result);
             }
         }
     }
