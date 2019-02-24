@@ -6,8 +6,6 @@ image: python:3.6.7
 # Pick zero or more services to be used on all builds.
 # Only needed when using a docker container to run your tests in.
 # Check out: http://docs.gitlab.com/ce/ci/docker/using_docker_images.html#what-is-a-service
-services:
-  - postgres:latest
 
 variables:
   POSTGRES_DB: badfeed_ci
@@ -29,6 +27,8 @@ stages:
 
 pytest:
   stage: tests
+  services:
+    - postgres:latest
   variables:
     DJANGO_SETTINGS_MODULE: config.settings.ci
     DATABASE_NAME: badfeed_ci
@@ -36,14 +36,14 @@ pytest:
     DATABASE_PASSWORD: postgres
     DATABASE_HOST: postgres
   script:
-  - pipenv run pytest
+    - pipenv run pytest
 
 flake8:
   stage: linting
   script:
-  - pipenv run flake8 .
+    - pipenv run flake8 .
 
 black:
   stage: linting
   script:
-  - pipenv run black --check .
+    - pipenv run black --check .
