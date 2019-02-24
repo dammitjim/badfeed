@@ -42,3 +42,8 @@ flake8:
   stage: linting
   script:
   - pipenv run flake8 .
+
+black:
+  stage: linting
+  script:
+  - pipenv run black --check .

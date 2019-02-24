@@ -192,6 +192,28 @@ class TestGenericFeedDashboardView:
         response = auth_api_client.get(self.url)
         assert response.data["results"] == []
 
+    def test_orders_feeds_by_entry_date_published(
+        self, auth_api_client, feed_factory, entry_factory, entry_state_factory
+    ):
+        """Feeds should be ordered by the date published of their subsequent entries."""
+        user = _get_user(auth_api_client)
+        feed1 = feed_factory(watched_by=user)
+        entry_factory(feed=feed1, date_published=maya.now().subtract(days=3).datetime())
+
+        feed2 = feed_factory(watched_by=user)
+        entry_factory(feed=feed2, date_published=maya.now().subtract(days=1).datetime())
+
+        feed3 = feed_factory(watched_by=user)
+        entry_factory(feed=feed3, date_published=maya.now().subtract(days=2).datetime())
+
+        response = auth_api_client.get(self.url)
+        assert response.data["count"] == 3
+
+        results = response.data["results"]
+        assert results[0]["feed"]["id"] == feed2.pk
+        assert results[1]["feed"]["id"] == feed3.pk
+        assert results[2]["feed"]["id"] == feed1.pk
+
     def test_responds(self, auth_api_client):
         """Should respond at the most basic level to a logged in user."""
         response = auth_api_client.get(self.url)

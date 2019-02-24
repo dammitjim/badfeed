@@ -48,8 +48,6 @@ class EntrySerializer(OmitMixin, ModelSerializer):
             "feed",
             "title",
             "link",
-            "content",
-            "summary",
             "date_published",
             "slang_date_published",
             "states",

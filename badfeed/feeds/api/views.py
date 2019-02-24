@@ -1,4 +1,4 @@
-from django.db.models import Max, Count, Q
+from django.db.models import Count, Max, Q
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
