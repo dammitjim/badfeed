@@ -40,6 +40,11 @@ export default new Vuex.Store({
         addBlock(state: IState, newBlock: IBlock) {
             state.blocks.push(newBlock);
         },
+        removeBlock(state: IState, block: IBlock) {
+            state.blocks = state.blocks.filter(stateBlock => {
+                return stateBlock.feed.id !== block.feed.id;
+            });
+        },
         removeEntry(state: IState, { feed, entry, callback }) {
             const wantedBlock = state.blocks.find(existing => {
                 return existing.feed.id === feed.id;
@@ -52,16 +57,26 @@ export default new Vuex.Store({
                     callback(wantedBlock);
                 }
             }
+        },
+        updateBlock(state: IState, block: IBlock) {
+            const wantedBlock = state.blocks.find(existing => {
+                return existing.feed.id === block.feed.id;
+            });
+            if (wantedBlock) {
+                wantedBlock.entries = block.entries;
+            }
         }
     },
     actions: {
         addBlock({ commit, state }, block: IBlock) {
-            const exists = state.blocks.some(existingBlock => {
-                return block.feed.id === existingBlock.feed.id;
+            const existingBlock = state.blocks.find(eb => {
+                return block.feed.id === eb.feed.id;
             });
 
-            if (!exists) {
+            if (!existingBlock) {
                 commit("addBlock", block);
+            } else {
+                commit("updateBlock", block);
             }
         },
         async archiveEntry({ commit, dispatch }, { entry, feed }) {

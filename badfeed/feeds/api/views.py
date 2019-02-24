@@ -46,7 +46,7 @@ class GenericFeedDashboardView(generics.ListAPIView):
         # amount of actioned entries is equal to the amount of entries
         # (meaning there are no more entries to action)
         for feed in qs:
-            if feed.actioned_entries == feed.entries.count():
+            if feed.actioned_entries >= feed.entries.count():
                 qs = qs.exclude(pk=feed.pk)
 
         return qs
