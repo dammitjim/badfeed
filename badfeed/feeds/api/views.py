@@ -1,4 +1,4 @@
-from django.db.models import Count
+from django.db.models import Count, Max, Q
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
@@ -28,17 +28,28 @@ class GenericFeedDashboardView(generics.ListAPIView):
             where an unread entry is one without a state
         * The entries must be ordered by date published
         * Fully actioned feeds must not be returned.
-
-        TODO there is probably a nicer way of writing this queryset chain
         """
-        return (
+        qs = (
             Feed.objects.watched_by(self.request.user)
             .filter(entries__gt=0)
-            .filter(entries__states__isnull=True)
-            .annotate(entry_states=Count("entries__states"))
-            .filter(entry_states__gte=0)
-            .order_by("-entries__date_published")
+            .annotate(
+                actioned_entries=Count(
+                    "entries__states", filter=Q(entries__states__user=self.request.user)
+                )
+            )
+            .annotate(last_published=Max("entries__date_published"))
+            .order_by("-last_published")
         )
+
+        # TODO figure out how to make this a part of the above query
+        # for now, we are cheeky and exclude any feeds whereby the
+        # amount of actioned entries is equal to the amount of entries
+        # (meaning there are no more entries to action)
+        for feed in qs:
+            if feed.actioned_entries >= feed.entries.count():
+                qs = qs.exclude(pk=feed.pk)
+
+        return qs
 
     def get_serializer_instance(self, feed):
         """Load the 5 latest unread entries for the given feed into a serializer instance."""
