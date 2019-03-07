@@ -1,4 +1,5 @@
 import logging
+from typing import List
 
 import feedparser
 import maya
@@ -17,7 +18,7 @@ class EntryParser:
 
     clean_fn = clean_content
 
-    def __init__(self, entry_data: feedparser.FeedParserDict, *args, **kwargs):
+    def __init__(self, entry_data: feedparser.FeedParserDict):
         """Load initial entry data into the parser."""
         self.entry_data = entry_data
 
@@ -69,16 +70,17 @@ class EntryParser:
 
 
 class RSSParser:
-    def __init__(self, feed: Feed, *args, **kwargs):
+    def __init__(self, feed: Feed):
         """Initialise feed as a constant (lol constants in python)."""
         self.FEED = feed
 
-    def get_entries_to_process(self, data):
+    def get_entries_to_process(self, entries: List[feedparser.FeedParserDict]):
         """Yield entries which don't currently exist.
 
         Could potentially instead return a list comp. Think this uses less memory.
+        TODO we need to be able to update existing entries?
         """
-        for entry in data.entries:
+        for entry in entries:
             if not Entry.objects.filter(guid=entry.id, feed=self.FEED).exists():
                 yield entry
 
@@ -90,12 +92,13 @@ class RSSParser:
         entry_parser = None
         data = feedparser.parse(response.text)
 
-        for entry in self.get_entries_to_process(data):
-            if not entry_parser:
-                entry_parser = EntryParser(entry)
-
+        for entry in self.get_entries_to_process(data.entries):
             try:
-                entry_parser.load(entry)
+                if not entry_parser:
+                    entry_parser = EntryParser(entry)
+                else:
+                    entry_parser.load(entry)
+
                 entry_extract = entry_parser.extract()
 
                 db_entry = Entry(feed=self.FEED, **entry_extract)
