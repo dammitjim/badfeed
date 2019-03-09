@@ -38,12 +38,17 @@ class EntryParser:
 
         return data
 
+    def _has_field(self, field: str):
+        if not hasattr(self.entry_data, field):
+            return False
+        return getattr(self.entry_data, field, False)
+
     def _get_content(self) -> str:
         """Get the data for the content field of the Entry."""
         field = None
-        if hasattr(self.entry_data, "content") and self.entry_data.content:
+        if self._has_field("content"):
             field = self.entry_data.content
-        elif hasattr(self.entry_data, "description") and self.entry_data.description:
+        elif self._has_field("description"):
             field = self.entry_data.description
         else:
             raise ContentErrorException("content")
@@ -53,12 +58,9 @@ class EntryParser:
     def _get_summary(self) -> str:
         """Get the data for the summary field of the Entry."""
         field = None
-        if (
-            hasattr(self.entry_data, "summary_detail")
-            and self.entry_data.summary_detail
-        ):
+        if self._has_field("summary_detail"):
             field = self.entry_data.summary_detail
-        elif hasattr(self.entry_data, "summary") and self.entry_data.summary:
+        elif self._has_field("summary"):
             field = self.entry_data.summary
         else:
             raise ContentErrorException("summary")
