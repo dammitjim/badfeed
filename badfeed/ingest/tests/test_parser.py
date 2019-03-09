@@ -1,9 +1,30 @@
+import maya
 import pytest
 
+from badfeed.ingest.exceptions import ContentErrorException
 from badfeed.ingest.parser import EntryParser, RSSParser
 
 
 class TestEntryParser:
+    @pytest.fixture
+    def valid_data(self, valid_data_partial):
+        valid_data_partial.content = "Test content"
+        valid_data_partial.summary_detail = "Test summary detail"
+        return valid_data_partial
+
+    @pytest.fixture
+    def valid_data_partial(self, mocker):
+        m = mocker.Mock()
+        m.title = "This is only a test"
+        m.link = "https://tightenupthe.tech"
+        m.id = "testguid"
+        m.published = str(maya.now())
+        m.content = None
+        m.summary_detail = None
+        m.description = None
+        m.summary = None
+        return m
+
     def test_init_loads_entry_data(self, mocker):
         """Should load the supplied entry data into the class on init."""
         mocked_data = mocker.MagicMock()
@@ -18,54 +39,73 @@ class TestEntryParser:
         parser.load(mocked_data_bar)
         assert parser.entry_data == mocked_data_bar
 
-    def test_clean_uses_class_attr(self, mocker):
-        """Should use class attr on call to clean."""
-        pass
-
-    def test_extracts_title(self):
+    def test_extracts_title(self, valid_data):
         """Should extract the title from the loaded entry_data."""
-        pass
+        parser = EntryParser(valid_data)
+        data = parser.extract()
+        assert data["title"] == "This is only a test"
 
-    def test_extracts_link(self):
+    def test_extracts_link(self, valid_data):
         """Should extract the link from the loaded entry_data."""
-        pass
+        parser = EntryParser(valid_data)
+        data = parser.extract()
+        assert data["link"] == "https://tightenupthe.tech"
 
-    def test_extracts_guid(self):
+    def test_extracts_guid(self, valid_data):
         """Should extract the guid from the loaded entry_data."""
+        parser = EntryParser(valid_data)
+        data = parser.extract()
+        assert data["guid"] == "testguid"
+
+    def test_extracts_content_from_content_field(self, valid_data):
+        """Should extract content from content field (over description)."""
+        parser = EntryParser(valid_data)
+        data = parser.extract()
+        assert data["content"] == "Test content"
+
+    def test_extracts_content_from_fallback_description(self, valid_data_partial):
+        """Should use description if no content available."""
+        valid_data_partial.description = "Test description"
+        valid_data_partial.summary = "Test summary"
+        parser = EntryParser(valid_data_partial)
+        data = parser.extract()
+        assert data["content"] == "Test description"
+
+    def test_raises_if_no_content_field_found(self, valid_data_partial):
+        """Should raise if no appropriate content field is present."""
+        with pytest.raises(ContentErrorException):
+            parser = EntryParser(valid_data_partial)
+            parser.extract()
+
+    def test_extracts_summary_from_summary_detail(self, valid_data):
+        """Should extract summary from summary detail if present."""
+        parser = EntryParser(valid_data)
+        data = parser.extract()
+        assert data["summary"] == "Test summary detail"
+
+    def test_extracts_summary_from_summary_fallback(self, valid_data_partial):
+        """Should extract summary from summary as fallback."""
+        valid_data_partial.description = "Test description"
+        valid_data_partial.summary = "Test summary"
+        parser = EntryParser(valid_data_partial)
+        data = parser.extract()
+        assert data["summary"] == "Test summary"
+
+    def test_raises_if_no_summary_field_found(self, valid_data_partial):
+        """Should raise if no appropriate summary field is present."""
+        valid_data_partial.description = "Test description"
+        with pytest.raises(ContentErrorException):
+            parser = EntryParser(valid_data_partial)
+            parser.extract()
+
+    # TODO parametrize
+    def test_extract_cleans_content(self):
+        """Should clean out any schmuck from the content field."""
         pass
 
     # TODO parametrize
     def test_date_published_parsing(self):
         """Should handle various date published strings."""
-        pass
-
-    def test_extracts_content_from_content_field(self):
-        """Should extract content from content field (over description)."""
-        pass
-
-    def test_extracts_content_from_fallback_description(self):
-        """Should use description if no content available."""
-        pass
-
-    def test_raises_if_no_content_field_found(self):
-        """Should raise if no appropriate content field is present."""
-        pass
-
-    def test_extracts_summary_from_summary_detail(self):
-        """Should extract summary from summary detail if present."""
-        pass
-
-    def test_extracts_summary_from_summary_fallback(self):
-        """Should extract summary from summary as fallback."""
-        pass
-
-    def test_raises_if_no_summary_field_found(self):
-        """Should raise if no appropriate summary field is present."""
-        pass
-
-    # TODO parametrize
-    def test_extract_cleans_content(self):
-        """Should clean out any schmuck from the content field."""
         pass
 
     # TODO parametrize

@@ -16,8 +16,6 @@ log = logging.getLogger("rq.worker")
 class EntryParser:
     """Parse an individual entry."""
 
-    clean_fn = clean_content
-
     def __init__(self, entry_data: feedparser.FeedParserDict):
         """Load initial entry data into the parser."""
         self.entry_data = entry_data
@@ -43,9 +41,9 @@ class EntryParser:
     def _get_content(self) -> str:
         """Get the data for the content field of the Entry."""
         field = None
-        if hasattr(self.entry_data, "content"):
+        if hasattr(self.entry_data, "content") and self.entry_data.content:
             field = self.entry_data.content
-        elif hasattr(self.entry_data, "description"):
+        elif hasattr(self.entry_data, "description") and self.entry_data.description:
             field = self.entry_data.description
         else:
             raise ContentErrorException("content")
@@ -55,17 +53,20 @@ class EntryParser:
     def _get_summary(self) -> str:
         """Get the data for the summary field of the Entry."""
         field = None
-        if hasattr(self.entry_data, "summary_detail"):
-            field = self.entry_data.content
-        elif hasattr(self.entry_data, "summary"):
-            field = self.entry_data.description
+        if (
+            hasattr(self.entry_data, "summary_detail")
+            and self.entry_data.summary_detail
+        ):
+            field = self.entry_data.summary_detail
+        elif hasattr(self.entry_data, "summary") and self.entry_data.summary:
+            field = self.entry_data.summary
         else:
-            raise ContentErrorException("content")
+            raise ContentErrorException("summary")
 
         return self._clean(field)
 
     def _clean(self, text_value) -> str:
-        cleaned = self.clean_fn(text_value)
+        cleaned = clean_content(text_value)
         return cleaned.article
 
 
