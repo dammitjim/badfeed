@@ -131,9 +131,7 @@ class RSSParser:
                 logger.exception("Failed to parse entry.", exc_info=True)
                 has_errored = True
                 IngestLog.objects.create(
-                    state=IngestLog.STATE_FAILED,
-                    feed=self.FEED,
-                    failing_xml=response.text,
+                    state=IngestLog.STATE_FAILED, feed=self.FEED, body=response.text
                 )
                 continue
 

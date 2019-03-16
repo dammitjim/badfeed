@@ -5,6 +5,7 @@ import requests
 from sentry_sdk import configure_scope
 
 from badfeed.feeds.models import Feed
+from badfeed.ingest.models import IngestLog
 from badfeed.ingest.parser import RSSParser
 
 
@@ -25,6 +26,9 @@ def sync_feed(feed: Feed):
             # TODO: store failures as database objects
             logger.error(
                 f"{r.status_code} received when scraping {feed.link}", exc_info=True
+            )
+            IngestLog.objects.create(
+                feed=feed, state=IngestLog.STATE_NOT_RESPONDING, body=r.text
             )
             return
 
