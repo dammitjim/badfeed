@@ -1,8 +1,8 @@
 from django_rq import job
+from loguru import logger
 import maya
 import requests
 from sentry_sdk import configure_scope
-from loguru import logger
 
 from badfeed.feeds.models import Feed
 from badfeed.ingest.parser import RSSParser

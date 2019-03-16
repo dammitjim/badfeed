@@ -1,7 +1,7 @@
 from typing import List
 
-from loguru import logger
 import feedparser
+from loguru import logger
 import maya
 import requests
 
