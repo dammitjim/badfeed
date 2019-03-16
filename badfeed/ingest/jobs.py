@@ -1,214 +1,38 @@
-import logging
-
-from django.core.exceptions import ValidationError
-from django.utils import timezone
 from django_rq import job
-import feedparser
+from loguru import logger
 import maya
+import requests
+from sentry_sdk import configure_scope
 
-from badfeed.feeds.models import Author, Enclosure, Entry, Tag
-from badfeed.ingest.exceptions import ContentErrorException
-from badfeed.ingest.utils import clean_content, clean_item_content
-
-
-log = logging.getLogger("rq.worker")
-
-
-class EntryIngest:
-    def __init__(self, feed):
-        self.feed = feed
-        self._ingest_entry = None
-
-    def get_date_published(self):
-        return maya.parse(self._ingest_entry.published).datetime()
-
-    def get_content(self):
-        if hasattr(self._ingest_entry, "content"):
-            return clean_item_content(self._ingest_entry.content).article
-
-        if hasattr(self._ingest_entry, "description"):
-            return clean_content(self._ingest_entry.description).article
-
-        raise ContentErrorException("no content")
-
-    def get_summary(self):
-        # TODO: the summary needs to strip all html tags i think
-        if hasattr(self._ingest_entry, "summary_detail"):
-            return clean_content(self._ingest_entry.summary_detail.value).article
-
-        if hasattr(self._ingest_entry, "summary"):
-            return clean_content(self._ingest_entry.summary).article
-
-        return ""
-
-    def get_guid(self):
-        if not hasattr(self._ingest_entry, "id"):
-            raise ValueError("no guid present on ingest entry")
-
-        return self._ingest_entry.id
-
-    def get_title(self):
-        if not hasattr(self._ingest_entry, "title"):
-            raise ValueError("no title present on ingest entry")
-
-        return self._ingest_entry.title
-
-    def get_link(self):
-        if not hasattr(self._ingest_entry, "link"):
-            raise ValueError("no link present on ingest entry")
-
-        return self._ingest_entry.link
-
-    def get_author(self, commit=True):
-        # TODO: some feeds have comma separated author fields, check if a comma is present and split
-        if hasattr(self._ingest_entry, "author_detail"):
-            try:
-                db_author = Author.objects.get(
-                    name=self._ingest_entry.author_detail.name, feed=self.feed
-                )
-            except Author.DoesNotExist:
-                db_author = Author(
-                    name=self._ingest_entry.author_detail.name,
-                    link=self._ingest_entry.author_detail.get("link", ""),
-                    email=self._ingest_entry.author_detail.get("email", ""),
-                    feed=self.feed,
-                )
-                if commit:
-                    db_author.save()
-            return db_author
-
-        if hasattr(self._ingest_entry, "author"):
-            try:
-                db_author = Author.objects.get(
-                    name=self._ingest_entry.author, feed=self.feed
-                )
-            except Author.DoesNotExist:
-                db_author = Author(name=self._ingest_entry.author, feed=self.feed)
-                if commit:
-                    db_author.save()
-            return db_author
-
-        return None
-
-    def get_contributors(self, commit=True):
-        if not hasattr(self._ingest_entry, "contributors"):
-            return None
-
-        contributors = []
-        for contributor in self._ingest_entry.contributors:
-            try:
-                db_author = Author.objects.get(name=contributor.name, feed=self.feed)
-            except Author.DoesNotExist:
-                db_author = Author(
-                    name=contributor.name,
-                    link=contributor.get("href", ""),
-                    email=contributor.get("email", ""),
-                    feed=self.feed,
-                )
-                if commit:
-                    db_author.save()
-            contributors.append(db_author)
-        return contributors
-
-    def get_tags(self, commit=True):
-        if not hasattr(self._ingest_entry, "tags"):
-            return None
-
-        tags = []
-        for tag in self._ingest_entry.tags:
-            term = tag.term.lower()
-            try:
-                db_tag = Tag.objects.get(term=term, feed=self.feed)
-            except Tag.DoesNotExist:
-                db_tag = Tag(
-                    term=term,
-                    scheme=tag.get("scheme", ""),
-                    label=tag.get("label", ""),
-                    feed=self.feed,
-                )
-                if commit:
-                    db_tag.save()
-            tags.append(db_tag)
-        return tags
-
-    def get_enclosures(self, entry, commit=True):
-        if not hasattr(self._ingest_entry, "enclosures"):
-            return None
-
-        enclosures = [
-            Enclosure(
-                href=enclosure.href,
-                length=enclosure.length,
-                file_type=enclosure.type,
-                entry=entry,
-            )
-            for enclosure in self._ingest_entry.enclosures
-        ]
-
-        if commit:
-            for enclosure in enclosures:
-                enclosure.save()
-
-        return enclosures
-
-    def ingest(self, ingest_entry, commit=True):
-        self._ingest_entry = ingest_entry
-
-        entry = Entry(
-            title=self.get_title(),
-            link=self.get_link(),
-            date_published=self.get_date_published(),
-            content=self.get_content(),
-            summary=self.get_summary(),
-            guid=self.get_guid(),
-            feed=self.feed,
-            author=self.get_author(commit=commit),
-        )
-        try:
-            entry.full_clean()
-        except ValidationError as e:
-            log.exception(f"Entry for feed {self.feed} failed clean.", exc_info=e)
-            return
-
-        if commit:
-            entry.save()
-
-        self.get_enclosures(entry, commit=commit)
-
-        tags = self.get_tags(commit=commit)
-        if tags:
-            entry.tags.add(*tags)
-
-        contributors = self.get_contributors(commit=commit)
-        if contributors:
-            entry.contributors.add(*contributors)
-
-        if (tags or contributors) and commit:
-            entry.save()
-
-        return entry
+from badfeed.feeds.models import Feed
+from badfeed.ingest.models import IngestLog
+from badfeed.ingest.parser import RSSParser
 
 
 @job
-def pull_feed(feed, save=True):
-    log.info(f"importing feed {feed.link}")
-    response = feedparser.parse(feed.link)
-    for entry in response.entries:
-        if Entry.objects.filter(guid=entry.id, feed=feed).exists() and save:
-            log.debug(f"skipping {entry.link}")
-            continue
+def sync_feed(feed: Feed):
+    """Sync feed parsing against the database."""
+    with configure_scope() as scope:
+        logger.debug(f"Processing feed {feed.link}")
+        scope.set_tag("feed", feed.title)
 
-        log.info(f"pulling {entry.link}")
-        try:
-            EntryIngest(feed).ingest(entry, commit=save)
-        # catch all exceptions are generally not great
-        # TODO clean this file to the point where we don't need this?
-        except Exception as e:
-            log.exception(f"Generic failure for entry in feed {feed}", exc_info=e)
-            continue
+        r = requests.get(
+            feed.link, headers={"User-Agent": "FeedBadger (tightenupthe.tech)"}
+        )
 
-    if not save:
-        return
+        scope.set_extra("body", r.text)
 
-    feed.date_last_scraped = timezone.now()
-    feed.save()
+        if r.status_code != 200:
+            logger.error(
+                f"{r.status_code} received when scraping {feed.link}", exc_info=True
+            )
+            IngestLog.objects.create(
+                feed=feed, state=IngestLog.STATE_NOT_RESPONDING, body=r.text
+            )
+            return
+
+        parser = RSSParser(feed)
+        parser.parse(r)
+
+        feed.date_last_scraped = maya.now().datetime()
+        feed.save()

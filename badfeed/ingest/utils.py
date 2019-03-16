@@ -1,7 +1,11 @@
 from collections import namedtuple
+from typing import List
 
 from bleach import clean
 from django.utils.text import Truncator
+from feedparser import FeedParserDict
+
+from badfeed.feeds.models import Feed, Tag
 
 CleanedContent = namedtuple("CleanedContent", ["teaser", "article"])
 
@@ -26,3 +30,28 @@ def clean_item_content(item_content):
     for section in item_content:
         content += section.value
     return clean_content(content)
+
+
+def get_or_create_tags(entry: FeedParserDict, feed: Feed) -> List[Tag]:
+    """From the parsed entry and given feed, get or create tags from the database."""
+    tags = []
+    if not hasattr(entry, "tags"):
+        return tags
+
+    for tag in entry.tags:
+        term = tag.term.lower().strip()
+
+        try:
+            db_tag = Tag.objects.get(term=term, feed=feed)
+        except Tag.DoesNotExist:
+            db_tag = Tag(
+                term=term,
+                scheme=tag.get("scheme", ""),
+                label=tag.get("label", ""),
+                feed=feed,
+            )
+            db_tag.save()
+
+        tags.append(db_tag)
+
+    return tags
