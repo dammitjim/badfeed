@@ -19,6 +19,7 @@ sentry-sdk = "*"
 pocket = "*"
 djangorestframework = "*"
 django-webpack-loader = "*"
+loguru = "*"
 
 [dev-packages]
 "flake8" = "*"

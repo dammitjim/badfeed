@@ -1,16 +1,14 @@
-import logging
 from typing import List
 
+from loguru import logger
 import feedparser
 import maya
 import requests
 
 from badfeed.feeds.models import Entry, Feed
 from badfeed.ingest.exceptions import ContentErrorException
+from badfeed.ingest.models import IngestLog
 from badfeed.ingest.utils import clean_content, get_or_create_tags
-
-
-log = logging.getLogger("rq.worker")
 
 
 class EntryParser:
@@ -67,8 +65,22 @@ class EntryParser:
 
         return self._clean(field)
 
-    def _clean(self, text_value) -> str:
-        cleaned = clean_content(text_value)
+    def _clean(self, field) -> str:
+        """Clean the given field and return a sanitized string.
+
+        This function is currently the dumping ground for dirt.
+        The argument `field` may be of varying type depending on which
+        feedparser field we've determined to be appropriate.
+        """
+        content = field
+
+        # TODO will this correctly handle multi part atom instances?
+        if isinstance(field, list):
+            content = "".join(f["value"] for f in field)
+        elif isinstance(field, feedparser.FeedParserDict):
+            content = field["value"]
+
+        cleaned = clean_content(content)
         return cleaned.article
 
 
@@ -94,8 +106,10 @@ class RSSParser:
         """
         entry_parser = None
         data = feedparser.parse(response.text)
+        has_errored = False
 
         for entry in self.get_entries_to_process(data.entries):
+            logger.info(f"New entry {entry.id} found for feed {self.FEED.title}")
             try:
                 if not entry_parser:
                     entry_parser = EntryParser(entry)
@@ -114,6 +128,14 @@ class RSSParser:
                     db_entry.save()
 
             except Exception:
-                log.exception("Failed to parse entry.", exc_info=True)
+                logger.exception("Failed to parse entry.", exc_info=True)
+                has_errored = True
+                IngestLog.objects.create(
+                    state=IngestLog.STATE_FAILED,
+                    feed=self.FEED,
+                    failing_xml=response.text,
+                )
                 continue
-                # TODO save failed data to file or something here
+
+        log_state = IngestLog.STATE_PARTIAL if has_errored else IngestLog.STATE_SUCCESS
+        IngestLog.objects.create(state=log_state, feed=self.FEED)

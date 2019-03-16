@@ -35,9 +35,11 @@ def clean_item_content(item_content):
 def get_or_create_tags(entry: FeedParserDict, feed: Feed) -> List[Tag]:
     """From the parsed entry and given feed, get or create tags from the database."""
     tags = []
+    if not hasattr(entry, "tags"):
+        return tags
 
     for tag in entry.tags:
-        term = tag.term.lower()
+        term = tag.term.lower().strip()
 
         try:
             db_tag = Tag.objects.get(term=term, feed=feed)
