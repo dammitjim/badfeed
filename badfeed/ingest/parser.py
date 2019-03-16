@@ -100,10 +100,7 @@ class RSSParser:
                 yield entry
 
     def parse(self, response: requests.Response):
-        """Parse the RSS feed response into the database.
-
-        TODO in future take example responses and patch the `response.text` in tests
-        """
+        """Parse the RSS feed response into the database."""
         entry_parser = None
         data = feedparser.parse(response.text)
         has_errored = False

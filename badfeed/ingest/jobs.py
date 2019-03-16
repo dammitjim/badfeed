@@ -23,7 +23,6 @@ def sync_feed(feed: Feed):
         scope.set_extra("body", r.text)
 
         if r.status_code != 200:
-            # TODO: store failures as database objects
             logger.error(
                 f"{r.status_code} received when scraping {feed.link}", exc_info=True
             )
