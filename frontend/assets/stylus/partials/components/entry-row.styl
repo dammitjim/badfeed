@@ -1,0 +1,39 @@
+.entry_row
+    display flex
+    height 50px
+    align-items: center;
+    justify-content: center;
+    max-width 900px
+    width 100%
+    border 1px solid #C2C2C2
+    background white
+
+    &:hover
+        & ^[0]__actions
+            display flex
+        & ^[0]__date
+            display none
+
+    &__text
+        flex-grow 1
+        padding 10px
+        font-weight 600
+
+    &__date
+        flex-grow 0
+        padding 10px
+
+    &__actions
+        display none
+        list-style none
+
+        &__action
+            color #4B4B4B
+            margin 15px
+            text-shadow: 2px 2px 2px #ccc;
+
+            &:hover
+                cursor pointer
+
+    &__tertiary
+        color black

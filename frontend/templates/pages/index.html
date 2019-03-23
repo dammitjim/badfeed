@@ -10,6 +10,35 @@
         id="main_content">
             <article class="page_content">
                 <div class="page_content__inner">
+                    @@include('../includes/components/entry_row.html')
+                    <hr />
+                    @@include('../includes/components/entry_list.html')
+                    <hr />
+                    @@include('../includes/components/feed_icon.html')
+                    <hr />
+                    <div class="feed_block">
+                        <div class="feed_block__menu">
+                            <div class="feed_block__menu__item">
+                            </div>
+                            <div class="feed_block__menu__item">
+                                @@include('../includes/components/feed_icon.html')
+                            </div>
+                            <div class="feed_block__menu__item">
+                                <i class="fas fa-low-vision"></i>
+                            </div>
+                        </div>
+                        <div class="feed_block__entries">
+                            <div class="feed_block__top">
+                                <div class="feed_block__heading">
+                                    <h3>Waypoint</h3>
+                                </div>
+                                <div class="feed_block__smart_action">
+                                    <i class="fas fa-backspace"></i>
+                                </div>
+                            </div>
+                            @@include('../includes/components/entry_list.html')
+                        </div>
+                    </div>
                 </div><!-- .page_content__inner -->
             </article><!-- .page_content -->
         </main><!-- .main_content #main_content -->
