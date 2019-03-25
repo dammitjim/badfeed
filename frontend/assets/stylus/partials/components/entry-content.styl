@@ -1,0 +1,32 @@
+.entry_content
+    mt()
+    display flex
+    flex-direction row
+    flex-grow 1
+    // justify-content space-between
+    width 100%
+
+    p
+        max-width 75ch
+
+    &__menu
+        flex-grow 0
+        width 50px
+        margin-right 40px
+        margin-left 10px
+
+        ul
+            display flex
+            flex-direction column
+            justify-content center
+
+            li
+                padding 10px
+                text-align center
+                cursor pointer
+                border 1px solid #C2C2C2
+                border-bottom none
+
+                &:last-child
+                &:only-child
+                    border-bottom 1px solid #C2C2C2
