@@ -6,7 +6,8 @@
     max-width 900px
     width 100%
     border 1px solid #C2C2C2
-    background white
+    border-bottom none
+    padding 10px
 
     &:hover
         & ^[0]__actions
@@ -14,10 +15,13 @@
         & ^[0]__date
             display none
 
+    &:last-child
+    &:only-child
+        border-bottom 1px solid #C2C2C2
+
     &__text
         flex-grow 1
         padding 10px
-        font-weight 600
 
     &__date
         flex-grow 0
