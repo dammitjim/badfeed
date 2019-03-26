@@ -18,6 +18,17 @@ contain($display = flex)
     margin-right auto
     margin-left auto
 
+inner()
+    contain(flex)
+    flex-direction column
+    align-items flex-start
+
+    > *:first-child
+        margin-top $sp--plus-half
+
+    > *:last-child
+        margin-bottom $sp--plus-half
+
 // mixin for resetting button elements
 button-reset()
     cursor pointer

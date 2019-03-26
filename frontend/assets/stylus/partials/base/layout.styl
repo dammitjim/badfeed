@@ -31,6 +31,15 @@ html
     flex-direction column
     width 100%
 
+.global_nav
+    position absolute
+    left 0
+    display flex
+    height 100%
+
+    &__inner
+        inner()
+
 // styles nested in this block are for a standard
 // content page layout with a centered containing div
 .page_content
@@ -38,15 +47,7 @@ html
     width 100%
 
     &__inner
-        contain(flex)
-        flex-direction column
-        align-items flex-start
-
-        > *:first-child
-            margin-top $sp--plus-half
-
-        > *:last-child
-            margin-bottom $sp--plus-half
+        inner()
 
 img
     display block
