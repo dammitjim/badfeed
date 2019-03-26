@@ -3,6 +3,6 @@
 {% block main %}
     <h1>{{ object.title }} <small>{% watch_button feed %}</small></h1>
     {% for entry in feed.entries.all %}
-        {% include "feeds/partials/entry_row.html" with entry=entry feed=feed %}
+        {% include "feeds/components/entry_row.html" with entry=entry feed=feed %}
     {% endfor %}
 {% endblock %}

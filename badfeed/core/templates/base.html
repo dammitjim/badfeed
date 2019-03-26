@@ -4,70 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
     <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
     <link rel="stylesheet" href="{% static 'css/app.min.css' %}" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,700,800,900" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-    <style>
-        main {
-            margin-top: 80px;
-        }
-    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="/">RSS</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
-            aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-            {% if request.user.is_authenticated %}
-                <li class="nav-item{% if request.resolver_match.view_name == "feeds:pinned_entries" %} active{% endif %}">
-                    <a class="nav-link" href="{% url "feeds:pinned_entries" %}">Pinned
-                        {% if request.resolver_match.view_name == "feeds:pinned_entries" %}
-                            <span class="sr-only">(current)</span>{% endif %}</a>
-                </li>
-                <li class="nav-item{% if request.resolver_match.view_name == "feeds:saved_entries" %} active{% endif %}">
-                    <a class="nav-link" href="{% url "feeds:saved_entries" %}">Saved
-                        {% if request.resolver_match.view_name == "feeds:saved_entries" %}
-                            <span class="sr-only">(current)</span>{% endif %}</a>
-                </li>
-                <li class="nav-item{% if request.resolver_match.view_name == "feeds:archived_entries" %} active{% endif %}">
-                    <a class="nav-link" href="{% url "feeds:archived_entries" %}">Archved
-                        {% if request.resolver_match.view_name == "feeds:archived_entries" %}
-                            <span class="sr-only">(current)</span>{% endif %}</a>
-                </li>
-            {% endif %}
-        </ul>
-        <form class="form-inline my-2 my-lg-0" action="{% url "feeds:search" %}" method="get">
-            <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" name="term"
-                   value="{{ search_term }}">
-            <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-        </form>
-        <ul class="navbar-nav ml-2">
-            {% if request.user.is_authenticated %}
-                <li class="nav-item active">
-                    <a class="nav-link">{{ request.user }}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url "users:logout" %}">Logout</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url "users:login" %}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url "users:register" %}">Register</a>
-                </li>
-            {% endif %}
-        </ul>
-    </div>
-</nav>
 {% block root %}
 {% endblock %}
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

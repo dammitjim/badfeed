@@ -9,7 +9,7 @@
     {% render_bundle 'app' %}
     {% else %}
     {% for entry in page_obj %}
-        {% include "feeds/partials/entry_row.html" with entry=entry feed=entry.feed %}
+        {% include "feeds/components/entry_row.html" with entry=entry feed=entry.feed %}
     {% endfor %}
     <nav aria-label="Page navigation example">
         <ul class="pagination">

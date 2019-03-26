@@ -166,12 +166,13 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         """Load paginated blocks based on GET parameter for page."""
         context = super().get_context_data(**kwargs)
         context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
+        context["page_title"] = "Inbox"
         return context
 
 
 class PinnedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/my_entries.html"
+    template_name = "feeds/deprecated/my_entries.html"
     model = Entry
 
     def get_queryset(self):
@@ -183,7 +184,7 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/my_entries.html"
+    template_name = "feeds/deprecated/my_entries.html"
     model = Entry
 
     def get_queryset(self):
@@ -195,7 +196,7 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/my_entries.html"
+    template_name = "feeds/deprecated/my_entries.html"
     model = Entry
 
     def get_queryset(self):

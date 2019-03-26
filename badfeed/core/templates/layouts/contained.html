@@ -7,6 +7,9 @@
         {% endblock %}
         <article class="page_content">
             <div class="page_content__inner">
+                {% block local_header %}
+                    {% include "components/local_header.html" with primary_title=page_title secondary_title=page_subtitle %}
+                {% endblock %}
                 {% block main %}
                 {% endblock %}
             </div>
