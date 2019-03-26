@@ -7,11 +7,6 @@ from badfeed.feeds import views
 app_name = "feeds"
 urlpatterns = [
     path("", views.DashboardView.as_view(), name="my_entries"),
-    path(
-        "bulk/delete/<int:page>/",
-        views.MyEntriesMassDeleteView.as_view(),
-        name="my_entries_mass_delete",
-    ),
     path("search/", views.FeedSearch.as_view(), name="search"),
     path("pinned/", views.PinnedEntriesListView.as_view(), name="pinned_entries"),
     path("saved/", views.SavedEntriesListView.as_view(), name="saved_entries"),

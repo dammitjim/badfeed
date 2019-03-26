@@ -1,8 +1,6 @@
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.core.paginator import Paginator
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -11,11 +9,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from pocket import Pocket
 
 from badfeed.feeds.models import Entry, Feed
-from badfeed.feeds.utils import (
-    delete_entries_for_user,
-    feeds_by_last_updated_entry,
-    get_actionable_entries,
-)
+from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 from badfeed.users.models import ThirdPartyTokens
 
 
@@ -144,6 +138,8 @@ class EntrySaveToggleView(ObjectActionToggleView):
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
+    """Render dashboard view until a SPA solution is found."""
+
     paginate_by = 3
     template_name = "feeds/dashboard.html"
 
@@ -167,38 +163,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ]
 
     def get_context_data(self, **kwargs):
+        """Load paginated blocks based on GET parameter for page."""
         context = super().get_context_data(**kwargs)
         context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
         return context
-
-
-MY_ENTRIES_PAGINATE_BY = 10
-
-
-class MyEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = MY_ENTRIES_PAGINATE_BY
-    template_name = "feeds/my_entries.html"
-    model = Entry
-
-    def get_queryset(self):
-        """Load all entries for the the feeds watched by the user."""
-        return Entry.user_state.unread(self.request.user)
-
-
-class MyEntriesMassDeleteView(LoginRequiredMixin, View):
-    def get_target_entries(self, page):
-        """Paginate the total queryset based on the page."""
-        queryset = Entry.user_state.unread(self.request.user)
-        paginator = Paginator(queryset, MY_ENTRIES_PAGINATE_BY)
-        return paginator.page(page)
-
-    def get(self, *args, **kwargs):
-        """Loads the appropriate set of entries, creates deletion states for them."""
-        entries = self.get_target_entries(kwargs["page"])
-        delete_entries_for_user(entries, self.request.user)
-        # TODO maybe put in the numbers here?
-        messages.info(self.request, "Entries deleted")
-        return redirect(reverse("feeds:my_entries"))
 
 
 class PinnedEntriesListView(LoginRequiredMixin, ListView):

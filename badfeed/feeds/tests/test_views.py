@@ -1,17 +1,14 @@
 from django.conf import settings
 from django.contrib.auth import get_user
 from django.core.exceptions import ImproperlyConfigured
-from django.test import RequestFactory
 from django.urls import reverse
 import pytest
 
-from badfeed.feeds.models import Entry, EntryState
+from badfeed.feeds.models import EntryState
 from badfeed.feeds.views import (
     EntryPinToggleView,
     EntrySaveToggleView,
     FeedWatchToggleView,
-    MY_ENTRIES_PAGINATE_BY,
-    MyEntriesMassDeleteView,
 )
 
 
@@ -355,88 +352,6 @@ class TestFeedWatchToggleView:
         response = auth_client.get(url)
         assert response.status_code == 302
         assert response.url == reverse("feeds:my_entries")
-
-
-@pytest.mark.django_db
-class TestMyEntriesListView:
-    def setup(self):
-        self.url = reverse("feeds:my_entries")
-
-    def test_renders(self, auth_client):
-        """The view should render."""
-        response = auth_client.get(self.url)
-        assert response.status_code == 200
-
-    def test_requires_login(self, client):
-        """The view requires the user be logged in."""
-        response = client.get(self.url)
-        assert response.status_code == 302
-        assert response.url == f"{settings.LOGIN_URL}?next={self.url}"
-
-    def test_only_returns_watched_feed_entries(
-        self, auth_client, entry_factory, feed_factory, user
-    ):
-        """The view should only return entries for watched feeds."""
-        watched_feed = feed_factory()
-        user.watch(watched_feed)
-        unwatched_feed = feed_factory()
-        watched_entries = [entry_factory(feed=watched_feed) for _ in range(5)]
-        [entry_factory(feed=unwatched_feed) for _ in range(5)]
-        response = auth_client.get(self.url)
-        for entry in response.context["page_obj"].object_list:
-            assert entry in watched_entries
-
-
-@pytest.mark.django_db
-class TestMyEntriesMassDeleteView:
-    def _get_url(self, page):
-        return reverse("feeds:my_entries_mass_delete", kwargs={"page": page})
-
-    def test_requires_login(self, client):
-        """The view should require a login."""
-        url = self._get_url(1)
-        response = client.get(url)
-        assert response.status_code == 302
-        assert response.url == f"{settings.LOGIN_URL}?next={url}"
-
-    def test_targets_appropriate_page(self, entry_factory, feed, user):
-        """Should only get the appropriate page of results."""
-        view = MyEntriesMassDeleteView()
-        request = RequestFactory()
-        request.user = user
-        view.request = request
-
-        user.watch(feed)
-
-        entries = [entry_factory(feed=feed) for _ in range(20)][MY_ENTRIES_PAGINATE_BY:]
-        paginated_entries = view.get_target_entries(2)
-
-        assert entries == list(paginated_entries)
-
-    def test_deletes_appropriate_page_of_entries(
-        self, auth_client, entry_factory, feed, user
-    ):
-        """Should test the correct intersection of entries."""
-        user.watch(feed)
-        entries = [entry_factory(feed=feed) for _ in range(20)]
-        auth_client.get(self._get_url(1))
-        assert len(EntryState.objects.filter(entry__in=entries, user=user)) == 10
-
-    def test_redirects_back_to_my_entries(self, auth_client):
-        """Should redirect back to the entries list."""
-        response = auth_client.get(self._get_url(1))
-        assert response.status_code == 302
-        assert response.url == reverse("feeds:my_entries")
-
-    def test_invalid_page_shouldnt_delete_anything(
-        self, entry_factory, auth_client, feed, user
-    ):
-        """An invalid page should not delete any data."""
-        user.watch(feed)
-        [entry_factory(feed=feed) for _ in range(20)]
-        assert len(Entry.objects.all()) == 20
-        auth_client.get(self._get_url(1))
-        assert len(Entry.objects.all()) == 20
 
 
 @pytest.mark.django_db
