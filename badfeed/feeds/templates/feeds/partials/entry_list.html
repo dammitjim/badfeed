@@ -1,0 +1,10 @@
+<div class="entry_list">
+    <div class="entry_list__entries">
+        {% for entry in entries %}
+            {% include "feeds/partials/entry_row.html" with entry=entry feed=entry.feed %}
+        {% endfor %}
+    </div>
+    <div class="entry_list__navigate">
+        <span><a href="#">19 more...</a></span>
+    </div>
+</div>

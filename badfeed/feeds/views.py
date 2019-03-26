@@ -7,11 +7,15 @@ from django.http.response import HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 from pocket import Pocket
 
 from badfeed.feeds.models import Entry, Feed
-from badfeed.feeds.utils import delete_entries_for_user
+from badfeed.feeds.utils import (
+    delete_entries_for_user,
+    feeds_by_last_updated_entry,
+    get_actionable_entries,
+)
 from badfeed.users.models import ThirdPartyTokens
 
 
@@ -42,9 +46,7 @@ class FeedDetailView(LoginRequiredMixin, DetailView):
 class EntryOffloadView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         """Mark the entry as read, then offload to the corresponding link."""
-        entry = get_object_or_404(
-            Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"]
-        )
+        entry = get_object_or_404(Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"])
         entry.mark_read_by(self.request.user)
         return HttpResponseRedirect(entry.link)
 
@@ -139,6 +141,33 @@ class EntrySaveToggleView(ObjectActionToggleView):
         obj.mark_unsaved(self.request.user)
 
 
+class DashboardView(LoginRequiredMixin, TemplateView):
+    paginate_by = 3
+    template_name = "feeds/dashboard.html"
+
+    def get_blocks(self, page=1, num_entries=3):
+        """Load `num` blocks for the dashboard.
+
+        A block is a feed with it's corresponding, actionable entries.
+        """
+        page = page - 1  # 0 index it
+        feeds = feeds_by_last_updated_entry(self.request.user)
+        paginated_slice = feeds[page : page + self.paginate_by]
+
+        return [
+            {
+                "feed": feed,
+                "entries": get_actionable_entries(feed, self.request.user, num=num_entries),
+            }
+            for feed in paginated_slice
+        ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
+        return context
+
+
 MY_ENTRIES_PAGINATE_BY = 10
 
 
@@ -175,9 +204,7 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.pinned(self.request.user).order_by(
-            "-states__date_created"
-        )
+        return Entry.user_state.pinned(self.request.user).order_by("-states__date_created")
 
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
@@ -187,9 +214,7 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.saved(self.request.user).order_by(
-            "-states__date_created"
-        )
+        return Entry.user_state.saved(self.request.user).order_by("-states__date_created")
 
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
@@ -199,9 +224,7 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.deleted(self.request.user).order_by(
-            "-states__date_created"
-        )
+        return Entry.user_state.deleted(self.request.user).order_by("-states__date_created")
 
 
 class SaveEntryToPocketView(LoginRequiredMixin, View):
@@ -211,9 +234,7 @@ class SaveEntryToPocketView(LoginRequiredMixin, View):
             pocket = Pocket(settings.POCKET_CONSUMER_KEY, request.user.pocket_token)
         except ThirdPartyTokens.DoesNotExist:
             return redirect(reverse("users:pocket:oauth_entry"))
-        entry = get_object_or_404(
-            Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"]
-        )
+        entry = get_object_or_404(Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"])
         # TODO handle pocket errors for fault tolerance
         pocket.add(entry.link, wait=False)
         entry.mark_saved(request.user)

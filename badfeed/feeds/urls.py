@@ -6,7 +6,7 @@ from badfeed.feeds import views
 
 app_name = "feeds"
 urlpatterns = [
-    path("", views.MyEntriesListView.as_view(), name="my_entries"),
+    path("", views.DashboardView.as_view(), name="my_entries"),
     path(
         "bulk/delete/<int:page>/",
         views.MyEntriesMassDeleteView.as_view(),
@@ -18,9 +18,7 @@ urlpatterns = [
     path("archived/", views.ArchivedEntriesListView.as_view(), name="archived_entries"),
     path("f/<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
     path(
-        "f/<slug:slug>/watch/",
-        views.FeedWatchToggleView.as_view(should_toggle=True),
-        name="watch",
+        "f/<slug:slug>/watch/", views.FeedWatchToggleView.as_view(should_toggle=True), name="watch"
     ),
     path(
         "f/<slug:slug>/unwatch/",
