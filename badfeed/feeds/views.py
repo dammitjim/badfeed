@@ -46,7 +46,9 @@ class FeedDetailView(LoginRequiredMixin, DetailView):
 class EntryOffloadView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         """Mark the entry as read, then offload to the corresponding link."""
-        entry = get_object_or_404(Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"])
+        entry = get_object_or_404(
+            Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"]
+        )
         entry.mark_read_by(self.request.user)
         return HttpResponseRedirect(entry.link)
 
@@ -157,7 +159,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return [
             {
                 "feed": feed,
-                "entries": get_actionable_entries(feed, self.request.user, num=num_entries),
+                "entries": get_actionable_entries(
+                    feed, self.request.user, num=num_entries
+                ),
             }
             for feed in paginated_slice
         ]
@@ -204,7 +208,9 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.pinned(self.request.user).order_by("-states__date_created")
+        return Entry.user_state.pinned(self.request.user).order_by(
+            "-states__date_created"
+        )
 
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
@@ -214,7 +220,9 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.saved(self.request.user).order_by("-states__date_created")
+        return Entry.user_state.saved(self.request.user).order_by(
+            "-states__date_created"
+        )
 
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
@@ -224,7 +232,9 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
-        return Entry.user_state.deleted(self.request.user).order_by("-states__date_created")
+        return Entry.user_state.deleted(self.request.user).order_by(
+            "-states__date_created"
+        )
 
 
 class SaveEntryToPocketView(LoginRequiredMixin, View):
@@ -234,7 +244,9 @@ class SaveEntryToPocketView(LoginRequiredMixin, View):
             pocket = Pocket(settings.POCKET_CONSUMER_KEY, request.user.pocket_token)
         except ThirdPartyTokens.DoesNotExist:
             return redirect(reverse("users:pocket:oauth_entry"))
-        entry = get_object_or_404(Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"])
+        entry = get_object_or_404(
+            Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"]
+        )
         # TODO handle pocket errors for fault tolerance
         pocket.add(entry.link, wait=False)
         entry.mark_saved(request.user)
