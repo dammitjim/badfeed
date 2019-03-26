@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 {% block root %}
-    <div class="container">
+    <main
+    class="main_content"
+    id="main_content">
         {% block before_main %}
         {% endblock %}
-        <main>
-            {% block main %}
-            {% endblock %}
-        </main>
+        <article class="page_content">
+            <div class="page_content__inner">
+                {% block main %}
+                {% endblock %}
+            </div>
+        </article>
         {% block after_main %}
         {% endblock %}
-    </div>
+    </main>
 {% endblock %}
