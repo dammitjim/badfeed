@@ -8,6 +8,7 @@ from django.views import View
 from django.views.generic import DetailView, ListView, TemplateView
 from pocket import Pocket
 
+from badfeed.core.utils import get_spaffy_quote
 from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 from badfeed.users.models import ThirdPartyTokens
@@ -140,7 +141,7 @@ class EntrySaveToggleView(ObjectActionToggleView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Render dashboard view until a SPA solution is found."""
 
-    paginate_by = 3
+    paginate_by = 2
     template_name = "feeds/dashboard.html"
 
     def get_blocks(self, page=1, num_entries=3):
@@ -167,6 +168,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
         context["page_title"] = "Inbox"
+        context["page_subtitle"] = get_spaffy_quote()
         return context
 
 
