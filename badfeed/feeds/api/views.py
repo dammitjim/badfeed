@@ -1,4 +1,4 @@
-from django.db.models import Count, Max, Q
+from django.db.models import Count
 from rest_framework import generics
 from rest_framework.exceptions import ParseError
 from rest_framework.permissions import IsAuthenticated
@@ -11,7 +11,8 @@ from badfeed.feeds.api.serializers import (
     EntrySerializer,
     FeedEntrySerializer,
 )
-from badfeed.feeds.models import Entry, EntryState, Feed
+from badfeed.feeds.models import Entry, EntryState
+from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 
 
 class GenericFeedDashboardView(generics.ListAPIView):
@@ -21,44 +22,13 @@ class GenericFeedDashboardView(generics.ListAPIView):
     def get_queryset(self):
         """Load watched feeds, ordered by when their entries were last published.
 
-        The query we return must match the following conditions:
-
-        * The feed must have 1 or more entries
-        * The feed must have 1 or more unread entries for this user
-            where an unread entry is one without a state
-        * The entries must be ordered by date published
-        * Fully actioned feeds must not be returned.
+        See util function for logic.
         """
-        qs = (
-            Feed.objects.watched_by(self.request.user)
-            .filter(entries__gt=0)
-            .annotate(
-                actioned_entries=Count(
-                    "entries__states", filter=Q(entries__states__user=self.request.user)
-                )
-            )
-            .annotate(last_published=Max("entries__date_published"))
-            .order_by("-last_published")
-        )
-
-        # TODO figure out how to make this a part of the above query
-        # for now, we are cheeky and exclude any feeds whereby the
-        # amount of actioned entries is equal to the amount of entries
-        # (meaning there are no more entries to action)
-        for feed in qs:
-            if feed.actioned_entries >= feed.entries.count():
-                qs = qs.exclude(pk=feed.pk)
-
-        return qs
+        return feeds_by_last_updated_entry(self.request.user)
 
     def get_serializer_instance(self, feed):
         """Load the 5 latest unread entries for the given feed into a serializer instance."""
-        unread_entries = (
-            feed.entries(manager="user_state")
-            .unread(self.request.user)
-            .order_by("-date_published")
-        )
-        unread_entries = unread_entries[:5]
+        unread_entries = get_actionable_entries(feed, self.request.user, num=5)
         return FeedEntrySerializer(
             instance={"feed": feed, "entries": unread_entries},
             context=self.get_serializer_context(),

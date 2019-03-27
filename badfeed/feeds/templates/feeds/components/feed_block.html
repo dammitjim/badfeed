@@ -1,0 +1,23 @@
+<div class="feed_block">
+    <div class="feed_block__menu">
+        <div class="feed_block__menu__item">
+        </div>
+        <div class="feed_block__menu__item">
+            W
+        </div>
+        <div class="feed_block__menu__item">
+            <i class="fas fa-low-vision"></i>
+        </div>
+    </div>
+    <div class="feed_block__entries">
+        <div class="feed_block__top">
+            <div class="feed_block__heading">
+                <h3>{{ feed.title }}</h3>
+            </div>
+            <div class="feed_block__smart_action">
+                <i class="fas fa-backspace"></i>
+            </div>
+        </div>
+        {% include "feeds/components/entry_list.html" with entries=entries %}
+    </div>
+</div>

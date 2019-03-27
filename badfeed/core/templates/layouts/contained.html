@@ -1,13 +1,25 @@
 {% extends "base.html" %}
 {% block root %}
-    <div class="container">
+    <main
+    class="main_content"
+    id="main_content">
         {% block before_main %}
         {% endblock %}
-        <main>
-            {% block main %}
-            {% endblock %}
-        </main>
+        <nav class="global_nav">
+            <div class="global_nav__inner">
+                {% include "components/nav_list.html" %}
+            </div>
+        </nav>
+        <article class="page_content">
+            <div class="page_content__inner">
+                {% block local_header %}
+                    {% include "components/local_header.html" with primary_title=page_title secondary_title=page_subtitle %}
+                {% endblock %}
+                {% block main %}
+                {% endblock %}
+            </div>
+        </article>
         {% block after_main %}
         {% endblock %}
-    </div>
+    </main>
 {% endblock %}

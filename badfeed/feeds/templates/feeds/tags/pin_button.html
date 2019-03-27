@@ -1,5 +1,13 @@
 {% if is_pinned %}
-    <a href="{% url 'feeds:entry_unpin' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Unpin</a>
+    <a
+    href="{% url 'feeds:entry_unpin' feed_slug=entry.feed.slug entry_slug=entry.slug %}"
+    >
+        <i class="fas fa-thumbtack pin_button--off"></i>
+    </a>
 {% else %}
-    <a href="{% url 'feeds:entry_pin' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Pin</a>
+    <a
+    href="{% url 'feeds:entry_pin' feed_slug=entry.feed.slug entry_slug=entry.slug %}"
+    >
+        <i class="fas fa-thumbtack pin_button--on"></i>
+    </a>
 {% endif %}

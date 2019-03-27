@@ -1,0 +1,27 @@
+.nav_element
+    display flex
+    flex-direction row
+    padding 10px
+    align-items center
+    width 100%
+    border-bottom 1px solid #c2c2c2
+    font-weight 400
+    height 50px
+
+    &:last-child
+    &:only-child
+        border-bottom none
+
+    &:hover
+        background-color #E5E5E5
+
+    &__icon
+        width 50px
+        text-align center
+
+    &__text
+        padding 0 10px
+
+    &--active
+        & ^[0]__text
+            font-weight 600

@@ -1,0 +1,29 @@
+// mixin for styling input placeholders
+placeholder()
+    &::-webkit-input-placeholder
+        {block}
+    &:-moz-placeholder
+        {block}
+    &::-moz-placeholder
+        {block}
+    &:-ms-input-placeholder
+        {block}
+
+// mixin for simple link underline which appears on hover/focus
+simple-link($background, $color)
+    z-index auto
+    overflow hidden
+    position relative
+    text-shadow .03em 0 $background, -.03em 0 $background, 0 .03em $background, 0 -.03em $background, .06em 0 $background, -.06em 0 $background, .09em 0 $background, -.09em 0 $background, .12em 0 $background, -.12em 0 $background, .15em 0 $background, -.15em 0 $background
+    background-image linear-gradient($background, $background), linear-gradient($background, $background), linear-gradient($color, $color)
+    background-position 0% 110%, 100% 110%, 0% 110%
+    background-repeat no-repeat, no-repeat, repeat-x
+    background-size .05em 1px, .05em 1px, 1px 1px
+    color $color
+
+    &:active
+    &:focus
+    &:hover
+        background-image linear-gradient($background, $background), linear-gradient($background, $background), linear-gradient($color, $color)
+        background-position 0% 80%, 100% 80%, 0% 80%
+        color @color

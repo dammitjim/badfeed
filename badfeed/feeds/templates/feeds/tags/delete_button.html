@@ -1,5 +1,13 @@
 {% if is_deleted %}
-    <a href="{% url 'feeds:entry_undelete' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Unarchive</a>
+    <a
+    href="{% url 'feeds:entry_undelete' feed_slug=entry.feed.slug entry_slug=entry.slug %}"
+    >
+        <i class="fas fa-backspace delete_button--off"></i>
+    </a>
 {% else %}
-    <a href="{% url 'feeds:entry_delete' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Archive</a>
+    <a
+    href="{% url 'feeds:entry_delete' feed_slug=entry.feed.slug entry_slug=entry.slug %}"
+    >
+        <i class="fas fa-backspace delete_button--on"></i>
+    </a>
 {% endif %}

@@ -1,0 +1,192 @@
+html
+    text-rendering optimizeLegibility
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
+
+:root
+    // see functions/interpolation.styl for an explanation of this function
+    interpolation('font-size', calc-interpolation, 480px, 1680px, 13px, 19px)
+
+    // set CSS variables for fluid typographic scale
+    // ratios used are in variables.styl
+    // %s is the syntax for printing the values of Stylus variables inside calc:
+    // http://stylus-lang.com/docs/operators.html#sprintf
+    --ratio $ratio--sml
+    +above(3)
+        --ratio $ratio--med
+    +above(6)
+        --ratio $ratio--lrg
+
+    --fz--h1 'calc(%s * var(--ratio) * var(--ratio) * var(--ratio) * var(--ratio))' % ($fz--base)
+    --fz--h2 'calc(%s * var(--ratio) * var(--ratio) * var(--ratio))' % ($fz--base)
+    --fz--h3 'calc(%s * var(--ratio) * var(--ratio))' % ($fz--base)
+    --fz--h4 'calc(%s * var(--ratio))' % ($fz--base)
+    --fz--sub 'calc(%s / var(--ratio))' % ($fz--base)
+    --fz--supersub 'calc((%s / var(--ratio)) / var(--ratio))' % ($fz--base)
+
+    // spacing variables
+    --sp--h1 'calc(var(--fz--h1) * %s)' % ($lh--heading)
+    --sp--h2 'calc(var(--fz--h2) * %s)' % ($lh--heading)
+    --sp--h3 'calc(var(--fz--h3) * %s)' % ($lh--heading)
+    --sp--h4 'calc(var(--fz--h4) * %s)' % ($lh--heading)
+
+body
+select
+input
+textarea
+    font-family $ff--body
+    font-weight $fw--normal
+    line-height $lh--body
+    font-size inherit
+    color $cl--light
+
+h1
+h2
+h3
+h4
+    display block
+    line-height $lh--heading
+    font-family $ff--heading
+    font-weight normal
+    letter-spacing $ls
+    color $cl--med
+
+    a
+    a:visited
+        color $cl--anchor
+
+        &:active
+        &:hover
+        &:focus
+            color $cl--anchor--hover
+
+h1
+    max-width ($ll * .5)ch
+    h1()
+
+h2
+    max-width ($ll * .5)ch
+    h2()
+
+    * + &
+        margin-top ($fz--base * $ratio--sml ** 3 * $lh--heading)
+        margin-top var(--sp--h2)
+        +above(3)
+            margin-top ($fz--base * $ratio--med ** 3 * $lh--heading)
+            margin-top var(--sp--h2)
+        +above(6)
+            margin-top ($fz--base * $ratio--lrg ** 3 * $lh--heading)
+            margin-top var(--sp--h2)
+
+h3
+    max-width ($ll * .7)ch
+    font-size var(--fz--h3)
+
+    * + &
+        margin-top ($fz--base * $ratio--sml ** 2 * $lh--heading)
+        margin-top var(--sp--h3)
+        +above(3)
+            margin-top ($fz--base * $ratio--med ** 2 * $lh--heading)
+            margin-top var(--sp--h3)
+        +above(6)
+            margin-top ($fz--base * $ratio--lrg ** 2 * $lh--heading)
+            margin-top var(--sp--h3)
+
+h4
+    max-width ($ll - 10)ch
+    font-size var(--fz--h4)
+
+    * + &
+        margin-top ($fz--base * $ratio--sml * $lh--heading)
+        margin-top var(--sp--h4)
+        +above(3)
+            margin-top ($fz--base * $ratio--med * $lh--heading)
+            margin-top var(--sp--h4)
+        +above(6)
+            margin-top ($fz--base * $ratio--lrg * $lh--heading)
+            margin-top var(--sp--h4)
+
+// I consider a span a UI element
+span
+    width auto
+    max-width 100%
+    font-family $ff--ui
+    font-size var(--fz--sub)
+    color $cl--med
+
+p
+    width auto
+    mt()
+    max-width 100%
+    font-family $ff--body
+    font-size $fz--base
+    line-height $lh--body
+    letter-spacing $ls
+    color $cl--med
+
+    h1 + &
+    h2 + &
+    h3 + &
+        margin-top $sp--third
+
+    h4 + &
+        margin-top $sp--half
+
+    // add this class to paragraph content to constrain it to a readable line-length
+    // avoid setting paragraph line-lengths globally so they don't need to be overridden
+    .reading_content &
+    &.reading_content
+        width ($ll)ch
+
+        > a
+        > a:visited
+            color $cl--anchor
+
+            &:active
+            &:hover
+            &:focus
+                color $cl--anchor--hover
+
+a
+a:visited
+    trans()
+    cursor pointer
+    text-decoration none
+
+b
+strong
+    font-weight normal
+    font-family $ff--strong
+
+i
+em
+    font-style normal
+    font-family $ff--emphasis
+
+::selection
+    background-color $cl--first
+    text-shadow 0 0 .1em $cl--first--dark
+    color white
+
+.reading_content__list
+    display block
+    width ($ll)ch
+    max-width 100%
+    mt()
+    padding-left 3ch
+
+    ol^[0]
+        list-style-type decimal
+
+    ul^[0]
+        list-style-type disc
+
+    li
+        max-width 100%
+
+        + li
+            margin-top $sp--half
+
+sup
+    vertical-align super
+    sub()

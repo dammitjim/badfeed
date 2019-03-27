@@ -102,6 +102,8 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = env.str("DJANGO_STATIC_ROOT", default="")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "..", "frontend", "dist", "assets")]
+
 MEDIA_ROOT = env.str("DJANGO_MEDIA_ROOT", default="")
 
 RQ_ENABLED = env.bool("RQ_ENABLED", default=True)

@@ -1,17 +1,16 @@
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
-from django.core.paginator import Paginator
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 from pocket import Pocket
 
+from badfeed.core.utils import get_spaffy_quote
 from badfeed.feeds.models import Entry, Feed
-from badfeed.feeds.utils import delete_entries_for_user
+from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 from badfeed.users.models import ThirdPartyTokens
 
 
@@ -139,43 +138,43 @@ class EntrySaveToggleView(ObjectActionToggleView):
         obj.mark_unsaved(self.request.user)
 
 
-MY_ENTRIES_PAGINATE_BY = 10
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """Render dashboard view until a SPA solution is found."""
 
+    paginate_by = 2
+    template_name = "feeds/dashboard.html"
 
-class MyEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = MY_ENTRIES_PAGINATE_BY
-    template_name = "feeds/my_entries.html"
-    model = Entry
+    def get_blocks(self, page=1, num_entries=3):
+        """Load `num` blocks for the dashboard.
 
-    def get_queryset(self):
-        """Load all entries for the the feeds watched by the user."""
-        return Entry.user_state.unread(self.request.user)
+        A block is a feed with it's corresponding, actionable entries.
+        """
+        page = page - 1  # 0 index it
+        feeds = feeds_by_last_updated_entry(self.request.user)
+        paginated_slice = feeds[page : page + self.paginate_by]
+
+        return [
+            {
+                "feed": feed,
+                "entries": get_actionable_entries(
+                    feed, self.request.user, num=num_entries
+                ),
+            }
+            for feed in paginated_slice
+        ]
 
     def get_context_data(self, **kwargs):
-        """Load the template in single page application mode."""
-        ctx = super().get_context_data(**kwargs)
-        return {"spa": True, **ctx}
-
-
-class MyEntriesMassDeleteView(LoginRequiredMixin, View):
-    def get_target_entries(self, page):
-        """Paginate the total queryset based on the page."""
-        queryset = Entry.user_state.unread(self.request.user)
-        paginator = Paginator(queryset, MY_ENTRIES_PAGINATE_BY)
-        return paginator.page(page)
-
-    def get(self, *args, **kwargs):
-        """Loads the appropriate set of entries, creates deletion states for them."""
-        entries = self.get_target_entries(kwargs["page"])
-        delete_entries_for_user(entries, self.request.user)
-        # TODO maybe put in the numbers here?
-        messages.info(self.request, "Entries deleted")
-        return redirect(reverse("feeds:my_entries"))
+        """Load paginated blocks based on GET parameter for page."""
+        context = super().get_context_data(**kwargs)
+        context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
+        context["page_title"] = "Inbox"
+        context["page_subtitle"] = get_spaffy_quote()
+        return context
 
 
 class PinnedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/my_entries.html"
+    template_name = "feeds/deprecated/my_entries.html"
     model = Entry
 
     def get_queryset(self):
@@ -187,7 +186,7 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/my_entries.html"
+    template_name = "feeds/deprecated/my_entries.html"
     model = Entry
 
     def get_queryset(self):
@@ -199,7 +198,7 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/my_entries.html"
+    template_name = "feeds/deprecated/my_entries.html"
     model = Entry
 
     def get_queryset(self):

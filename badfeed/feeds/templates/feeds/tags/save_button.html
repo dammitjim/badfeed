@@ -1,5 +1,13 @@
 {% if is_saved %}
-    <a href="{% url 'feeds:entry_unsave' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Unsave</a>
+    <a
+    href="{% url 'feeds:entry_unsave' feed_slug=entry.feed.slug entry_slug=entry.slug %}"
+    >
+        <i class="fas fa-save save_button--off"></i>
+    </a>
 {% else %}
-    <a href="{% url 'feeds:entry_save' feed_slug=entry.feed.slug entry_slug=entry.slug %}" class="card-link">Save</a>
+    <a
+    href="{% url 'feeds:entry_save' feed_slug=entry.feed.slug entry_slug=entry.slug %}"
+    >
+        <i class="fas fa-save save_button--on"></i>
+    </a>
 {% endif %}
