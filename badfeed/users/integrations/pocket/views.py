@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -8,7 +9,7 @@ from django.views import View
 from pocket import Pocket
 
 
-class ConsumerKeyMixin:
+class PocketConsumerKeyMixin:
     STATE_COOKIE_KEY = "badfeed_pocket_state"
     CODE_COOKIE_KEY = "badfeed_pocket_code"
 
@@ -16,9 +17,11 @@ class ConsumerKeyMixin:
         """Load the consumer key into the instance variables of the mixin."""
         super().__init__(*args, **kwargs)
         self.consumer_key = settings.POCKET_CONSUMER_KEY
+        if not self.consumer_key:
+            raise ImproperlyConfigured("POCKET_CONSUMER_KEY not set.")
 
 
-class OAuthEntry(LoginRequiredMixin, ConsumerKeyMixin, View):
+class OAuthEntry(LoginRequiredMixin, PocketConsumerKeyMixin, View):
     http_method_names = ["get"]
 
     def __init__(self, *args, **kwargs):
@@ -51,7 +54,7 @@ class OAuthEntry(LoginRequiredMixin, ConsumerKeyMixin, View):
         return response
 
 
-class OAuthCallback(LoginRequiredMixin, ConsumerKeyMixin, View):
+class OAuthCallback(LoginRequiredMixin, PocketConsumerKeyMixin, View):
     http_method_names = ["get"]
     success_url = "/"
 

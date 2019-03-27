@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ImproperlyConfigured
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
@@ -12,6 +11,7 @@ from badfeed.core.utils import get_spaffy_quote
 from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 from badfeed.users.models import ThirdPartyTokens
+from badfeed.users.integrations.pocket.views import PocketConsumerKeyMixin
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
@@ -208,13 +208,14 @@ class ArchivedEntriesListView(LoginRequiredMixin, ListView):
         )
 
 
-class SaveEntryToPocketView(LoginRequiredMixin, View):
+class SaveEntryToPocketView(LoginRequiredMixin, PocketConsumerKeyMixin, View):
     def get(self, request, *args, **kwargs):
         """Save the given entry to the request user's pocket account."""
         try:
-            pocket = Pocket(settings.POCKET_CONSUMER_KEY, request.user.pocket_token)
+            pocket = Pocket(self.consumer_key, request.user.pocket_token)
         except ThirdPartyTokens.DoesNotExist:
             return redirect(reverse("users:pocket:oauth_entry"))
+
         entry = get_object_or_404(
             Entry, slug=kwargs["entry_slug"], feed__slug=kwargs["feed_slug"]
         )
