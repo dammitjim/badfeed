@@ -5,9 +5,9 @@ from django.urls import reverse
 import pytest
 
 from badfeed.users.integrations.pocket.views import (
-    PocketConsumerKeyMixin,
     OAuthCallback,
     OAuthEntry,
+    PocketConsumerKeyMixin,
 )
 from badfeed.users.models import ThirdPartyTokens
 

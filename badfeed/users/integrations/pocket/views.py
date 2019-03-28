@@ -1,8 +1,8 @@
 from uuid import uuid4
 
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.views import View

@@ -10,8 +10,8 @@ from pocket import Pocket
 from badfeed.core.utils import get_spaffy_quote
 from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
-from badfeed.users.models import ThirdPartyTokens
 from badfeed.users.integrations.pocket.views import PocketConsumerKeyMixin
+from badfeed.users.models import ThirdPartyTokens
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
