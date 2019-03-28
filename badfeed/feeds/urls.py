@@ -11,7 +11,9 @@ urlpatterns = [
     path("pinned/", views.PinnedEntriesListView.as_view(), name="pinned_entries"),
     path("saved/", views.SavedEntriesListView.as_view(), name="saved_entries"),
     path("archived/", views.ArchivedEntriesListView.as_view(), name="archived_entries"),
-    path("delete-multi/", views.MultiDeleteView.as_view(), name="entry_multi_delete"),
+    path(
+        "delete-multi/", views.MultiEntryDeleteView.as_view(), name="entry_multi_delete"
+    ),
     path("f/<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
     path("f/<slug:slug>/actions/", views.FeedActionsView.as_view(), name="actions"),
     path(
@@ -58,6 +60,11 @@ urlpatterns = [
         "f/<slug:feed_slug>/<slug:entry_slug>/undelete/",
         views.EntryDeleteToggleView.as_view(should_toggle=False),
         name="entry_undelete",
+    ),
+    path(
+        "f/<slug:feed_slug>/<slug:entry_slug>/actions/",
+        views.EntryActionsView.as_view(),
+        name="entry_actions",
     ),
     path(
         "f/<slug:feed_slug>/<slug:entry_slug>/pocket/",

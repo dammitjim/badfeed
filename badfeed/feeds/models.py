@@ -143,6 +143,14 @@ class Entry(SlugifiedMixin, models.Model):
             return False
         return not Entry.objects.filter(slug=text).exists()
 
+    def archive_older_than_this(self, user):
+        """Mark all entries older than this entry, for this feed, as archived."""
+        older_entries = Entry.objects.filter(
+            date_created__lt=self.date_created, feed=self.feed
+        )
+        for entry in older_entries:
+            entry.mark_deleted(user)
+
     def mark_read_by(self, user):
         """Create an entrystate object marking this entry as having been read."""
         return EntryState.objects.get_or_create(

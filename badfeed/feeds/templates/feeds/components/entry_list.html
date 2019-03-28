@@ -5,5 +5,8 @@
         {% endfor %}
     </div>
     <div class="entry_list__navigate">
+        {% if total_entries %}
+            <span>{{ total_entries }} remaining...</span>
+        {% endif %}
     </div>
 </div>

@@ -52,9 +52,6 @@ def feeds_by_last_updated_entry(user):
     return qs
 
 
-def get_actionable_entries(feed, user, num=5):
+def get_actionable_entries(feed, user):
     """Load the 5 latest unread / unactioned entries for the feed."""
-    unread_entries = (
-        feed.entries(manager="user_state").unread(user).order_by("-date_published")
-    )
-    return unread_entries[:num]
+    return feed.entries(manager="user_state").unread(user).order_by("-date_published")

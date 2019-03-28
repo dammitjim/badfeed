@@ -10,30 +10,87 @@ from django.views.generic import DetailView, FormView, ListView, TemplateView
 from pocket import Pocket
 
 from badfeed.core.utils import get_spaffy_quote
-from badfeed.feeds.forms import FeedActionsForm
+from badfeed.feeds.forms import FeedActionsForm, EntryActionsForm
 from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 from badfeed.users.integrations.pocket.views import PocketConsumerKeyMixin
 from badfeed.users.models import ThirdPartyTokens
 
 
-class FeedActionsView(LoginRequiredMixin, FormView):
-    form_class = FeedActionsForm
-    template_name = "feeds/actions.html"
-    success_url = "/"
-    object = None
+class DashboardView(LoginRequiredMixin, TemplateView):
+    """Render dashboard view until a SPA solution is found."""
 
-    def dispatch(self, request, *args, **kwargs):
-        """We need to ensure that we are performing actions on a feed that exists."""
-        self.object = get_object_or_404(Feed, slug=kwargs["slug"])
-        return super().dispatch(request, *args, **kwargs)
+    paginate_by = 2
+    template_name = "feeds/dashboard.html"
+    extra_context = {"page_title": "Inbox"}
 
-    def form_valid(self, form):
-        """Perform the appropriate bulk action against the feed."""
-        action = form.cleaned_data["action"]
-        if action == FeedActionsForm.ACTIONS_ARCHIVE:
-            self.object.mark_entries_archived(self.request.user)
-        return super().form_valid(form)
+    def get_blocks(self, page=1, entries_per_block=3):
+        """Load `num` blocks for the dashboard.
+
+        A block is a feed with it's corresponding, actionable entries.
+        """
+        page = page - 1  # 0 index it
+        feeds = feeds_by_last_updated_entry(self.request.user)
+        paginated_slice = feeds[page : page + self.paginate_by]
+
+        blocks = []
+        for feed in paginated_slice:
+            actionable_entries = get_actionable_entries(feed, self.request.user)
+            blocks.append(
+                {
+                    "feed": feed,
+                    "entries": actionable_entries[:entries_per_block],
+                    "total_entries": len(actionable_entries),
+                }
+            )
+
+        return blocks
+
+    def get_context_data(self, **kwargs):
+        """Load paginated blocks based on GET parameter for page."""
+        context = super().get_context_data(**kwargs)
+        context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
+        context["page_subtitle"] = get_spaffy_quote()
+        return context
+
+
+class PinnedEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "feeds/list.html"
+    model = Entry
+    extra_context = {"page_title": "Pinned"}
+
+    def get_queryset(self):
+        """Load all pinned entries for the user."""
+        return Entry.user_state.pinned(self.request.user).order_by(
+            "-states__date_created"
+        )
+
+
+class SavedEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "feeds/list.html"
+    model = Entry
+    extra_context = {"page_title": "Saved"}
+
+    def get_queryset(self):
+        """Load all pinned entries for the user."""
+        return Entry.user_state.saved(self.request.user).order_by(
+            "-states__date_created"
+        )
+
+
+class ArchivedEntriesListView(LoginRequiredMixin, ListView):
+    paginate_by = 10
+    template_name = "feeds/list.html"
+    model = Entry
+    extra_context = {"page_title": "Archived"}
+
+    def get_queryset(self):
+        """Load all pinned entries for the user."""
+        return Entry.user_state.deleted(self.request.user).order_by(
+            "-states__date_created"
+        )
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
@@ -55,11 +112,6 @@ class FeedSearch(LoginRequiredMixin, ListView):
         return {"search_term": self.request.GET["term"], **ctx}
 
 
-class FeedDetailView(LoginRequiredMixin, DetailView):
-    model = Feed
-    template_name = "feeds/detail.html"
-
-
 class EntryOffloadView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         """Mark the entry as read, then offload to the corresponding link."""
@@ -70,7 +122,7 @@ class EntryOffloadView(LoginRequiredMixin, View):
         return HttpResponseRedirect(entry.link)
 
 
-class MultiDeleteView(LoginRequiredMixin, View):
+class MultiEntryDeleteView(LoginRequiredMixin, View):
     """To be killed once past proof of concept stage... or maybe not."""
 
     @csrf_exempt
@@ -176,77 +228,49 @@ class EntrySaveToggleView(ObjectActionToggleView):
         obj.mark_unsaved(self.request.user)
 
 
-class DashboardView(LoginRequiredMixin, TemplateView):
-    """Render dashboard view until a SPA solution is found."""
+class FeedActionsView(LoginRequiredMixin, FormView):
+    form_class = FeedActionsForm
+    template_name = "feeds/actions.html"
+    success_url = "/"
+    object = None
 
-    paginate_by = 2
-    template_name = "feeds/dashboard.html"
-    extra_context = {"page_title": "Inbox"}
+    def dispatch(self, request, *args, **kwargs):
+        """We need to ensure that we are performing actions on a feed that exists."""
+        self.object = get_object_or_404(Feed, slug=kwargs["slug"])
+        return super().dispatch(request, *args, **kwargs)
 
-    def get_blocks(self, page=1, num_entries=3):
-        """Load `num` blocks for the dashboard.
-
-        A block is a feed with it's corresponding, actionable entries.
-        """
-        page = page - 1  # 0 index it
-        feeds = feeds_by_last_updated_entry(self.request.user)
-        paginated_slice = feeds[page : page + self.paginate_by]
-
-        return [
-            {
-                "feed": feed,
-                "entries": get_actionable_entries(
-                    feed, self.request.user, num=num_entries
-                ),
-            }
-            for feed in paginated_slice
-        ]
-
-    def get_context_data(self, **kwargs):
-        """Load paginated blocks based on GET parameter for page."""
-        context = super().get_context_data(**kwargs)
-        context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
-        context["page_subtitle"] = get_spaffy_quote()
-        return context
+    def form_valid(self, form):
+        """Perform the appropriate bulk action against the feed."""
+        action = form.cleaned_data["action"]
+        if action == FeedActionsForm.ACTIONS_ARCHIVE:
+            self.object.mark_entries_archived(self.request.user)
+        return super().form_valid(form)
 
 
-class PinnedEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = 10
-    template_name = "feeds/list.html"
-    model = Entry
-    extra_context = {"page_title": "Pinned"}
+class EntryActionsView(LoginRequiredMixin, FormView):
+    form_class = EntryActionsForm
+    template_name = "feeds/actions.html"
+    success_url = "/"
+    object = None
 
-    def get_queryset(self):
-        """Load all pinned entries for the user."""
-        return Entry.user_state.pinned(self.request.user).order_by(
-            "-states__date_created"
+    def dispatch(self, request, *args, **kwargs):
+        """We need to ensure that we are performing actions on a feed that exists."""
+        self.object = get_object_or_404(
+            Entry, feed__slug=kwargs["feed_slug"], slug=kwargs["entry_slug"]
         )
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Perform the appropriate bulk action against the feed."""
+        action = form.cleaned_data["action"]
+        if action == EntryActionsForm.ACTIONS_ARCHIVE:
+            self.object.archive_older_than_this(self.request.user)
+        return super().form_valid(form)
 
 
-class SavedEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = 10
-    template_name = "feeds/list.html"
-    model = Entry
-    extra_context = {"page_title": "Saved"}
-
-    def get_queryset(self):
-        """Load all pinned entries for the user."""
-        return Entry.user_state.saved(self.request.user).order_by(
-            "-states__date_created"
-        )
-
-
-class ArchivedEntriesListView(LoginRequiredMixin, ListView):
-    paginate_by = 10
-    template_name = "feeds/list.html"
-    model = Entry
-    extra_context = {"page_title": "Archived"}
-
-    def get_queryset(self):
-        """Load all pinned entries for the user."""
-        return Entry.user_state.deleted(self.request.user).order_by(
-            "-states__date_created"
-        )
+class FeedDetailView(LoginRequiredMixin, DetailView):
+    model = Feed
+    template_name = "feeds/detail.html"
 
 
 class SaveEntryToPocketView(LoginRequiredMixin, PocketConsumerKeyMixin, View):
