@@ -3,7 +3,9 @@
         <div class="feed_block__menu__item">
         </div>
         <div class="feed_block__menu__item">
-            <i class="fas fa-bars"></i>
+            <a href="{% url "feeds:actions" slug=feed.slug %}">
+                <i class="fas fa-bars"></i>
+            </a>
         </div>
         <div class="feed_block__menu__item">
             <i class="fas fa-low-vision"></i>

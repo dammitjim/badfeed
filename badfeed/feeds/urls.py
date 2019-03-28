@@ -13,6 +13,7 @@ urlpatterns = [
     path("archived/", views.ArchivedEntriesListView.as_view(), name="archived_entries"),
     path("delete-multi/", views.MultiDeleteView.as_view(), name="entry_multi_delete"),
     path("f/<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
+    path("f/<slug:slug>/actions/", views.FeedActionsView.as_view(), name="actions"),
     path(
         "f/<slug:slug>/watch/",
         views.FeedWatchToggleView.as_view(should_toggle=True),
