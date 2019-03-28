@@ -1,9 +1,11 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, SuspiciousOperation
 from django.http.response import HttpResponseNotFound, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView, TemplateView
 from pocket import Pocket
 
@@ -46,6 +48,22 @@ class EntryOffloadView(LoginRequiredMixin, View):
         )
         entry.mark_read_by(self.request.user)
         return HttpResponseRedirect(entry.link)
+
+
+class MultiDeleteView(LoginRequiredMixin, View):
+    """To be killed once past proof of concept stage... or maybe not."""
+
+    @csrf_exempt
+    def post(self, request, *args, **kwargs):
+        """Delete the entries for the logged in user."""
+        ids = request.POST.getlist("to_delete")
+        if len(ids) == 0:
+            raise SuspiciousOperation()
+        entries = Entry.objects.filter(pk__in=ids)
+        for entry in entries:
+            entry.mark_deleted(self.request.user)
+        messages.success(request, f"Deleted {entries.count()} entries.")
+        return redirect(self.request.META.get("HTTP_REFERER", "/"))
 
 
 class ObjectActionToggleView(LoginRequiredMixin, View):

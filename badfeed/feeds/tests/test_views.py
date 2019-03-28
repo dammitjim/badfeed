@@ -456,6 +456,53 @@ class TestArchivedEntriesListView:
 
 
 @pytest.mark.django_db
+class TestMultiDeleteView:
+    def setup(self):
+        self.url = reverse("feeds:entry_multi_delete")
+
+    def test_requires_login(self, client):
+        """Should require a logged in user to access."""
+        response = client.post(self.url)
+        assert response.status_code == 302
+        assert response.url == f"{settings.LOGIN_URL}?next={self.url}"
+
+    def test_redirects_to_root_url_by_default(self, auth_client, entry_factory):
+        """Should redirect to root url by default."""
+        entry_1 = entry_factory()
+        response = auth_client.post(self.url, {"to_delete": [entry_1.pk]})
+        assert response.status_code == 302
+        assert response.url == "/"
+
+    def test_deletes_specified_entries(self, auth_client, entry_factory):
+        """Should delete all IDs passed in via GET params"""
+        entry_1 = entry_factory()
+        entry_2 = entry_factory()
+
+        assert (
+            len(
+                EntryState.objects.filter(
+                    entry__in=[entry_1, entry_2], state=EntryState.STATE_DELETED
+                )
+            )
+            == 0
+        )
+        auth_client.post(self.url, {"to_delete": [entry_1.pk, entry_2.pk]})
+        assert (
+            len(
+                EntryState.objects.filter(
+                    entry__in=[entry_1, entry_2], state=EntryState.STATE_DELETED
+                )
+            )
+            == 2
+        )
+
+    def test_bad_request_if_no_entry_ids_present(self, auth_client):
+        """Should raise a bad request if no entry IDs are present in the POST data."""
+        response = auth_client.post(self.url, {"to_delete": []})
+        assert response.status_code == 400
+
+
+@pytest.mark.django_db
 class TestSaveEntryToPocketView:
     @staticmethod
     def _get_url(entry):
