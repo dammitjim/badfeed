@@ -143,6 +143,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     paginate_by = 2
     template_name = "feeds/dashboard.html"
+    extra_context = {"page_title": "Inbox"}
 
     def get_blocks(self, page=1, num_entries=3):
         """Load `num` blocks for the dashboard.
@@ -167,7 +168,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         """Load paginated blocks based on GET parameter for page."""
         context = super().get_context_data(**kwargs)
         context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
-        context["page_title"] = "Inbox"
         context["page_subtitle"] = get_spaffy_quote()
         return context
 
