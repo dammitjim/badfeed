@@ -6,14 +6,34 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic import DetailView, ListView, TemplateView
+from django.views.generic import DetailView, FormView, ListView, TemplateView
 from pocket import Pocket
 
 from badfeed.core.utils import get_spaffy_quote
+from badfeed.feeds.forms import FeedActionsForm
 from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 from badfeed.users.integrations.pocket.views import PocketConsumerKeyMixin
 from badfeed.users.models import ThirdPartyTokens
+
+
+class FeedActionsView(LoginRequiredMixin, FormView):
+    form_class = FeedActionsForm
+    template_name = "feeds/actions.html"
+    success_url = "/"
+    object = None
+
+    def dispatch(self, request, *args, **kwargs):
+        """We need to ensure that we are performing actions on a feed that exists."""
+        self.object = get_object_or_404(Feed, slug=kwargs["slug"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        """Perform the appropriate bulk action against the feed."""
+        action = form.cleaned_data["action"]
+        if action == FeedActionsForm.ACTIONS_ARCHIVE:
+            self.object.mark_entries_archived(self.request.user)
+        return super().form_valid(form)
 
 
 class FeedSearch(LoginRequiredMixin, ListView):
