@@ -11,6 +11,7 @@ urlpatterns = [
     path("pinned/", views.PinnedEntriesListView.as_view(), name="pinned_entries"),
     path("saved/", views.SavedEntriesListView.as_view(), name="saved_entries"),
     path("archived/", views.ArchivedEntriesListView.as_view(), name="archived_entries"),
+    path("delete-multi/", views.MultiDeleteView.as_view(), name="entry_multi_delete"),
     path("f/<slug:slug>/", views.FeedDetailView.as_view(), name="detail"),
     path(
         "f/<slug:slug>/watch/",
