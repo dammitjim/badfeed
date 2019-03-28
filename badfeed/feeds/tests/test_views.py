@@ -1,8 +1,8 @@
-import pytest
 from django.conf import settings
 from django.contrib.auth import get_user
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse
+import pytest
 
 from badfeed.feeds.models import EntryState
 from badfeed.feeds.views import (
