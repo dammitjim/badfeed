@@ -1,17 +1,8 @@
 {% extends "layouts/contained.html" %}
 {% block main %}
-    <h1 class="mb-3">Login</h1>
-    {% if form.errors %}
-        {% for error in form.non_field_errors %}
-            <div class="alert alert-danger">
-                <strong>{{ error|escape }}</strong>
-            </div>
-        {% endfor %}
-    {% endif %}
     <div class="login-box auth0-box before">
         <img src="https://i.cloudup.com/StzWWrY34s.png" alt="auth0-logo"/>
-        <h3>Auth0 Example</h3>
-        <p>Zero friction identity infrastructure, built for developers</p>
-        <a class="btn btn-primary btn-lg btn-login btn-block" href="/login/auth0">Log In</a>
+        <p>Get a load of this fantastic log in page.</p>
+        <a href="/login/auth0">Log In</a>
     </div>
 {% endblock %}

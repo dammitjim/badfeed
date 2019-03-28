@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 
 class LoginView(TemplateView):
     template_name = "users/login.html"
+    extra_context = {"page_title": "Login"}
 
     def dispatch(self, request, *args, **kwargs):
         """Redirect already logged in users if they try to be cheeky."""
