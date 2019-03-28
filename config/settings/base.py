@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     # third party
+    "social_django",
     "django_rq",
     "rest_framework",
     "webpack_loader",
@@ -81,6 +82,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+AUTHENTICATION_BACKENDS = {
+    "badfeed.users.backends.Auth0",
+    "django.contrib.auth.backends.ModelBackend",
+}
 
 PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.Argon2PasswordHasher",
@@ -117,7 +122,6 @@ RQ_QUEUES = {
     }
 }
 
-LOGIN_URL = "/login"
 
 POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY", default="")
 
@@ -134,3 +138,13 @@ WEBPACK_LOADER = {
         "STATS_FILE": os.path.join(FRONTEND_DIR, "webpack-stats.json"),
     }
 }
+
+SOCIAL_AUTH_TRAILING_SLASH = False  # Remove trailing slash from routes
+SOCIAL_AUTH_AUTH0_DOMAIN = env.str("SOCIAL_AUTH_AUTH0_DOMAIN", default="")
+SOCIAL_AUTH_AUTH0_KEY = env.str("SOCIAL_AUTH_AUTH0_KEY", default="")
+SOCIAL_AUTH_AUTH0_SECRET = env.str("SOCIAL_AUTH_AUTH0_SECRET", default="")
+SOCIAL_AUTH_AUTH0_SCOPE = ["openid", "profile"]
+
+LOGIN_URL = "/login/auth0"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

@@ -2,7 +2,8 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
-from django.views.generic import FormView
+from django.urls import reverse
+from django.views.generic import FormView, TemplateView
 
 from badfeed.users.forms import ExtendedAuthenticationForm, RegistrationForm
 
@@ -39,7 +40,7 @@ class PasswordChangeView(auth_views.PasswordChangeView):
         CHANGE_SUCCESS_MESSAGE = "Your password has been successfully changed."
 
 
-class LoginView(auth_views.LoginView):
+class LoginView(TemplateView):
     template_name = "users/login.html"
     form_class = ExtendedAuthenticationForm
 
@@ -47,7 +48,7 @@ class LoginView(auth_views.LoginView):
         """Redirect already logged in users if they try to be cheeky."""
         if request.user.is_authenticated:
             messages.info(request, self.Messages.ALREADY_LOGGED_IN)
-            return redirect(self.get_success_url())
+            return redirect(reverse("feeds:my_entries"))
         return super().dispatch(request, *args, **kwargs)
 
     class Messages:

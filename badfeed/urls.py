@@ -10,5 +10,6 @@ urlpatterns = [
     path("admin/django-rq/", include("django_rq.urls")),
     path("", include("badfeed.feeds.urls")),
     path("", include("badfeed.users.urls")),
+    path("", include("social_django.urls")),
     path("api/v1/", include(api_urlpatterns)),
 ]

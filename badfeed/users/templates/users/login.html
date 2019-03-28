@@ -8,20 +8,10 @@
             </div>
         {% endfor %}
     {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <label>Username</label>
-        <div class="row mb-3">
-            <div class="col">
-                {% include "partials/forms/input.html" with field=form.username %}
-            </div>
-        </div>
-        <label>Password</label>
-        <div class="row mb-3">
-            <div class="col">
-                {% include "partials/forms/input.html" with field=form.password %}
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Register</button>
-    </form>
+    <div class="login-box auth0-box before">
+        <img src="https://i.cloudup.com/StzWWrY34s.png" alt="auth0-logo"/>
+        <h3>Auth0 Example</h3>
+        <p>Zero friction identity infrastructure, built for developers</p>
+        <a class="btn btn-primary btn-lg btn-login btn-block" href="/login/auth0">Log In</a>
+    </div>
 {% endblock %}
