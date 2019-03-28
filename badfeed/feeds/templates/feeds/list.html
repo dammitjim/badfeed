@@ -1,0 +1,6 @@
+{% extends "layouts/contained.html" %}
+{% load feed_tags %}
+
+{% block main %}
+    {% include "feeds/components/entry_list.html" with entries=object_list show_feed=True %}
+{% endblock%}

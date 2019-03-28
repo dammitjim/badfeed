@@ -11,7 +11,7 @@
                 <span>Inbox</span>
             </div>
         </a>
-        <a class="nav_element" href="#">
+        <a class="nav_element" href="{% url "feeds:pinned_entries" %}">
             <div class="nav_element__icon">
                 <i class="fas fa-thumbtack"></i>
             </div>
@@ -19,7 +19,15 @@
                 <span>Pinned</span>
             </div>
         </a>
-        <a class="nav_element" href="#">
+        <a class="nav_element" href="{% url "feeds:saved_entries" %}">
+            <div class="nav_element__icon">
+                <i class="fas fa-save"></i>
+            </div>
+            <div class="nav_element__text">
+                <span>Saved</span>
+            </div>
+        </a>
+        <a class="nav_element" href="{% url "feeds:archived_entries" %}">
             <div class="nav_element__icon">
                 <i class="fas fa-backspace"></i>
             </div>

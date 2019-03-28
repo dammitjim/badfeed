@@ -192,8 +192,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
 class PinnedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/deprecated/my_entries.html"
+    template_name = "feeds/list.html"
     model = Entry
+    extra_context = {"page_title": "Pinned"}
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
@@ -204,8 +205,9 @@ class PinnedEntriesListView(LoginRequiredMixin, ListView):
 
 class SavedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/deprecated/my_entries.html"
+    template_name = "feeds/list.html"
     model = Entry
+    extra_context = {"page_title": "Saved"}
 
     def get_queryset(self):
         """Load all pinned entries for the user."""
@@ -216,8 +218,9 @@ class SavedEntriesListView(LoginRequiredMixin, ListView):
 
 class ArchivedEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 10
-    template_name = "feeds/deprecated/my_entries.html"
+    template_name = "feeds/list.html"
     model = Entry
+    extra_context = {"page_title": "Archived"}
 
     def get_queryset(self):
         """Load all pinned entries for the user."""

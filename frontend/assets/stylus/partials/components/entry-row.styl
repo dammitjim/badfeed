@@ -3,7 +3,6 @@
     height 50px
     align-items: center;
     justify-content: center;
-    max-width 900px
     width 100%
     border 1px solid #C2C2C2
     border-bottom none
@@ -21,9 +20,21 @@
     &:only-child
         border-bottom 1px solid #C2C2C2
 
+    &__feed
+        padding 10px
+        width 125px
+        font-weight 700
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        border-right 1px solid #c2c2c2
+
     &__text
         flex-grow 1
         padding 10px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
 
         a
             color $cl--med
