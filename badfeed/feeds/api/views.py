@@ -28,7 +28,7 @@ class GenericFeedDashboardView(generics.ListAPIView):
 
     def get_serializer_instance(self, feed):
         """Load the 5 latest unread entries for the given feed into a serializer instance."""
-        unread_entries = get_actionable_entries(feed, self.request.user, num=5)
+        unread_entries = get_actionable_entries(feed, self.request.user)[:5]
         return FeedEntrySerializer(
             instance={"feed": feed, "entries": unread_entries},
             context=self.get_serializer_context(),

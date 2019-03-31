@@ -3,6 +3,6 @@
 
 {% block main %}
     {% for data in blocks %}
-        {% include "feeds/components/feed_block.html" with feed=data.feed entries=data.entries %}
+        {% include "feeds/components/feed_block.html" with feed=data.feed entries=data.entries total_entries=data.total_entries%}
     {% endfor %}
 {% endblock%}

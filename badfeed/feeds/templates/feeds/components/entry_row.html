@@ -30,7 +30,9 @@
             {% pin_button entry %}
         </li>
         <li class="entry_row__actions__action">
-            <i class="fas fa-bars"></i>
+            <a href="{% url "feeds:entry_actions" feed_slug=entry.feed.slug entry_slug=entry.slug %}">
+                <i class="fas fa-bars"></i>
+            </a>
         </li>
     </ul>
 </div>

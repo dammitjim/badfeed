@@ -1,21 +1,6 @@
-from typing import List
-
 from django.db.models import Count, Max, Q
 
-from badfeed.feeds.models import Entry, Feed
-from badfeed.users.models import BadFeedUser
-
-
-def delete_entries_for_user(entries: List[Entry], user: BadFeedUser):
-    return [entry.mark_deleted(user) for entry in entries]
-
-
-def pin_entries_for_user(entries: List[Entry], user: BadFeedUser):
-    return [entry.mark_pinned(user) for entry in entries]
-
-
-def save_entries_for_user(entries: List[Entry], user: BadFeedUser):
-    return [entry.mark_saved(user) for entry in entries]
+from badfeed.feeds.models import Feed
 
 
 def feeds_by_last_updated_entry(user):
@@ -52,9 +37,6 @@ def feeds_by_last_updated_entry(user):
     return qs
 
 
-def get_actionable_entries(feed, user, num=5):
+def get_actionable_entries(feed, user):
     """Load the 5 latest unread / unactioned entries for the feed."""
-    unread_entries = (
-        feed.entries(manager="user_state").unread(user).order_by("-date_published")
-    )
-    return unread_entries[:num]
+    return feed.entries(manager="user_state").unread(user).order_by("-date_published")

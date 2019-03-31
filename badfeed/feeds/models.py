@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from django.db.models import Q
+from loguru import logger
 import maya
 
 from badfeed.core.models import SlugifiedMixin
@@ -42,6 +44,13 @@ class Feed(SlugifiedMixin, models.Model):
         """Assert user is contained within watched_by m2m field."""
         return user in self.watched_by.all()
 
+    def mark_entries_archived(self, user):
+        """Will archive all current unread entries."""
+        entries = self.entries.all().exclude(states__isnull=False, states__user=user)
+        # TODO this may be expensive, consider a bulk operation?
+        for entry in entries:
+            entry.mark_deleted(user)
+
 
 class Author(models.Model):
     """An author of an entry."""
@@ -74,7 +83,9 @@ class EntryUserStateManager(models.Manager):
     def unread(self, user):
         """Get all entries that haven't been read by the user yet."""
         feeds = Feed.objects.watched_by(user)
-        entries = self.filter(feed__in=feeds).exclude(states__isnull=False)
+        entries = self.filter(feed__in=feeds).exclude(
+            states__isnull=False, states__user=user
+        )
         return entries.order_by("-date_published")
 
     def saved(self, user):
@@ -133,6 +144,14 @@ class Entry(SlugifiedMixin, models.Model):
             return False
         return not Entry.objects.filter(slug=text).exists()
 
+    def archive_older_than_this(self, user):
+        """Mark all entries older than this entry, for this feed, as archived."""
+        older_entries = Entry.objects.filter(
+            date_created__lt=self.date_created, feed=self.feed
+        )
+        for entry in older_entries:
+            entry.mark_deleted(user)
+
     def mark_read_by(self, user):
         """Create an entrystate object marking this entry as having been read."""
         return EntryState.objects.get_or_create(
@@ -152,9 +171,8 @@ class Entry(SlugifiedMixin, models.Model):
                 state=EntryState.STATE_PINNED, entry=self, user=user
             )
             state.delete()
-        except EntryState.DoesNotExist:
-            # TODO log attempt to delete?
-            pass
+        except EntryState.DoesNotExist as e:
+            logger.exception("Attempted to unpin an unpinned entry.", exc_info=e)
 
     def mark_deleted(self, user):
         """Pin the entry for the user if not already deleted.
@@ -162,14 +180,9 @@ class Entry(SlugifiedMixin, models.Model):
         By marking for deletion, we also delete all other states.
         TODO consider moving this to the entry state model?
         """
-        if self.is_pinned_by(user):
-            EntryState.objects.filter(
-                state=EntryState.STATE_PINNED, entry=self, user=user
-            ).delete()
-        if self.is_saved_by(user):
-            EntryState.objects.filter(
-                state=EntryState.STATE_SAVED, entry=self, user=user
-            ).delete()
+        EntryState.objects.filter(entry=self, user=user).filter(
+            Q(state=EntryState.STATE_PINNED) | Q(state=EntryState.STATE_SAVED)
+        ).delete()
         return EntryState.objects.get_or_create(
             state=EntryState.STATE_DELETED, entry=self, user=user
         )
@@ -181,9 +194,8 @@ class Entry(SlugifiedMixin, models.Model):
                 state=EntryState.STATE_DELETED, entry=self, user=user
             )
             state.delete()
-        except EntryState.DoesNotExist:
-            # TODO log attempt to delete?
-            pass
+        except EntryState.DoesNotExist as e:
+            logger.exception("Attempted to undelete an undeleted entry.", exc_info=e)
 
     def mark_saved(self, user):
         """Save the entry for the user if not already saved.
@@ -206,9 +218,8 @@ class Entry(SlugifiedMixin, models.Model):
                 state=EntryState.STATE_SAVED, entry=self, user=user
             )
             state.delete()
-        except EntryState.DoesNotExist:
-            # TODO log attempt to delete?
-            pass
+        except EntryState.DoesNotExist as e:
+            logger.exception("Attempted to undelete an undeleted entry.", exc_info=e)
 
     def is_pinned_by(self, user) -> bool:
         """Check if the given entry has been pinned by the given user."""
