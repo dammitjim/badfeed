@@ -5,7 +5,7 @@ from django.urls import reverse
 import pytest
 
 from badfeed.feeds.models import EntryState
-from badfeed.feeds.views import (
+from badfeed.feeds.views.actions import (
     EntryPinToggleView,
     EntrySaveToggleView,
     FeedWatchToggleView,
@@ -534,7 +534,7 @@ class TestSaveEntryToPocketView:
 
     def test_calls_pocket_api(self, mocker, client_factory, pocket_token, entry):
         """The view should add the entry link to pocket."""
-        mocked_fn = mocker.patch("badfeed.feeds.views.Pocket.add")
+        mocked_fn = mocker.patch("badfeed.feeds.views.actions.Pocket.add")
         client = client_factory(user=pocket_token.user)
         client.get(self._get_url(entry))
         assert mocked_fn.call_count == 1
@@ -543,7 +543,7 @@ class TestSaveEntryToPocketView:
         self, mocker, client_factory, pocket_token, entry
     ):
         """The view should also mark the entry as saved."""
-        mocker.patch("badfeed.feeds.views.Pocket.add")
+        mocker.patch("badfeed.feeds.views.actions.Pocket.add")
         client = client_factory(user=pocket_token.user)
         client.get(self._get_url(entry))
         assert entry.is_saved_by(pocket_token.user)
