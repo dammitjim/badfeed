@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from loguru import logger
 import maya
 
 from badfeed.core.models import SlugifiedMixin
@@ -170,9 +171,8 @@ class Entry(SlugifiedMixin, models.Model):
                 state=EntryState.STATE_PINNED, entry=self, user=user
             )
             state.delete()
-        except EntryState.DoesNotExist:
-            # TODO log attempt to delete?
-            pass
+        except EntryState.DoesNotExist as e:
+            logger.exception("Attempted to unpin an unpinned entry.", exc_info=e)
 
     def mark_deleted(self, user):
         """Pin the entry for the user if not already deleted.
@@ -194,9 +194,8 @@ class Entry(SlugifiedMixin, models.Model):
                 state=EntryState.STATE_DELETED, entry=self, user=user
             )
             state.delete()
-        except EntryState.DoesNotExist:
-            # TODO log attempt to delete?
-            pass
+        except EntryState.DoesNotExist as e:
+            logger.exception("Attempted to undelete an undeleted entry.", exc_info=e)
 
     def mark_saved(self, user):
         """Save the entry for the user if not already saved.
@@ -219,9 +218,8 @@ class Entry(SlugifiedMixin, models.Model):
                 state=EntryState.STATE_SAVED, entry=self, user=user
             )
             state.delete()
-        except EntryState.DoesNotExist:
-            # TODO log attempt to delete?
-            pass
+        except EntryState.DoesNotExist as e:
+            logger.exception("Attempted to undelete an undeleted entry.", exc_info=e)
 
     def is_pinned_by(self, user) -> bool:
         """Check if the given entry has been pinned by the given user."""
