@@ -7,50 +7,70 @@
     border 1px solid #C2C2C2
     border-bottom none
     padding 10px
+    position relative
+
+    &--detail
+        height 100px
+
+        & ^[0]__actions
+            display flex
+
+    &--compact
+        height 50px
 
     &:hover
         background-color darken(white, 1%)
 
         & ^[0]__actions
             display flex
-        & ^[0]__date
-            display none
 
     &:last-child
     &:only-child
         border-bottom 1px solid #C2C2C2
 
     &__feed
-        padding 10px
-        width 125px
-        font-weight 700
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
-        border-right 1px solid #c2c2c2
+        padding-right 10px
+        font-size var(--fz--supersub)
 
     &__text
         flex-grow 1
-        padding 10px
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
+        font-size $fz--sub
+        font-weight 600
 
         a
             color $cl--med
 
     &__date
         flex-grow 0
-        padding 10px
+        font-size var(--fz--supersub)
+
+    &__body
+        flex-grow 1
+        display flex
+        flex-direction column
+
+        &__meta
+            display flex
+            flex-direction row
+            align-items center
 
     &__actions
         display none
         list-style none
+        margin-left 10px
 
         &__action
-            color #4B4B4B
-            margin 15px
-            text-shadow: 2px 2px 2px #ccc;
+            margin 0 5px
+            font-family $ff--ui
+            font-size var(--fz--supersub)
+            text-decoration underline
+            font-style italic
 
             &:hover
                 cursor pointer
