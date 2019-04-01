@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
+from django.utils.text import Truncator
 from loguru import logger
 import maya
 
@@ -246,6 +247,15 @@ class Entry(SlugifiedMixin, models.Model):
             return "?"
         maya_dt = maya.MayaDT.from_datetime(self.date_published)
         return maya_dt.slang_time()
+
+    TEASER_WORDS = 15
+
+    @property
+    def teaser(self):
+        """Get a displayable teaser for rows or cards."""
+        text = self.summary if self.summary else self.content
+        truncated_text = Truncator(text).words(self.TEASER_WORDS)
+        return truncated_text
 
     def __str__(self):
         """Str dunder implementation."""

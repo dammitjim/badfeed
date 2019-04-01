@@ -383,3 +383,29 @@ class TestEntryModel:
             )
             == 0
         )
+
+    def test_teaser_uses_summary_if_available(self, entry):
+        """If the summary is available from the feed, use it instead."""
+        entry.summary = "Summary"
+        entry.content = "Content"
+        assert entry.teaser == "Summary"
+
+    def test_teaser_falls_back_to_content(self, entry):
+        """If the summary is not available from the feed, use content."""
+        entry.summary = None
+        entry.content = "Content"
+        assert entry.teaser == "Content"
+
+    def test_teaser_truncates(self, entry):
+        """Should truncate content longer than X characters."""
+        text = "Do you see any Teletubbies in here? Do you see a slender plastic tag clipped to my shirt with my name printed on it?"  # noqa
+        entry.summary = text
+        assert (
+            entry.teaser
+            == "Do you see any Teletubbies in here? Do you see a slender plastic tag clipped..."
+        )
+
+    def test_teaser_short_copy_no_truncate(self, entry):
+        """Short copy should return unmodified."""
+        entry.summary = "This is only a test"
+        assert entry.teaser == "This is only a test"
