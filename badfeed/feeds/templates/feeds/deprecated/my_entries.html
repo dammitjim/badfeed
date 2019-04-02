@@ -1,13 +1,6 @@
 {% extends "layouts/contained.html" %}
 {% load feed_tags %}
-{% load render_bundle from webpack_loader %}
 {% block main %}
-    {% if spa|default:False %}
-    <div id="app">
-         <app></app>
-     </div>
-    {% render_bundle 'app' %}
-    {% else %}
     {% for entry in page_obj %}
         {% include "feeds/components/entry_row.html" with entry=entry feed=entry.feed %}
     {% endfor %}
@@ -29,5 +22,4 @@
             {% endif %}
         </ul>
     </nav>
-    {% endif %}
 {% endblock %}

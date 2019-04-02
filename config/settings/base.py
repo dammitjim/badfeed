@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     "social_django",
     "django_rq",
     "rest_framework",
-    "webpack_loader",
     # internal
     "badfeed.users",
     "badfeed.feeds",
@@ -129,14 +128,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 5,
-}
-
-WEBPACK_LOADER = {
-    "DEFAULT": {
-        "CACHE": DEBUG,
-        "BUNDLE_DIR_NAME": "/bundles/",  # must end with slash
-        "STATS_FILE": os.path.join(FRONTEND_DIR, "webpack-stats.json"),
-    }
 }
 
 SOCIAL_AUTH_TRAILING_SLASH = False  # Remove trailing slash from routes
