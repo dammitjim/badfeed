@@ -32,7 +32,6 @@ black = "==18.9b0"
 pre-commit = "*"
 pydocstyle = "*"
 pytest-mock = "*"
-django-cors-headers = "*"
 flake8-import-order = "*"
 
 [requires]

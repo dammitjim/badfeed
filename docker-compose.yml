@@ -14,8 +14,10 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - redis
     env_file:
       - docker.env
+      - secrets.env
   rq:
     build: .
     command: bash -c "python manage.py rqworker"
@@ -27,3 +29,4 @@ services:
     - web
     env_file:
       - docker.env
+      - secrets.env
