@@ -402,7 +402,7 @@ class TestEntryModel:
         entry.summary = text
         assert (
             entry.teaser
-            == "Do you see any Teletubbies in here? Do you see a slender plastic tag clipped..."
+            == "Do you see any Teletubbies in here? Do you see a slender plastic tag clipped…"
         )
 
     def test_teaser_short_copy_no_truncate(self, entry):
