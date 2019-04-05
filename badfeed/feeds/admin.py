@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import Author, Enclosure, Entry, EntryState, Feed, Tag
+from .models import Author, Enclosure, EnrichedContent, Entry, EntryState, Feed, Tag
 
 
 @admin.register(Feed)
@@ -35,6 +35,11 @@ class EntryAdmin(admin.ModelAdmin):
 
 @admin.register(EntryState)
 class EntryStateAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(EnrichedContent)
+class EnrichedContentAdmin(admin.ModelAdmin):
     pass
 
 

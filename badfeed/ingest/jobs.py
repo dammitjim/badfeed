@@ -5,6 +5,7 @@ import requests
 from sentry_sdk import configure_scope
 
 from badfeed.feeds.models import Feed
+from badfeed.ingest.constants import REQUESTS_USER_AGENT
 from badfeed.ingest.models import IngestLog
 from badfeed.ingest.parser import RSSParser
 
@@ -16,9 +17,7 @@ def sync_feed(feed: Feed):
         logger.debug(f"Processing feed {feed.link}")
         scope.set_tag("feed", feed.title)
 
-        r = requests.get(
-            feed.link, headers={"User-Agent": "FeedBadger (tightenupthe.tech)"}
-        )
+        r = requests.get(feed.link, headers={"User-Agent": REQUESTS_USER_AGENT})
 
         scope.set_extra("body", r.text)
 

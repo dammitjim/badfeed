@@ -6,6 +6,7 @@ import maya
 import requests
 
 from badfeed.feeds.models import Entry, Feed
+from badfeed.ingest.enricher.simple import SimpleEnricher
 from badfeed.ingest.exceptions import ContentErrorException
 from badfeed.ingest.models import IngestLog
 from badfeed.ingest.utils import clean_content, get_or_create_tags
@@ -24,17 +25,14 @@ class EntryParser:
 
     def extract(self) -> dict:
         """Extract the appropriate values from the entry_data."""
-        data = {
+        return {
             "title": self.entry_data.title,
             "link": self.entry_data.link,
             "guid": self.entry_data.id,
+            "date_published": maya.parse(self.entry_data.published).datetime(),
+            "content": self._get_content(),
+            "summary": self._get_summary(),
         }
-
-        data["date_published"] = maya.parse(self.entry_data.published).datetime()
-        data["content"] = self._get_content()
-        data["summary"] = self._get_summary()
-
-        return data
 
     def _has_field(self, field: str):
         if not hasattr(self.entry_data, field):
@@ -43,7 +41,6 @@ class EntryParser:
 
     def _get_content(self) -> str:
         """Get the data for the content field of the Entry."""
-        field = None
         if self._has_field("content"):
             field = self.entry_data.content
         elif self._has_field("description"):
@@ -55,7 +52,6 @@ class EntryParser:
 
     def _get_summary(self) -> str:
         """Get the data for the summary field of the Entry."""
-        field = None
         if self._has_field("summary_detail"):
             field = self.entry_data.summary_detail
         elif self._has_field("summary"):
@@ -99,8 +95,11 @@ class RSSParser:
             if not Entry.objects.filter(guid=entry.id, feed=self.FEED).exists():
                 yield entry
 
-    def parse(self, response: requests.Response):
-        """Parse the RSS feed response into the database."""
+    def parse(self, response: requests.Response, should_enrich=True):
+        """Parse the RSS feed response into the database.
+
+        TODO this function needs to be smaller
+        """
         entry_parser = None
         data = feedparser.parse(response.text)
         has_errored = False
@@ -122,7 +121,12 @@ class RSSParser:
                 tags = get_or_create_tags(entry, self.FEED)
                 if len(tags) > 0:
                     db_entry.tags.add(*tags)
+                    # TODO is this save call needed?
                     db_entry.save()
+
+                if should_enrich:
+                    # TODO multiple enrichers need some logic here to get the appropriate one
+                    SimpleEnricher(db_entry).enrich()
 
             except Exception:
                 logger.exception("Failed to parse entry.", exc_info=True)
