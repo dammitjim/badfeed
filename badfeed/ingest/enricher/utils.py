@@ -11,7 +11,7 @@ def convert_html_to_newspaper(html: str) -> newspaper.Article:
 
 def get_sorted_images(article: newspaper.Article) -> List[str]:
     """Arrange images array whereby the article's top image is the first element."""
-    images = article.images
+    images = list(article.images)
     if article.top_image:
         # TODO this _could_ raise a ValueError
         images.insert(0, images.pop(images.index(article.top_image)))

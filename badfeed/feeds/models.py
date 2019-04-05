@@ -329,7 +329,7 @@ class EnrichedContent(models.Model):
     """Contains enriched content for entries, pulled from the ingest enricher."""
 
     entry = models.OneToOneField(
-        Entry, related_name="enriched", on_delete=models.CASCADE
+        Entry, related_name="enriched", on_delete=models.CASCADE, null=True, blank=True
     )
     content = models.TextField()
     summary = models.TextField()
@@ -337,3 +337,7 @@ class EnrichedContent(models.Model):
     # where the first element is considered the "top image"
     images = ArrayField(models.CharField(max_length=500), blank=True)
     movies = ArrayField(models.CharField(max_length=500), blank=True)
+
+    def __str__(self):
+        # TODO consider what would actually be useful here
+        return f"{self.entry.title} - enriched"

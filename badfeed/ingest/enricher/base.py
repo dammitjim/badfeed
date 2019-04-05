@@ -10,7 +10,7 @@ class Enricher:
         self.entry = entry
 
     def enrich(self):
-        if self.entry.enriched:
+        if hasattr(self.entry, "enriched"):
             logger.warning(
                 f"Attempting to enrich entry which already has enriched content: {self.entry.pk}"
             )
@@ -21,12 +21,17 @@ class Enricher:
 
     def save_to_entry(self, article: newspaper.Article):
         images = get_sorted_images(article)
+
+        summary = article.summary
+        if not summary:
+            summary = self.entry.summary
+
         EnrichedContent(
             entry=self.entry,
-            content=article.text,
-            summary=article.summary,
-            movies=article.movies,
+            summary=summary,
             images=images,
+            content=article.text,
+            movies=article.movies,
         ).save()
 
     def extract_page_html(self) -> str:

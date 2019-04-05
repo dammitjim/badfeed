@@ -32,7 +32,12 @@
                     <li>Published {{ entry.slang_date_published }}</li>
                 </ul>
             </div>
-            {{ entry.content|safe }}
+            {% if enriched|default:False %}
+                <img src="{{ entry.enriched.images|first }}" />
+                {{ entry.enriched.content|linebreaks }}
+            {% else %}
+                {{ entry.content|safe }}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

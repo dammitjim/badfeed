@@ -25,6 +25,7 @@ class EntryDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         """Load page title into context."""
         ctx = super().get_context_data(**kwargs)
+        ctx["enriched"] = hasattr(self.object, "enriched")
         ctx["page_title"] = self.object.title
         ctx["page_subtitle"] = f"{self.object.feed.title}"
         return ctx
