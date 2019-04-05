@@ -7,25 +7,13 @@
     {% endif %}
     <span class="entry_row__text">
         <a
-        href="{% url 'feeds:entry_read' feed_slug=feed.slug entry_slug=entry.slug %}"
-        target="_blank"
+        href="{% url 'feeds:entry_detail' feed_slug=feed.slug entry_slug=entry.slug %}"
         >
             {{ entry.title }}
         </a>
     </span>
     <span class="entry_row__date">{{ entry.slang_date_published }}</span>
     <ul class="entry_row__actions">
-        <li class="entry_row__actions__action">
-            {% delete_button entry %}
-        </li>
-        <li class="entry_row__actions__action">
-            {% save_button entry %}
-        </li>
-        <li class="entry_row__actions__action">
-            <a href="{% url 'feeds:entry_pocket' feed_slug=entry.feed.slug entry_slug=entry.slug %}">
-                <i class="fab fa-get-pocket"></i>
-            </a>
-        </li>
         <li class="entry_row__actions__action">
             {% pin_button entry %}
         </li>
