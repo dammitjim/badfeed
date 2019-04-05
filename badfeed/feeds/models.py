@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Q
 from django.utils.text import Truncator
@@ -305,7 +306,10 @@ class EntryState(models.Model):
 
 
 class Enclosure(models.Model):
-    """A media file."""
+    """A media file.
+
+    TODO can this just be removed?
+    """
 
     href = models.CharField(max_length=1000)
     file_type = models.CharField(max_length=1000)
@@ -319,3 +323,17 @@ class Enclosure(models.Model):
     def __str__(self):
         """Str representation of enclosure."""
         return self.href
+
+
+class EnrichedContent(models.Model):
+    """Contains enriched content for entries, pulled from the ingest enricher."""
+
+    entry = models.OneToOneField(
+        Entry, related_name="enriched", on_delete=models.CASCADE
+    )
+    content = models.TextField()
+    summary = models.TextField()
+
+    # where the first element is considered the "top image"
+    images = ArrayField(models.CharField(max_length=500), blank=True)
+    movies = ArrayField(models.CharField(max_length=500), blank=True)

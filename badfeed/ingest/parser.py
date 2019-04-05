@@ -6,6 +6,7 @@ import maya
 import requests
 
 from badfeed.feeds.models import Entry, Feed
+from badfeed.ingest.enricher.simple import SimpleEnricher
 from badfeed.ingest.exceptions import ContentErrorException
 from badfeed.ingest.models import IngestLog
 from badfeed.ingest.utils import clean_content, get_or_create_tags
@@ -94,7 +95,7 @@ class RSSParser:
             if not Entry.objects.filter(guid=entry.id, feed=self.FEED).exists():
                 yield entry
 
-    def parse(self, response: requests.Response):
+    def parse(self, response: requests.Response, should_enrich=True):
         """Parse the RSS feed response into the database.
 
         TODO this function needs to be smaller
@@ -120,7 +121,12 @@ class RSSParser:
                 tags = get_or_create_tags(entry, self.FEED)
                 if len(tags) > 0:
                     db_entry.tags.add(*tags)
+                    # TODO is this save call needed?
                     db_entry.save()
+
+                if should_enrich:
+                    # TODO multiple enrichers need some logic here to get the appropriate one
+                    SimpleEnricher(db_entry).enrich()
 
             except Exception:
                 logger.exception("Failed to parse entry.", exc_info=True)

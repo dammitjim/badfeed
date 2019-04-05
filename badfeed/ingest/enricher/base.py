@@ -1,7 +1,8 @@
+from loguru import logger
 import newspaper
 
-from badfeed.feeds.models import Entry
-from badfeed.ingest.enricher.utils import convert_html_to_newspaper
+from badfeed.feeds.models import Entry, EnrichedContent
+from badfeed.ingest.enricher.utils import convert_html_to_newspaper, get_sorted_images
 
 
 class Enricher:
@@ -9,13 +10,24 @@ class Enricher:
         self.entry = entry
 
     def enrich(self):
+        if self.entry.enriched:
+            logger.warning(
+                f"Attempting to enrich entry which already has enriched content: {self.entry.pk}"
+            )
+            return
         html = self.extract_page_html()
         article = convert_html_to_newspaper(html)
         self.save_to_entry(article)
 
     def save_to_entry(self, article: newspaper.Article):
-        self.entry.content = article.text
-        self.entry.save()
+        images = get_sorted_images(article)
+        EnrichedContent(
+            entry=self.entry,
+            content=article.text,
+            summary=article.summary,
+            movies=article.movies,
+            images=images,
+        ).save()
 
     def extract_page_html(self) -> str:
         raise NotImplementedError()
