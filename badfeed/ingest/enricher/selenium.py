@@ -3,14 +3,17 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from badfeed.ingest.enricher.base import Enricher
 
 
-class EntryContentEnricher(Enricher):
+class SeleniumEnricher(Enricher):
     """Enrich a database entry with content that is closer to the source by parsing the webpage.
 
     Likely to provide mixed results, especially as we're navigating the minefield of selenium
     but it may help for the feeds which just provide a snippet and a "read more" link to drive
     traffic.
+
+    # TODO needs a lot of work
     """
 
+    # TODO add user agent that is consistent with everything else
     BROWSER_CAPABILITIES = {"browserName": "chrome", "javascriptEnabled": True}
 
     def __init__(self, *args, driver: WebDriver = None, **kwargs):

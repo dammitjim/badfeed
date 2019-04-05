@@ -1,6 +1,7 @@
 import newspaper
 
 from badfeed.feeds.models import Entry
+from badfeed.ingest.enricher.utils import convert_html_to_newspaper
 
 
 class Enricher:
@@ -9,7 +10,7 @@ class Enricher:
 
     def enrich(self):
         html = self.extract_page_html()
-        article = self.to_newspaper_article(html)
+        article = convert_html_to_newspaper(html)
         self.save_to_entry(article)
 
     def save_to_entry(self, article: newspaper.Article):
@@ -21,9 +22,3 @@ class Enricher:
 
     def get_start_url(self) -> str:
         return self.entry.link
-
-    def to_newspaper_article(self, html: str) -> newspaper.Article:
-        article = newspaper.api.build_article()
-        article.set_html(html)
-        article.parse()
-        return article

@@ -24,17 +24,14 @@ class EntryParser:
 
     def extract(self) -> dict:
         """Extract the appropriate values from the entry_data."""
-        data = {
+        return {
             "title": self.entry_data.title,
             "link": self.entry_data.link,
             "guid": self.entry_data.id,
+            "date_published": maya.parse(self.entry_data.published).datetime(),
+            "content": self._get_content(),
+            "summary": self._get_summary(),
         }
-
-        data["date_published"] = maya.parse(self.entry_data.published).datetime()
-        data["content"] = self._get_content()
-        data["summary"] = self._get_summary()
-
-        return data
 
     def _has_field(self, field: str):
         if not hasattr(self.entry_data, field):
@@ -43,7 +40,6 @@ class EntryParser:
 
     def _get_content(self) -> str:
         """Get the data for the content field of the Entry."""
-        field = None
         if self._has_field("content"):
             field = self.entry_data.content
         elif self._has_field("description"):
@@ -55,7 +51,6 @@ class EntryParser:
 
     def _get_summary(self) -> str:
         """Get the data for the summary field of the Entry."""
-        field = None
         if self._has_field("summary_detail"):
             field = self.entry_data.summary_detail
         elif self._has_field("summary"):
@@ -100,7 +95,10 @@ class RSSParser:
                 yield entry
 
     def parse(self, response: requests.Response):
-        """Parse the RSS feed response into the database."""
+        """Parse the RSS feed response into the database.
+
+        TODO this function needs to be smaller
+        """
         entry_parser = None
         data = feedparser.parse(response.text)
         has_errored = False
