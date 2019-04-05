@@ -15,5 +15,7 @@ def get_sorted_images(article: newspaper.Article) -> List[str]:
     images = list(article.images)
     if article.top_image:
         # TODO this _could_ raise a ValueError
-        images.insert(0, images.pop(images.index(article.top_image)))
+        top_image_index = images.index(article.top_image)
+        top_image = images.pop(top_image_index)
+        images.insert(0, top_image)
     return images
