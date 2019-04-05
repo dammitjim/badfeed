@@ -1,0 +1,38 @@
+{% extends "layouts/contained.html" %}
+{% load feed_tags %}
+
+{% block main %}
+    <div class="entry_content">
+        <div class="entry_content__menu">
+            <ul>
+                <li>
+                    {% pin_button entry %}
+                </li>
+                <li>
+                    {% delete_button entry %}
+                </li>
+                <li>
+                    <a href="{% url 'feeds:entry_pocket' feed_slug=entry.feed.slug entry_slug=entry.slug %}">
+                        <i class="fab fa-get-pocket"></i>
+                    </a>
+                </li>
+                <li>
+                    {% save_button entry %}
+                </li>
+                <li>
+                    <a href="{% url "feeds:entry_actions" feed_slug=entry.feed.slug entry_slug=entry.slug %}">
+                        <i class="fas fa-bars"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="entry_content__body">
+            <div class="entry_content__body__meta">
+                <ul>
+                    <li>Published {{ entry.slang_date_published }}</li>
+                </ul>
+            </div>
+            {{ entry.content|linebreaks }}
+        </div>
+    </div>
+{% endblock %}
