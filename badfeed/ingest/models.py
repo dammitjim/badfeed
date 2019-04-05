@@ -20,7 +20,7 @@ class IngestLog(models.Model):
         (STATE_FAILED, "Failed"),
         (STATE_NOT_RESPONDING, "Not responding"),
     ]
-    state = models.CharField(max_length=10, choices=STATE_CHOICES)
+    state = models.CharField(max_length=15, choices=STATE_CHOICES)
     body = models.TextField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     feed = models.ForeignKey(Feed, related_name="ingest_logs", on_delete=models.CASCADE)
