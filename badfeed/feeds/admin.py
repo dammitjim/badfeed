@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import Author, Enclosure, Entry, EntryState, EnrichedContent, Feed, Tag
+from .models import Author, Enclosure, EnrichedContent, Entry, EntryState, Feed, Tag
 
 
 @admin.register(Feed)
