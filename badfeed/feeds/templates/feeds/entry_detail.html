@@ -32,7 +32,7 @@
                     <li>Published {{ entry.slang_date_published }}</li>
                 </ul>
             </div>
-            {{ entry.content|linebreaks }}
+            {{ entry.content|safe }}
         </div>
     </div>
 {% endblock %}
