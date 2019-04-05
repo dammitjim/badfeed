@@ -1,7 +1,7 @@
 from loguru import logger
 import newspaper
 
-from badfeed.feeds.models import Entry, EnrichedContent
+from badfeed.feeds.models import EnrichedContent, Entry
 from badfeed.ingest.enricher.utils import convert_html_to_newspaper, get_sorted_images
 
 

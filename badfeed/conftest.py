@@ -4,7 +4,7 @@ from model_mommy import mommy
 import pytest
 from rest_framework.test import APIClient
 
-from badfeed.feeds.models import Entry, EntryState, Feed
+from badfeed.feeds.models import EnrichedContent, Entry, EntryState, Feed
 from badfeed.users.models import ThirdPartyTokens
 
 
@@ -118,5 +118,18 @@ def entry_state_factory(user):
         else:
             attached_user = user
         return mommy.make(EntryState, user=attached_user, **kwargs)
+
+    return _make
+
+
+@pytest.fixture
+def enriched_content():
+    return mommy.make(EnrichedContent)
+
+
+@pytest.fixture
+def enriched_content_factory(**kwargs):
+    def _make(**kwargs):
+        return mommy.make(EnrichedContent, **kwargs)
 
     return _make

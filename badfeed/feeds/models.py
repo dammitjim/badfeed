@@ -335,8 +335,8 @@ class EnrichedContent(models.Model):
     summary = models.TextField()
 
     # where the first element is considered the "top image"
-    images = ArrayField(models.CharField(max_length=500), blank=True)
-    movies = ArrayField(models.CharField(max_length=500), blank=True)
+    images = ArrayField(models.CharField(max_length=500), blank=True, default=[])
+    movies = ArrayField(models.CharField(max_length=500), blank=True, default=[])
 
     def __str__(self):
         # TODO consider what would actually be useful here
