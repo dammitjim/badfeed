@@ -1,30 +1,50 @@
 """A list view presents a traditional list of content."""
+from typing import List
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, TemplateView
 
-from badfeed.core.utils import get_spaffy_quote
-from badfeed.feeds.models import Entry
+from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Render dashboard view until a SPA solution is found."""
 
-    paginate_by = 2
+    PAGINATE_BY = 2
     template_name = "feeds/dashboard.html"
     extra_context = {"page_title": "Inbox"}
 
-    def get_blocks(self, page=1, entries_per_block=3):
-        """Load `num` blocks for the dashboard.
+    def get_context_data(self, **kwargs):
+        """Load paginated blocks based on GET parameter for page."""
+        context = super().get_context_data(**kwargs)
+        context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
+        return context
+
+    def get_blocks(self, page: int):
+        """Load blocks for the dashboard.
 
         A block is a feed with it's corresponding, actionable entries.
         """
-        page = page - 1  # 0 index it
         feeds = feeds_by_last_updated_entry(self.request.user)
-        paginated_slice = feeds[page : page + self.paginate_by]
+        paginated_feeds = self._paginate_feeds(feeds, page)
+        blocks = self._build_blocks(paginated_feeds)
+        return blocks
 
+    def _paginate_feeds(self, feeds: List[Feed], page: int):
+        """Get the appropriate slice of feeds for the given page.
+
+        The page argument should not be 0 indexed, it should instead be the human
+        interpreted version. This is because we 0 index it as a part of the function.
+        """
+        page = page - 1
+        paginated_slice = feeds[page : page + self.PAGINATE_BY]
+        return paginated_slice
+
+    def _build_blocks(self, paginated_feeds: List[Feed], entries_per_block: int = 3):
+        """Construct a list of blocks containing the actionable entries for the given feeds"""
         blocks = []
-        for feed in paginated_slice:
+        for feed in paginated_feeds:
             actionable_entries = get_actionable_entries(feed, self.request.user)
             blocks.append(
                 {
@@ -33,15 +53,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                     "total_entries": len(actionable_entries),
                 }
             )
-
         return blocks
-
-    def get_context_data(self, **kwargs):
-        """Load paginated blocks based on GET parameter for page."""
-        context = super().get_context_data(**kwargs)
-        context["blocks"] = self.get_blocks(int(self.request.GET.get("page", 1)))
-        context["page_subtitle"] = get_spaffy_quote()
-        return context
 
 
 class PinnedEntriesListView(LoginRequiredMixin, ListView):
