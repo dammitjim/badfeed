@@ -30,6 +30,7 @@
             <div class="entry_content__body__meta">
                 <ul>
                     <li>Published {{ entry.slang_date_published }}</li>
+                    <li>Source: <a target="_blank" href="{{ entry.link }}">{{ entry.link }}</a></li>
                 </ul>
             </div>
             {% if enriched|default:False %}
