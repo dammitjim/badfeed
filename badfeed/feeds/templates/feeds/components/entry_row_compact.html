@@ -1,5 +1,5 @@
 {% load feed_tags %}
-<div class="entry_row">
+<div class="entry_row entry_row--compact">
     {% if show_feed %}
         <span class="entry_row__feed">
             {{ entry.feed.title }}
@@ -10,6 +10,11 @@
         href="{% url 'feeds:entry_detail' feed_slug=feed.slug entry_slug=entry.slug %}"
         >
             {{ entry.title }}
+        </a>
+    </span>
+    <span class="entry_row__feed">
+        <a href="{% url "feeds:actions" slug=entry.feed.slug %}">
+            {{ entry.feed.title }}
         </a>
     </span>
     <span class="entry_row__date">{{ entry.slang_date_published }}</span>

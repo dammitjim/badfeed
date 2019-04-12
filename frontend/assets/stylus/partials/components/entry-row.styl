@@ -12,17 +12,18 @@
     &--detail
         height 100px
 
-        & ^[0]__actions
-            display flex
-
     &--compact
         height 50px
+        & ^[0]__date
+            text-align right
 
     &:hover
         background-color darken(white, 1%)
 
         & ^[0]__actions
             display flex
+            position absolute
+            right 0
 
     &:last-child
     &:only-child
@@ -49,6 +50,7 @@
     &__date
         flex-grow 0
         font-size var(--fz--supersub)
+        width 100px
 
     &__body
         flex-grow 1
@@ -64,13 +66,11 @@
         display none
         list-style none
         margin-left 10px
+        background white
+        padding-left 20px
 
         &__action
-            margin 0 5px
-            font-family $ff--ui
-            font-size var(--fz--supersub)
-            text-decoration underline
-            font-style italic
+            margin-right 20px
 
             &:hover
                 cursor pointer

@@ -7,6 +7,7 @@ from badfeed.feeds.views import actions, details, lists, redirects, search
 app_name = "feeds"
 urlpatterns = [
     path("", lists.DashboardView.as_view(), name="my_entries"),
+    path("inbox/", lists.InboxView.as_view(), name="inbox"),
     path("search/", search.FeedSearch.as_view(), name="search"),
     path("pinned/", lists.PinnedEntriesListView.as_view(), name="pinned_entries"),
     path("saved/", lists.SavedEntriesListView.as_view(), name="saved_entries"),
