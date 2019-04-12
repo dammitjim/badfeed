@@ -1,0 +1,28 @@
+{% extends "layouts/contained.html" %}
+
+{% block main %}
+    <div class="inbox">
+        <div class="inbox__smart">
+            <div class="inbox__smart__actions">
+                <div class="inbox__smart__actions__remaining">
+                    <span>{{ remaining }} remaining...</span>
+                </div>
+                <form method="post" action="{% url 'feeds:entry_multi_delete' %}">
+                    {% csrf_token %}
+                    {% for entry in action_entries %}
+                        <input type="hidden" value="{{ entry.pk }}" name="to_delete" />
+                    {% endfor %}
+                    <button type="submit">
+                        <i class="fas fa-backspace"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="inbox__smart__entries">
+                {% include "feeds/components/entry_list.html" with entries=action_entries detail=True %}
+            </div>
+        </div>
+        <div class="inbox__list">
+            {% include "feeds/components/entry_list.html" with entries=list_entries %}
+        </div>
+    </div>
+{% endblock %}

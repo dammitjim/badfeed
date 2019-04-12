@@ -1,0 +1,31 @@
+{% load feed_tags %}
+<div class="entry_row entry_row--detail">
+    <div class="entry_row__body">
+        <span class="entry_row__text">
+            <a
+                href="{% url 'feeds:entry_detail' feed_slug=feed.slug entry_slug=entry.slug %}"
+            >
+                {{ entry.title }}
+            </a>
+        </span>
+        <ul class="entry_row__actions">
+            <li class="entry_row__actions__action">
+                {% pin_button entry %}
+            </li>
+            <li class="entry_row__actions__action">
+                <a href="{% url "feeds:entry_actions" feed_slug=entry.feed.slug entry_slug=entry.slug %}">
+                    <i class="fas fa-bars"></i>
+                </a>
+            </li>
+        </ul>
+        <span class="entry_row__summary">{{ entry.summary|truncatechars:135 }}</span>
+        <div class="entry_row__body__meta">
+            <span class="entry_row__feed">
+                <a href="{% url "feeds:actions" slug=entry.feed.slug %}">
+                    {{ entry.feed.title }}
+                </a>
+            </span>
+            <span class="entry_row__date">{{ entry.slang_date_published }}</span>
+        </div>
+    </div>
+</div>

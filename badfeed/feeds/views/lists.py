@@ -8,6 +8,29 @@ from badfeed.feeds.models import Entry, Feed
 from badfeed.feeds.utils import feeds_by_last_updated_entry, get_actionable_entries
 
 
+class InboxView(LoginRequiredMixin, ListView):
+    """The primary inbox view, let's get to zero."""
+
+    template_name = "feeds/inbox.html"
+    extra_context = {"page_title": "Inbox"}
+    model = Entry
+    paginate_by = 20
+    ordering = "-date_published"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(states__isnull=True)
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["action_entries"] = ctx["object_list"][:3]
+        ctx["list_entries"] = ctx["object_list"][3:]
+        # TODO this is a bad and will likely shitcan performance
+        ctx["remaining"] = len(self.get_queryset())
+        return ctx
+
+
 class DashboardView(LoginRequiredMixin, TemplateView):
     """Render dashboard view until a SPA solution is found."""
 

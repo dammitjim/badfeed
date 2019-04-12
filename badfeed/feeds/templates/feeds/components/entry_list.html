@@ -1,7 +1,11 @@
 <div class="entry_list {% if show_feed %}entry_list--standalone{% endif %}">
     <div class="entry_list__entries">
         {% for entry in entries %}
-            {% include "feeds/components/entry_row.html" with entry=entry feed=entry.feed show_feed=show_feed %}
+            {% if detail %}
+                {% include "feeds/components/entry_row_detail.html" with entry=entry feed=entry.feed show_feed=show_feed %}
+            {% else %}
+                {% include "feeds/components/entry_row_compact.html" with entry=entry feed=entry.feed show_feed=show_feed %}
+            {% endif %}
         {% endfor %}
     </div>
     <div class="entry_list__navigate">
