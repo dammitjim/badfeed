@@ -13,14 +13,10 @@ class InboxView(LoginRequiredMixin, ListView):
 
     template_name = "feeds/inbox.html"
     extra_context = {"page_title": "Inbox"}
-    model = Entry
     paginate_by = 20
-    ordering = "-date_published"
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(states__isnull=True)
-        return queryset
+        return Entry.user_state.unread(self.request.user).order_by("-date_published")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
