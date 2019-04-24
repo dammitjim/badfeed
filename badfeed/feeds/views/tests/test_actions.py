@@ -74,7 +74,7 @@ class TestEntryPinToggleView:
         url = self._get_pin_url(entry)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:my_entries")
+        assert response.url == reverse("feeds:inbox")
 
 
 @pytest.mark.django_db
@@ -139,7 +139,7 @@ class TestEntryDeleteToggleView:
         url = self._get_delete_url(entry)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:my_entries")
+        assert response.url == reverse("feeds:inbox")
 
 
 @pytest.mark.django_db
@@ -204,7 +204,7 @@ class TestEntrySaveToggleView:
         url = self._get_save_url(entry)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:my_entries")
+        assert response.url == reverse("feeds:inbox")
 
 
 @pytest.mark.django_db
@@ -256,7 +256,7 @@ class TestFeedWatchToggleView:
         url = self._get_watch_url(feed)
         response = auth_client.get(url)
         assert response.status_code == 302
-        assert response.url == reverse("feeds:my_entries")
+        assert response.url == reverse("feeds:inbox")
 
 
 @pytest.mark.django_db

@@ -12,7 +12,7 @@ class LoginView(TemplateView):
         """Redirect already logged in users if they try to be cheeky."""
         if request.user.is_authenticated:
             messages.info(request, self.Messages.ALREADY_LOGGED_IN)
-            return redirect(reverse("feeds:my_entries"))
+            return redirect(reverse("feeds:inbox"))
         return super().dispatch(request, *args, **kwargs)
 
     class Messages:
