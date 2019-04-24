@@ -39,6 +39,7 @@ class FeedInboxView(InboxView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["page_title"] = f"Inbox / {self.feed.title}"
+        ctx["feed"] = self.feed
         return ctx
 
 

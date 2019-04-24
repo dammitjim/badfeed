@@ -6,6 +6,9 @@
             <div class="inbox__smart__actions">
                 <div class="inbox__smart__actions__remaining">
                     <span>{{ remaining }} remaining...</span>
+                    {% if feed %}
+                        <span><a href="{% url 'feeds:actions' slug=feed.slug %}">Actions</a></span>
+                    {% endif %}
                 </div>
                 <form method="post" action="{% url 'feeds:entry_multi_delete' %}">
                     {% csrf_token %}
