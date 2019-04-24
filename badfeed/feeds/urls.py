@@ -6,13 +6,12 @@ from badfeed.feeds.views import actions, details, lists, redirects, search
 
 app_name = "feeds"
 urlpatterns = [
-    path("", lists.DashboardView.as_view(), name="my_entries"),
-    path("inbox/", lists.InboxView.as_view(), name="inbox"),
+    path("", lists.InboxView.as_view(), name="inbox"),
     path("search/", search.FeedSearch.as_view(), name="search"),
     path("pinned/", lists.PinnedEntriesListView.as_view(), name="pinned_entries"),
     path("saved/", lists.SavedEntriesListView.as_view(), name="saved_entries"),
     path("archived/", lists.ArchivedEntriesListView.as_view(), name="archived_entries"),
-    path("f/<slug:slug>/", details.FeedDetailView.as_view(), name="detail"),
+    path("f/<slug:slug>/", lists.FeedInboxView.as_view(), name="feed_inbox"),
     path(
         "f/<slug:feed_slug>/<slug:entry_slug>/",
         details.EntryDetailView.as_view(),

@@ -21,7 +21,7 @@
         <span class="entry_row__summary">{{ entry.summary|truncatechars:135 }}</span>
         <div class="entry_row__body__meta">
             <span class="entry_row__feed">
-                <a href="{% url "feeds:actions" slug=entry.feed.slug %}">
+                <a href="{% url "feeds:feed_inbox" slug=entry.feed.slug %}">
                     {{ entry.feed.title }}
                 </a>
             </span>
