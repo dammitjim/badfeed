@@ -1,11 +1,19 @@
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+import maya
 
 from badfeed.feeds.models import Entry, EntryState, Feed
 
 
 User = get_user_model()
+
+
+class RuleManager(models.Manager):
+    def active(self):
+        """Filter for only active rules."""
+        now = maya.now()
+        return self.filter(date_start__gt=now, date_end__lt=now)
 
 
 class Rule(models.Model):
@@ -22,6 +30,10 @@ class Rule(models.Model):
         ContentType, blank=True, null=True, on_delete=models.PROTECT
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="rules")
+
+    def match(self, entry) -> bool:
+        """Verify that the entry matches the rule."""
+        raise NotImplementedError("Rule must implement match function.")
 
     def apply(self, entry: Entry):
         """Apply the appropriate action to the entry based on the action saved to self."""
