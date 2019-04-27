@@ -1,6 +1,6 @@
 from django.contrib.contenttypes.models import ContentType
-import pytest
 import maya
+import pytest
 
 
 from badfeed.feeds.models import EntryState

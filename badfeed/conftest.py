@@ -5,7 +5,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from badfeed.feeds.models import EnrichedContent, Entry, EntryState, Feed
-from badfeed.rules.models import FeedRule, TextMatchRule, Rule
+from badfeed.rules.models import FeedRule, Rule, TextMatchRule
 from badfeed.users.models import ThirdPartyTokens
 
 

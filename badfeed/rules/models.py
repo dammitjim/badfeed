@@ -39,7 +39,7 @@ class Rule(models.Model):
 
     objects = RuleManager()
 
-    def match(self, entry) -> bool:
+    def match(self, entry: Entry) -> bool:
         """Verify that the entry matches the rule."""
         raise NotImplementedError("Rule must implement match function.")
 
@@ -69,7 +69,7 @@ class FeedRule(Rule):
 
     feed = models.ForeignKey(Feed, on_delete=models.CASCADE, related_name="feed_rules")
 
-    def match(self, entry) -> bool:
+    def match(self, entry: Entry) -> bool:
         """The entry should share the same feed."""
         return self.feed == entry.feed
 
@@ -79,7 +79,7 @@ class TextMatchRule(Rule):
 
     text = models.CharField(max_length=100)
 
-    def match(self, entry) -> bool:
+    def match(self, entry: Entry) -> bool:
         """The entry should contain the stated text."""
         entry_title = entry.title.lower()
         text_match_lower = self.text.lower()
