@@ -5,6 +5,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from badfeed.feeds.models import EnrichedContent, Entry, EntryState, Feed
+from badfeed.rules.models import FeedRule, Rule, TextMatchRule
 from badfeed.users.models import ThirdPartyTokens
 
 
@@ -131,5 +132,44 @@ def enriched_content():
 def enriched_content_factory(**kwargs):
     def _make(**kwargs):
         return mommy.make(EnrichedContent, **kwargs)
+
+    return _make
+
+
+@pytest.fixture
+def rule():
+    return mommy.make(Rule)
+
+
+@pytest.fixture
+def rule_factory():
+    def _make(**kwargs):
+        return mommy.make(Rule, **kwargs)
+
+    return _make
+
+
+@pytest.fixture
+def feed_rule():
+    return mommy.make(FeedRule)
+
+
+@pytest.fixture
+def feed_rule_factory():
+    def _make(**kwargs):
+        return mommy.make(FeedRule, **kwargs)
+
+    return _make
+
+
+@pytest.fixture
+def text_match_rule():
+    return mommy.make(TextMatchRule)
+
+
+@pytest.fixture
+def text_match_rule_factory():
+    def _make(**kwargs):
+        return mommy.make(TextMatchRule, **kwargs)
 
     return _make

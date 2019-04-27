@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "badfeed.users",
     "badfeed.feeds",
     "badfeed.ingest",
+    "badfeed.rules",
 ]
 
 MIDDLEWARE = [

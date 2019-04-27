@@ -279,9 +279,11 @@ class EntryState(models.Model):
     STATE_SAVED = "saved"
     STATE_DELETED = "deleted"
     STATE_PINNED = "pinned"
+    STATE_HIDDEN = "hidden"
     STATE_CHOICES = [
         (STATE_UNREAD, "Unread"),
         (STATE_READ, "Read"),
+        (STATE_HIDDEN, "Hidden"),
         (STATE_SAVED, "Saved"),
         (STATE_DELETED, "Deleted"),
         (STATE_PINNED, "Pinned"),
