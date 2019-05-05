@@ -1,3 +1,4 @@
+import bleach
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -257,6 +258,12 @@ class Entry(SlugifiedMixin, models.Model):
         text = self.summary if self.summary else self.content
         truncated_text = Truncator(text).words(self.TEASER_WORDS)
         return truncated_text
+
+    def save(self, *args, **kwargs):
+        """Ensure certain data mutations always occur."""
+        if self.summary:
+            self.summary = bleach.clean(self.summary, strip=True)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         """Str dunder implementation."""
