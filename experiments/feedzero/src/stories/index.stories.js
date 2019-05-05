@@ -1,25 +1,26 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { storiesOf } from '@storybook/vue'
-import { action } from '@storybook/addon-actions'
-import { linkTo } from '@storybook/addon-links'
+import {storiesOf} from '@storybook/vue'
+import {withKnobs, boolean} from '@storybook/addon-knobs'
 
-import MyButton from '../components/MyButton.vue'
+import EntryRow from "../components/EntryRow.vue"
 
-storiesOf('Button', module)
-  .add('with text', () => ({
-    components: { MyButton },
-    template: '<my-button @click="action">Hello Button</my-button>',
-    methods: { action: action('clicked') }
-  }))
-  .add('with JSX', () => ({
-    components: { MyButton },
-    render() {
-      return <my-button onClick={this.action}>With JSX</my-button>;
-    },
-    methods: { action: linkTo('Button', 'with some emoji') }
-  }))
-  .add('with some emoji', () => ({
-    components: { MyButton },
-    template: '<my-button @click="action">😀 😎 👍 💯</my-button>',
-    methods: { action: action('clicked') }
-  }))
+const dummyEntry = {
+    title: "'League of Legends' Studio Faces Employee Walkout, Promises Changes",
+    summary: "Riot Games' decision to try and block lawsuits being filed against the company prompted an enormous internal blowback it's still wrestling with.",
+    href: "https://tightenupthe.tech",
+    feed: {title: "Waypoint", href: "https://tightenupthe.tech"},
+    relativeDatePublished: "2 days ago",
+};
+
+const entryRowStories = storiesOf("EntryRow", module);
+entryRowStories.addDecorator(withKnobs);
+entryRowStories
+    .add("regular", () => ({
+        components: {EntryRow},
+        template: '<EntryRow :entry="entry" :detailed="detailed" :important="important" />',
+        props: {
+            entry: {default: dummyEntry},
+            detailed: {default: boolean("Detailed", true)},
+            important: {default: boolean("Important", false)},
+        }
+    }))
