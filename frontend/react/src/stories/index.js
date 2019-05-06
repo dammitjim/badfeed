@@ -3,7 +3,8 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { withKnobs, boolean } from "@storybook/addon-knobs";
 
-import EntryRow from "../components/entry-row/index.tsx";
+import EntryRowLarge from "../components/entry-row-large/index.tsx";
+import EntryRowSmall from "../components/entry-row-small/index.tsx";
 
 const dummyEntry = {
     title: "'League of Legends' Studio Faces Employee Walkout, Promises Changes",
@@ -16,6 +17,9 @@ const dummyEntry = {
 const entryRowStories = storiesOf('EntryRow', module)
 entryRowStories.addDecorator(withKnobs);
 entryRowStories
-    .add('regular', () => (
-        <EntryRow entry={dummyEntry} detailed={boolean("Disabled", true)} important={boolean("Important", false)}/>
+    .add('large', () => (
+        <EntryRowLarge entry={dummyEntry} important={boolean("Important", false)}/>
+    ))
+    .add('small', () => (
+        <EntryRowSmall entry={dummyEntry} important={boolean("Important", false)}/>
     ))

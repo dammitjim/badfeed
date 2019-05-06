@@ -1,13 +1,19 @@
 import * as React from "react";
 
-import * as Styled from "./styled";
 import Props from "./props";
 
 const entryRowAction = (action: string) => {
+    let icon;
+    if (action === "Pin") {
+        icon = <i className="fas fa-thumbtack"></i>
+    }
+    else if (action === "Bars") {
+        icon = <i className="fas fa-bars"></i>
+    }
     return (
-        <Styled.Item>
-            {action}
-        </Styled.Item>
+        <li className="entry_row__actions__action">
+            {icon}
+        </li>
     )
 };
 
@@ -26,8 +32,8 @@ export default(props: Props) => {
     }
 
     return (
-        <Styled.List {...props}>
+        <ul className="entry_row__actions">
             {actions}
-        </Styled.List>
+        </ul>
     );
 }

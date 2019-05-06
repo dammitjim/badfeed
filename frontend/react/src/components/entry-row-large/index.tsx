@@ -1,9 +1,9 @@
 import React, {useState} from "react";
 
 import EntryRowActions from "../entry-row-actions/index";
-import EntryRowMeta from "../entry-row-meta/index";
+import EntryRowMeta from "../entry-row-large-meta/index";
+import EntryRowText from "../entry-row-text/index";
 
-import * as Styled from "./styled";
 import Props from "./props";
 
 export default (props: Props) => {
@@ -18,13 +18,13 @@ export default (props: Props) => {
     };
 
     return (
-        <Styled.Container {...props} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-            <Styled.Body>
-                <Styled.Heading><a href={props.entry.href} target="_blank">{props.entry.title}</a></Styled.Heading>
+        <div className="entry_row entry_row--detail" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            <div className="entry_row__body">
+                <EntryRowText href={props.entry.href} title={props.entry.title} />
                 <EntryRowActions show={showActions} pin bars/>
-                <span>{props.entry.summary}</span>
+                <span className="entry_row__summary">{props.entry.summary}</span>
                 <EntryRowMeta feed={props.entry.feed} datePublished="2 days ago"/>
-            </Styled.Body>
-        </Styled.Container>
+            </div>
+        </div>
     )
 }
