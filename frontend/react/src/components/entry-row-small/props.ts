@@ -1,4 +1,4 @@
 export default interface EntryRowProps {
-    important: boolean;
+    important?: boolean;
     entry: any;
 }

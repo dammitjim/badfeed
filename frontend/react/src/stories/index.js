@@ -3,6 +3,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { withKnobs, boolean } from "@storybook/addon-knobs";
 
+import EntryGroup from "../components/entry-group/index.tsx";
 import EntryRowLarge from "../components/entry-row-large/index.tsx";
 import EntryRowSmall from "../components/entry-row-small/index.tsx";
 
@@ -23,3 +24,11 @@ entryRowStories
     .add('small', () => (
         <EntryRowSmall entry={dummyEntry} important={boolean("Important", false)}/>
     ))
+
+
+const entryGroupStories = storiesOf("EntryGroup", module);
+entryGroupStories.addDecorator(withKnobs);
+entryGroupStories
+    .add("group", () => (
+        <EntryGroup entries={[dummyEntry, dummyEntry, dummyEntry, dummyEntry]} demo />
+    ));
