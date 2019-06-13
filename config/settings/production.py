@@ -13,4 +13,4 @@ sentry_init(
 
 POCKET_CONSUMER_KEY = env.str("POCKET_CONSUMER_KEY")
 
-STATICFILES_DIRS = [os.path.join(FRONTEND_DIR, "dist", "assets")]
+STATICFILES_DIRS = [os.path.join(FRONTEND_DIR, "theme", "dist", "assets")]
