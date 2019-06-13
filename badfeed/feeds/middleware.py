@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, When, Case, IntegerField
+from django.db.models import Case, Count, IntegerField, Q, When
 
 from badfeed.feeds.models import Feed
 
