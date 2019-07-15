@@ -5,7 +5,7 @@ from django.db import models
 from feedzero.feeds.models import Feed
 
 
-class feedzeroUser(AbstractUser):
+class FeedZeroUser(AbstractUser):
 
     email = models.EmailField(unique=True)
     watching = models.ManyToManyField(Feed, related_name="watched_by", blank=True)
@@ -53,7 +53,7 @@ class ThirdPartyTokens(models.Model):
     provider = models.CharField(max_length=50, choices=PROVIDER_CHOICES)
     metadata = JSONField(blank=True, null=True)
     user = models.ForeignKey(
-        feedzeroUser, related_name="third_party_tokens", on_delete=models.CASCADE
+        FeedZeroUser, related_name="third_party_tokens", on_delete=models.CASCADE
     )
 
     class Meta:

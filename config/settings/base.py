@@ -74,7 +74,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "users.feedzeroUser"
+AUTH_USER_MODEL = "users.FeedZeroUser"
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"

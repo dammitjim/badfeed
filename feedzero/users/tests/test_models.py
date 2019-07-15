@@ -1,18 +1,18 @@
 from django.db.utils import IntegrityError
 import pytest
 
-from feedzero.users.models import feedzeroUser, ThirdPartyTokens
+from feedzero.users.models import FeedZeroUser, ThirdPartyTokens
 
 
 @pytest.mark.django_db
-class TestfeedzeroUserModel:
+class TestFeedZeroUserModel:
     def test_email_field_unique(self):
         """The email field on the user model should be unique."""
-        assert feedzeroUser._meta.get_field("email").unique
+        assert FeedZeroUser._meta.get_field("email").unique
 
     def test_watching_field_blank(self):
         """The watching field should allow 0 entries."""
-        assert feedzeroUser._meta.get_field("watching").blank
+        assert FeedZeroUser._meta.get_field("watching").blank
 
     def test_dunder_str(self, user):
         """The model should return the username as the string value."""

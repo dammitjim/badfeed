@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name="feedzeroUser",
+            name="FeedZeroUser",
             fields=[
                 (
                     "id",

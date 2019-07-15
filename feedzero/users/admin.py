@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from feedzero.users.models import feedzeroUser, ThirdPartyTokens
+from feedzero.users.models import FeedZeroUser, ThirdPartyTokens
 
 
-@admin.register(feedzeroUser)
-class feedzeroUser(admin.ModelAdmin):
+@admin.register(FeedZeroUser)
+class FeedZeroUser(admin.ModelAdmin):
     exclude = ("password",)
 
 
