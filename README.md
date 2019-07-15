@@ -1,6 +1,6 @@
-# Project BADFEED
+# Project feedzero
 
-Badfeed is the codename for an experimental RSS reader with a focus on
+feedzero is the codename for an experimental RSS reader with a focus on
 reduction of noise. The goal is to surface content that may otherwise be missed
 due to the publishing velocity of noisier feeds, while also providing the tools
 to manage the large amount of clutter.

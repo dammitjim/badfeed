@@ -1,5 +1,5 @@
 """
-WSGI config for badfeed project.
+WSGI config for feedzero project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

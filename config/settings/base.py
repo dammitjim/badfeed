@@ -24,10 +24,10 @@ INSTALLED_APPS = [
     "django_rq",
     "rest_framework",
     # internal
-    "badfeed.users",
-    "badfeed.feeds",
-    "badfeed.ingest",
-    "badfeed.rules",
+    "feedzero.users",
+    "feedzero.feeds",
+    "feedzero.ingest",
+    "feedzero.rules",
 ]
 
 MIDDLEWARE = [
@@ -38,15 +38,15 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "badfeed.feeds.middleware.FeedMenuMiddleware",
+    "feedzero.feeds.middleware.FeedMenuMiddleware",
 ]
 
-ROOT_URLCONF = "badfeed.urls"
+ROOT_URLCONF = "feedzero.urls"
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "..", "badfeed", "core", "templates")],
+        "DIRS": [os.path.join(BASE_DIR, "..", "feedzero", "core", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -54,7 +54,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "badfeed.core.context_processors.search_term_processor",
+                "feedzero.core.context_processors.search_term_processor",
             ]
         },
     }
@@ -65,7 +65,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": env.str("DATABASE_NAME", default="badfeed_dev"),
+        "NAME": env.str("DATABASE_NAME", default="feedzero_dev"),
         "USER": env.str("DATABASE_USER", default="postgres"),
         "PASSWORD": env.str("DATABASE_PASSWORD", default=""),
         "HOST": env.str("DATABASE_HOST", default="localhost"),
@@ -74,7 +74,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = "users.BadFeedUser"
+AUTH_USER_MODEL = "users.feedzeroUser"
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
@@ -84,7 +84,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 AUTHENTICATION_BACKENDS = {
-    "badfeed.users.backends.Auth0",
+    "feedzero.users.backends.Auth0",
     "django.contrib.auth.backends.ModelBackend",
 }
 
