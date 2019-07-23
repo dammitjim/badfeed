@@ -4,12 +4,6 @@ import pytest
 from feedzero.feeds.models import EntryState
 
 
-def _get_user(client):
-    # TODO replace this with something less tragic
-    #      I tried the typical get_user to no avail
-    return client.handler._force_user
-
-
 @pytest.mark.django_db
 class TestEntryStateCreationView:
     def setup(self):
@@ -61,18 +55,18 @@ class TestEntryStateCreationView:
     )
     def test_mark_entry_state(self, state, auth_api_client, entry):
         """When submitted as an action, the entry should be marked as read by."""
-        user = _get_user(auth_api_client)
         response = auth_api_client.post(
             self.url,
             {"actions": [{"state": state, "entry_id": entry.id}]},
             format="json",
         )
         assert response.status_code == 200
-        assert EntryState.objects.filter(entry=entry, state=state, user=user).exists()
+        assert EntryState.objects.filter(
+            entry=entry, state=state, user=auth_api_client.user
+        ).exists()
 
     def test_bulk_mark_different_entries(self, auth_api_client, entry_factory):
         """Should be able to mark different entries with different states."""
-        user = _get_user(auth_api_client)
         entries = [entry_factory() for _ in range(4)]
         states = [
             EntryState.STATE_READ,
@@ -91,5 +85,7 @@ class TestEntryStateCreationView:
 
         for action in actions:
             assert EntryState.objects.filter(
-                entry__id=action["entry_id"], state=action["state"], user=user
+                entry__id=action["entry_id"],
+                state=action["state"],
+                user=auth_api_client.user,
             ).exists()
