@@ -1,6 +1,7 @@
 from django.db.models import Count, Max, Q
 
-from feedzero.feeds.models import Feed
+from feedzero.feeds.models import Entry, EntryState, Feed
+from feedzero.users.models import FeedZeroUser
 
 
 def feeds_by_last_updated_entry(user):
@@ -40,3 +41,14 @@ def feeds_by_last_updated_entry(user):
 def get_actionable_entries(feed, user):
     """Load the 5 latest unread / unactioned entries for the feed."""
     return feed.entries(manager="user_state").unread(user).order_by("-date_published")
+
+
+def apply_state_to_entry(entry: Entry, state: str, for_user: FeedZeroUser):
+    if state == EntryState.STATE_READ:
+        entry.mark_read_by(for_user)
+    elif state == EntryState.STATE_SAVED:
+        entry.mark_saved(for_user)
+    elif state == EntryState.STATE_PINNED:
+        entry.mark_pinned(for_user)
+    elif state == EntryState.STATE_DELETED:
+        entry.mark_deleted(for_user)

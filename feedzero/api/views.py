@@ -6,9 +6,12 @@ from rest_framework.views import APIView
 
 from feedzero.api.serializers import EntrySerializer, EntryWithStateSerializer
 from feedzero.feeds.models import Entry, EntryState
+from feedzero.feeds.utils import apply_state_to_entry
 
 
 class EntryListView(ListAPIView):
+    """List all unread entries for the request user."""
+
     serializer_class = EntrySerializer
 
     def get_queryset(self):
@@ -16,6 +19,8 @@ class EntryListView(ListAPIView):
 
 
 class PinnedEntryListView(ListAPIView):
+    """List all current pinned entries for the request user."""
+
     serializer_class = EntryWithStateSerializer
 
     def get_queryset(self):
@@ -27,34 +32,24 @@ class PinnedEntryListView(ListAPIView):
 class EntryStateCreationView(APIView):
     """Manage multiple state amends simultaneously."""
 
+    def __init__(self):
+        super().__init__()
+        self.valid_states = dict(EntryState.STATE_CHOICES).keys()
+
     def _get_entry(self, entry_id):
         try:
             return Entry.objects.get(pk=entry_id)
         except Entry.DoesNotExist:
             raise NotFound("entry corresponding to entry_id does not exist")
 
-    def _validate_action(self, action: dict):
+    def validate_action(self, action: dict):
         if "state" not in action:
             raise ParseError("state is a required parameter of each action")
         if "entry_id" not in action:
             raise ParseError("entry_id is a required parameter of each action")
 
-        valid_states = dict(EntryState.STATE_CHOICES).keys()
-        if action["state"] not in valid_states:
+        if action["state"] not in self.valid_states:
             raise ParseError(f"{action['state']} is not a valid state")
-
-    def _apply_action(self, action: dict):
-        """Apply the corresponding change against the entry."""
-        entry = self._get_entry(action["entry_id"])
-        desired_state = action["state"]
-        if desired_state == EntryState.STATE_READ:
-            entry.mark_read_by(self.request.user)
-        elif desired_state == EntryState.STATE_SAVED:
-            entry.mark_saved(self.request.user)
-        elif desired_state == EntryState.STATE_PINNED:
-            entry.mark_pinned(self.request.user)
-        elif desired_state == EntryState.STATE_DELETED:
-            entry.mark_deleted(self.request.user)
 
     def post(self, request: Request, format=None):
         """Accept an array of state changes."""
@@ -63,7 +58,15 @@ class EntryStateCreationView(APIView):
 
         # TODO at some point may want this to continue even if one of them fails
         for action in request.data["actions"]:
-            self._validate_action(action)
-            self._apply_action(action)
+            self.validate_action(action)
+
+            try:
+                entry_id = action["entry_id"]
+                entry = Entry.objects.get(pk=entry_id)
+            except Entry.DoesNotExist:
+                raise NotFound("entry corresponding to entry_id does not exist")
+
+            desired_state = action["state"]
+            apply_state_to_entry(entry, desired_state, self.request.user)
 
         return Response(status=200)

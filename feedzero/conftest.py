@@ -55,7 +55,7 @@ def watched_feed(user):
     feed = mommy.make(Feed, title="My Watched Feed!")
     user.watching.add(feed)
     user.save()
-    return feed
+    return feed, user
 
 
 @pytest.fixture

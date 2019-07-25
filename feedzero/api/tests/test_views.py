@@ -5,6 +5,72 @@ from feedzero.feeds.models import EntryState
 
 
 @pytest.mark.django_db
+class TestEntryListView:
+    def setup(self):
+        self.url = reverse("api:entry_list")
+
+    def test_requires_login(self, api_client):
+        """Should require an authenticated user to access."""
+        response = api_client.get(self.url)
+        assert response.status_code == 403
+
+    def test_responds_200(self, auth_api_client, entry_factory, watched_feed):
+        """Should respond 200 without error."""
+        (feed, user) = watched_feed
+        [entry_factory(feed=feed) for _ in range(5)]
+        response = auth_api_client.get(self.url)
+        assert response.status_code == 200
+
+    def test_lists_only_unread_entries(
+        self, auth_api_client, entry_factory, watched_feed
+    ):
+        """Should only list unread entries for the user."""
+        (feed, user) = watched_feed
+        entries = [entry_factory(feed=feed) for _ in range(5)]
+        for entry in entries[:3]:
+            entry.mark_deleted(auth_api_client.user)
+        response = auth_api_client.get(self.url)
+        assert response.json()["count"] == 2
+
+    def test_omits_state(self, auth_api_client, entry_factory, watched_feed):
+        """Should not include any state information in this payload."""
+        (feed, user) = watched_feed
+        entry_factory(feed=feed)
+        data = auth_api_client.get(self.url).json()
+        for entry in data["results"]:
+            assert "state" not in entry
+
+
+@pytest.mark.django_db
+class TestPinnedEntryListView:
+    def setup(self):
+        self.url = reverse("api:pinned_entry_list")
+
+    def test_requires_login(self, api_client):
+        """Should require an authenticated user to access."""
+        response = api_client.get(self.url)
+        assert response.status_code == 403
+
+    def test_responds_200(self, auth_api_client, entry_factory, watched_feed):
+        """Should respond 200 without error."""
+        (feed, user) = watched_feed
+        entries = [entry_factory(feed=feed) for _ in range(5)]
+        [entry.mark_pinned(user) for entry in entries]
+        response = auth_api_client.get(self.url)
+        assert response.status_code == 200
+
+    def test_lists_only_pinned_entries(
+        self, auth_api_client, entry_factory, watched_feed
+    ):
+        """Should only list pinned entries for the user."""
+        (feed, user) = watched_feed
+        entries = [entry_factory(feed=feed) for _ in range(5)]
+        [entry.mark_pinned(user) for entry in entries[:3]]
+        response = auth_api_client.get(self.url)
+        assert response.json()["count"] == 3
+
+
+@pytest.mark.django_db
 class TestEntryStateCreationView:
     def setup(self):
         self.url = reverse("api:state_create")
