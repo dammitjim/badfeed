@@ -18,15 +18,24 @@ services:
     env_file:
       - docker.env
       - secrets.env
+    logging:
+      options:
+        max-size: "200k"
+        max-file: "10"
   rq:
     build: .
     command: bash -c "python manage.py rqworker"
     volumes:
-    - .:/code
+      - .:/code
     depends_on:
-    - db
-    - redis
-    - web
+      - db
+      - redis
+      - web
     env_file:
       - docker.env
       - secrets.env
+    logging:
+      options:
+        max-size: "200k"
+        max-file: "10"
+

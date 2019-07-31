@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.contrib import admin
 
-from .models import Author, Enclosure, EnrichedContent, Entry, EntryState, Feed, Tag
+from feedzero.feeds.models import (
+    Author,
+    Enclosure,
+    EnrichedContent,
+    Entry,
+    EntryState,
+    Feed,
+    Tag,
+)
+from feedzero.ingest.jobs import sync_feed
 
 
 @admin.register(Feed)
@@ -14,8 +24,19 @@ class FeedAdmin(admin.ModelAdmin):
         "date_created",
         "date_modified",
     )
-    list_filter = ("date_created", "date_modified", "date_last_scraped")
-    search_fields = ("title",)
+    list_filter = ["date_created", "date_modified", "date_last_scraped"]
+    search_fields = ["title"]
+    actions = ["sync_feeds"]
+
+    def sync_feeds(modeladmin, request, queryset):
+        """Manual action to sync the requested feeds."""
+        for feed in queryset:
+            if settings.RQ_ENABLED:
+                sync_feed.delay(feed)
+            else:
+                sync_feed(feed)
+
+    sync_feeds.short_description = "Queue sync."
 
 
 @admin.register(Entry)
