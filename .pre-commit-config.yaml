@@ -4,10 +4,11 @@ repos:
     rev: 18.9b0
     hooks:
       - id: black
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.7.8
+    hooks:
+      - id: flake8
   - repo: git://github.com/pre-commit/pre-commit-hooks
     rev: v2.1.0
     hooks:
       - id: debug-statements # check for existence of pdb / ipdb/ pudb statements
-      - id: flake8
-        name: flake8
-        entry: flake8
