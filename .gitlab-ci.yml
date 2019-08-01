@@ -9,12 +9,14 @@ image: python:3.6.7
 
 variables:
   POSTGRES_DB: feedzero_ci
+  WORKON_HOME: .pipenv/venvs
+  PIP_CACHE_DIR: .pipenv/pipcache
 
 # This folder is cached between builds
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
 cache:
   paths:
-    - ~/.cache/pip/
+    - ~/.pipenv
     - ~/frontend/new/node_modules/
 
 stages:
