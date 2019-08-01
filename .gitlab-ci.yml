@@ -14,10 +14,10 @@ variables:
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
 cache:
   paths:
-  - ~/.cache/pip/
+    - ~/.cache/pip/
 
 before_script:
-  - python -V                                   # Print out python version for debugging
+  - python -V # Print out python version for debugging
   - pip install pipenv
   - pipenv install --dev
 
@@ -47,3 +47,13 @@ black:
   stage: linting
   script:
     - pipenv run black --check .
+
+frontend:
+  image: node:12.7-alpine
+  stage: tests
+  script:
+    - cd frontend/new
+    - npm install --dev
+    - npm run lint --no-fix
+    - npm run lint:formatting
+    - npm run test:unit
