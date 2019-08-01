@@ -15,11 +15,7 @@ variables:
 cache:
   paths:
     - ~/.cache/pip/
-
-before_script:
-  - python -V # Print out python version for debugging
-  - pip install pipenv
-  - pipenv install --dev
+    - ~/frontend/new/node_modules/
 
 stages:
   - linting
@@ -27,6 +23,9 @@ stages:
 
 backend_lint:
   stage: linting
+  before_script:
+    - pip install pipenv
+    - pipenv install --dev
   script:
     - pipenv run flake8 .
     - pipenv run black --check .
@@ -34,9 +33,10 @@ backend_lint:
 frontend_lint:
   image: node:12.7-alpine
   stage: linting
-  script:
+  before_script:
     - cd frontend/new
     - npm install --dev
+  script:
     - npm run lint --no-fix
     - npm run lint:formatting
 
@@ -50,13 +50,17 @@ backend_test:
     DATABASE_USER: postgres
     DATABASE_PASSWORD: postgres
     DATABASE_HOST: postgres
+  before_script:
+    - pip install pipenv
+    - pipenv install --dev
   script:
     - pipenv run pytest
 
 frontend_test:
   image: node:12.7-alpine
   stage: tests
-  script:
+  before_script:
     - cd frontend/new
     - npm install --dev
+  script:
     - npm run test:unit
