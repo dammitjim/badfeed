@@ -25,7 +25,22 @@ stages:
   - linting
   - tests
 
-pytest:
+backend_lint:
+  stage: linting
+  script:
+    - pipenv run flake8 .
+    - pipenv run black --check .
+
+frontend_lint:
+  image: node:12.7-alpine
+  stage: linting
+  script:
+    - cd frontend/new
+    - npm install --dev
+    - npm run lint --no-fix
+    - npm run lint:formatting
+
+backend_test:
   stage: tests
   services:
     - postgres:latest
@@ -38,22 +53,10 @@ pytest:
   script:
     - pipenv run pytest
 
-flake8:
-  stage: linting
-  script:
-    - pipenv run flake8 .
-
-black:
-  stage: linting
-  script:
-    - pipenv run black --check .
-
-frontend:
+frontend_test:
   image: node:12.7-alpine
   stage: tests
   script:
     - cd frontend/new
     - npm install --dev
-    - npm run lint --no-fix
-    - npm run lint:formatting
     - npm run test:unit
