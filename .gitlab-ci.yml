@@ -27,7 +27,7 @@ backend_lint:
   stage: linting
   before_script:
     - pip install pipenv
-    - pipenv install --dev
+    - pipenv install --dev --ignore-pipfile
   script:
     - pipenv run flake8 .
     - pipenv run black --check .
@@ -54,7 +54,7 @@ backend_test:
     DATABASE_HOST: postgres
   before_script:
     - pip install pipenv
-    - pipenv install --dev
+    - pipenv install --dev --ignore-pipfile
   script:
     - pipenv run pytest
 
