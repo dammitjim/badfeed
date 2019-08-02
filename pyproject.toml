@@ -2,3 +2,4 @@
 line-length = 88
 safe = true
 py36 = true
+exclude = ".pipenv/*,frontend/*"
