@@ -9,23 +9,40 @@ image: python:3.6.7
 
 variables:
   POSTGRES_DB: feedzero_ci
+  WORKON_HOME: .pipenv/venvs
+  PIP_CACHE_DIR: .pipenv/pipcache
 
 # This folder is cached between builds
 # http://docs.gitlab.com/ce/ci/yaml/README.html#cache
 cache:
   paths:
-  - ~/.cache/pip/
-
-before_script:
-  - python -V                                   # Print out python version for debugging
-  - pip install pipenv
-  - pipenv install --dev
+    - ~/.pipenv
+    - ~/frontend/new/node_modules/
 
 stages:
   - linting
   - tests
 
-pytest:
+backend_lint:
+  stage: linting
+  before_script:
+    - pip install pipenv
+    - pipenv install --dev
+  script:
+    - pipenv run flake8 .
+    - pipenv run black --check .
+
+frontend_lint:
+  image: node:12.7-alpine
+  stage: linting
+  before_script:
+    - cd frontend/new
+    - npm install --dev
+  script:
+    - npm run lint --no-fix
+    - npm run lint:formatting
+
+backend_test:
   stage: tests
   services:
     - postgres:latest
@@ -35,15 +52,17 @@ pytest:
     DATABASE_USER: postgres
     DATABASE_PASSWORD: postgres
     DATABASE_HOST: postgres
+  before_script:
+    - pip install pipenv
+    - pipenv install --dev
   script:
     - pipenv run pytest
 
-flake8:
-  stage: linting
+frontend_test:
+  image: node:12.7-alpine
+  stage: tests
+  before_script:
+    - cd frontend/new
+    - npm install --dev
   script:
-    - pipenv run flake8 .
-
-black:
-  stage: linting
-  script:
-    - pipenv run black --check .
+    - npm run test:unit

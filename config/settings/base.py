@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "social_django",
     "django_rq",
     "rest_framework",
+    "webpack_loader",
     # internal
     "feedzero.users",
     "feedzero.feeds",
@@ -108,7 +109,10 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = env.str("DJANGO_STATIC_ROOT", default="")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "..", "frontend", "theme", "dist", "assets")]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "..", "frontend", "theme", "dist", "assets"),
+    os.path.join(FRONTEND_DIR, "new", "dist"),
+]
 
 MEDIA_ROOT = env.str("DJANGO_MEDIA_ROOT", default="")
 
@@ -141,3 +145,11 @@ SOCIAL_AUTH_AUTH0_SCOPE = ["openid", "profile"]
 LOGIN_URL = "/login/auth0"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login"
+
+WEBPACK_LOADER = {
+    "DEFAULT": {
+        "CACHE": not DEBUG,
+        "BUNDLE_DIR_NAME": "/dist/",  # must end with slash
+        "STATS_FILE": os.path.join(FRONTEND_DIR, "webpack-stats-prod.json"),
+    }
+}

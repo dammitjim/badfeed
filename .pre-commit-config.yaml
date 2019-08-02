@@ -12,3 +12,4 @@ repos:
     rev: v2.1.0
     hooks:
       - id: debug-statements # check for existence of pdb / ipdb/ pudb statements
+  # TODO frontend linting
