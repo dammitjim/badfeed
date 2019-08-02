@@ -2,4 +2,4 @@
 line-length = 88
 safe = true
 py36 = true
-exclude = ".pipenv/*,frontend/*"
+exclude = '/(\.eggs|\.git|\.hg|\.mypy_cache|\.nox|\.tox|\.venv|_build|buck-out|build|dist|\.pipenv|frontend)/'
