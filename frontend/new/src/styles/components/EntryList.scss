@@ -1,0 +1,9 @@
+.entry-list-transition-enter-active,
+.entry-list-transition-leave-active {
+    transition: all 0.4s ease-out;
+}
+
+.entry-list-transition-enter,
+.entry-list-transition-leave-to {
+    opacity: 0;
+}
