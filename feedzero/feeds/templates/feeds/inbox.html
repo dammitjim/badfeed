@@ -1,4 +1,5 @@
 {% extends "layouts/contained.html" %}
+{% load render_bundle from webpack_loader %}
 
 {% block main %}
     <div class="inbox">
@@ -28,4 +29,9 @@
             {% include "feeds/components/entry_list.html" with entries=list_entries %}
         </div>
     </div>
+{% endblock %}
+
+{% block root %}
+    <div id="reader-app"></div>
+    {% render_bundle "reader" %}
 {% endblock %}
