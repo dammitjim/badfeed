@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6377c5ca9b124e8d6eccb529d2db17828af84fbd3f70a61373c0b2b745cc0ecf"
+            "sha256": "33a529ac5969ec3967dc31b7d746e15d2d3ec07574a12a8fac7cc06b30f83819"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.6"
+            "python_version": "3.7"
         },
         "sources": [
             {
@@ -292,10 +292,10 @@
         },
         "oauthlib": {
             "hashes": [
-                "sha256:40a63637707e9163eda62d0f5345120c65e001a790480b8256448543c1f78f66",
-                "sha256:b4d99ae8ccfb7d33ba9591b59355c64eef5241534aa3da2e4c0435346b84bc8e"
+                "sha256:bee41cc35fcca6e988463cacc3bcb8a96224f470ca547e697b604cc697b2f889",
+                "sha256:df884cd6cbe20e32633f1db1072e9356f53638e4361bef4e8b03c9127c9328ea"
             ],
-            "version": "==3.0.2"
+            "version": "==3.1.0"
         },
         "pendulum": {
             "hashes": [
@@ -460,10 +460,10 @@
         },
         "redis": {
             "hashes": [
-                "sha256:1f2493b72f669a096c59ca7cf7f4067b1ab58a0a3c6bef51d5d8fd384298c6a2",
-                "sha256:b851b0ef53b6d416f1dc692dc168f3d390b37995925bfe29351b3a869976598c"
+                "sha256:45682ecf226c7611efe731974c4fa3390170ba045b9cdb26f0051114a5c2a68b",
+                "sha256:f2609a85e5f37f489ba3b5652e1175dc3711c4d7a7818c4f657615810afd23df"
             ],
-            "version": "==3.3.4"
+            "version": "==3.3.6"
         },
         "regex": {
             "hashes": [
@@ -707,14 +707,6 @@
                 "sha256:80d2de76188eabfbfcf27e6a37342c2827801e59c4cc14b0371c56fed43820e3"
             ],
             "version": "==0.19"
-        },
-        "importlib-resources": {
-            "hashes": [
-                "sha256:6e2783b2538bd5a14678284a3962b0660c715e5a0f10243fd5e00a4b5974f50b",
-                "sha256:d3279fd0f6f847cced9f7acc19bd3e5df54d34f93a2e7bb5f238f81545787078"
-            ],
-            "markers": "python_version < '3.7'",
-            "version": "==1.0.2"
         },
         "mccabe": {
             "hashes": [
