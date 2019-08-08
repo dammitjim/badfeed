@@ -19,9 +19,9 @@ export default {
     },
     methods: {
         async pin() {
-            await this.$store.dispatch(ACTIONS.PIN_STORY, this.entry)
+            await this.$store.dispatch(ACTIONS.PIN_STORY, this.entry);
         }
     }
-}
+};
 </script>
 

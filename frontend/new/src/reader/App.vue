@@ -9,7 +9,7 @@
             </section>
             <section class="columns">
                 <div class="column is-one-fifth">
-                    Feeds
+                    <FeedList />
                 </div>
                 <div class="column is-three-fifths">
                     <router-view />
@@ -20,10 +20,12 @@
 </template>
 <script>
 import TabbedRouter from "@/reader/components/TabbedRouter";
+import FeedList from "@/reader/components/FeedList";
 
 export default {
     name: "App",
     components: {
+        FeedList,
         TabbedRouter
     }
 }

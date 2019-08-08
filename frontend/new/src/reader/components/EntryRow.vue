@@ -14,7 +14,7 @@
     </div>
 </template>
 <script>
-import ButtonPin from "@/reader/components/ButtonPin"
+import ButtonPin from "@/reader/components/ButtonPin";
 
 export default {
     name: "EntryRow",
@@ -27,5 +27,5 @@ export default {
             required: true
         }
     }
-}
+};
 </script>

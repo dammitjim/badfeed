@@ -1,8 +1,8 @@
 <template>
-  <b-tabs type="is-boxed" @change="handleClick">
-    <b-tab-item label="Inbox" icon="paper-plane"></b-tab-item>
-    <b-tab-item label="Pinned" icon="thumbtack"></b-tab-item>
-  </b-tabs>
+    <b-tabs type="is-boxed" @change="handleClick">
+        <b-tab-item label="Inbox" icon="paper-plane"></b-tab-item>
+        <b-tab-item label="Pinned" icon="thumbtack"></b-tab-item>
+    </b-tabs>
 </template>
 <script>
 const indexToRouteMap = {
