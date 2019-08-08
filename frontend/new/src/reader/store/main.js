@@ -17,8 +17,8 @@ export const ACTIONS = {
 
 export const store = new Vuex.Store({
     state: {
-        feeds: createSpoofFeeds(5),
-        inbox: createSpoofStories(10),
+        feeds: createSpoofFeeds(20),
+        inbox: createSpoofStories(100),
         pinned: []
     },
     mutations: {

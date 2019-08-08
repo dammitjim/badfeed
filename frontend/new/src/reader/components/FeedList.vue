@@ -11,85 +11,23 @@
                 </p>
             </div>
             <div class="feed-list__items">
-                <a class="panel-block is-active">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    bulma
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    marksheet
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    minireset.css
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    jgthms.github.io
-                </a>
-                <a class="panel-block is-active">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    bulma
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    marksheet
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    minireset.css
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    jgthms.github.io
-                </a>
-                <a class="panel-block is-active">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    bulma
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    marksheet
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    minireset.css
-                </a>
-                <a class="panel-block">
-                    <span class="panel-icon">
-                        <i class="fas fa-book" aria-hidden="true"></i>
-                    </span>
-                    jgthms.github.io
-                </a>
+                <FeedRow :key="feed.id" v-for="feed in feeds" :title="feed.name" />
             </div>
         </b-collapse>
     </div>
 </template>
 <script>
+import FeedRow from "@/reader/components/FeedRow";
 export default {
-    name: "FeedList"
+    name: "FeedList",
+    components: {
+        FeedRow
+    },
+    computed: {
+        feeds() {
+            return this.$store.state.feeds;
+        }
+    }
 };
 </script>
 <style lang="scss">

@@ -15,7 +15,7 @@ export default {
     },
     computed: {
         entries() {
-            return this.$store.state.inbox;
+            return this.$store.state.inbox.slice(0, 6);
         }
     },
     methods: {
