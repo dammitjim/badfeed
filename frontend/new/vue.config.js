@@ -13,10 +13,10 @@ module.exports = {
         }
     },
 
-    baseUrl: process.env.NODE_ENV === "production" ? "/static/" : "http://localhost:8080/",
+    publicPath: process.env.NODE_ENV === "production" ? "/static/" : "http://0.0.0.0:8080/",
 
     devServer: {
-        publicPath: "http://localhost:8080/",
+        publicPath: "/",
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",

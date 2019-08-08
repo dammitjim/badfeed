@@ -1,7 +1,7 @@
 <template>
-  <div class="view-inbox">
-      <EntryList :entries="entries" />
-  </div>
+    <div class="view-inbox">
+        <EntryList :entries="entries" />
+    </div>
 </template>
 <script>
 import EntryList from "@/reader/components/EntryList";
@@ -11,7 +11,7 @@ import { ACTIONS } from "@/reader/store/main.js";
 export default {
     name: "Inbox",
     components: {
-        EntryList,
+        EntryList
     },
     computed: {
         entries() {
@@ -20,7 +20,7 @@ export default {
     },
     methods: {
         async pin(story) {
-            await this.$store.dispatch(ACTIONS.PIN_STORY, story)
+            await this.$store.dispatch(ACTIONS.PIN_STORY, story);
         }
     }
 };
