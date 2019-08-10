@@ -1,11 +1,16 @@
 from rest_framework.exceptions import ParseError, NotFound
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from feedzero.api.serializers import EntrySerializer, EntryWithStateSerializer
-from feedzero.feeds.models import Entry, EntryState
+from feedzero.api.serializers import (
+    EntrySerializer,
+    EntryDetailSerializer,
+    EntryWithStateSerializer,
+    FeedSerializer,
+)
+from feedzero.feeds.models import Entry, EntryState, Feed
 from feedzero.feeds.utils import apply_state_to_entry
 
 
@@ -27,6 +32,26 @@ class PinnedEntryListView(ListAPIView):
         return Entry.user_state.pinned(self.request.user).order_by(
             "-states__date_created"
         )
+
+
+class EntryDetailView(RetrieveAPIView):
+    """Detail view for an individual entry."""
+
+    serializer_class = EntryDetailSerializer
+    lookup_field = "slug"
+    lookup_url_kwarg = "slug"
+
+
+class FeedListView(ListAPIView):
+    """Listing view for feeds."""
+
+    serializer_class = FeedSerializer
+
+    def get_queryset(self):
+        only = self.request.GET.get("only", None)
+        if only == "user":
+            return Feed.objects.watched_by(self.request.user)
+        return Feed.objects.all()
 
 
 class EntryStateCreationView(APIView):

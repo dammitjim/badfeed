@@ -71,6 +71,25 @@ class TestPinnedEntryListView:
 
 
 @pytest.mark.django_db
+class TestFeedListView:
+    def setup(self):
+        self.url = reverse("api:feed_list")
+
+    def test_requires_login(self, api_client):
+        """Should require an authenticated user to access."""
+        response = api_client.get(self.url)
+        assert response.status_code == 403
+
+    def test_responds_200(self, auth_api_client, feed_factory):
+        """Should respond 200 from a basic request."""
+        pass
+
+    def test_filter_only_watched_feeds(self, auth_api_client, feed_factory):
+        """Should only return watched feeds if passed only=user as a GET param."""
+        pass
+
+
+@pytest.mark.django_db
 class TestEntryStateCreationView:
     def setup(self):
         self.url = reverse("api:state_create")

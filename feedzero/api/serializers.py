@@ -38,3 +38,9 @@ class EntryWithStateSerializer(EntrySerializer):
     class Meta:
         fields = EntrySerializer.Meta.fields + ["states"]
         model = EntrySerializer.Meta.model
+
+
+class EntryDetailSerializer(EntrySerializer):
+    class Meta:
+        model = EntrySerializer.Meta.model
+        fields = EntrySerializer.Meta.fields + ["content"]
