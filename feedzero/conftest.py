@@ -28,6 +28,7 @@ def api_client():
 def auth_api_client(user):
     client = APIClient()
     client.force_authenticate(user=user)
+    client.user = user
     return client
 
 
@@ -54,7 +55,7 @@ def watched_feed(user):
     feed = mommy.make(Feed, title="My Watched Feed!")
     user.watching.add(feed)
     user.save()
-    return feed
+    return feed, user
 
 
 @pytest.fixture
