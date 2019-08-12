@@ -50,6 +50,7 @@ class FeedListView(ListAPIView):
     serializer_class = FeedSerializer
     filterset_class = FeedListFilterSet
     queryset = Feed.objects.all()
+    page_size = 30
 
 
 class EntryStateCreationView(APIView):

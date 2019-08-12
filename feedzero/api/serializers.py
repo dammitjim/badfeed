@@ -23,9 +23,11 @@ class FeedSerializer(ModelSerializer):
 
 
 class EntrySerializer(ModelSerializer):
+    feed = FeedSerializer()
+
     class Meta:
         model = Entry
-        fields = ["title", "link", "guid", "date_published", "feed"]
+        fields = ["id", "title", "link", "summary", "guid", "date_published", "feed"]
 
 
 class EntryStateSerializer(ModelSerializer):
