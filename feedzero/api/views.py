@@ -4,6 +4,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from feedzero.api.filters import FeedListFilterSet
 from feedzero.api.serializers import (
     EntrySerializer,
     EntryDetailSerializer,
@@ -18,6 +19,7 @@ class EntryListView(ListAPIView):
     """List all unread entries for the request user."""
 
     serializer_class = EntrySerializer
+    filterset_fields = ["feed"]
 
     def get_queryset(self):
         return Entry.user_state.unread(self.request.user).order_by("-date_published")
@@ -46,6 +48,7 @@ class FeedListView(ListAPIView):
     """Listing view for feeds."""
 
     serializer_class = FeedSerializer
+    filterset_class = FeedListFilterSet
 
     def get_queryset(self):
         only = self.request.GET.get("only", None)

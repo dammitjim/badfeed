@@ -4,9 +4,22 @@ from feedzero.feeds.models import Entry, EntryState, Feed
 
 
 class FeedSerializer(ModelSerializer):
+    unread = SerializerMethodField()
+
+    def get_unread(self, obj):
+        """If appropriate, return the amount of unread entries for the feed."""
+        if "request" not in self.context:
+            return None
+
+        user = self.context["request"].user
+        if not obj.is_watched_by(user):
+            return None
+
+        return Entry.user_state.unread(user).filter(feed=obj).count()
+
     class Meta:
         model = Feed
-        fields = ["title", "slug", "link", "date_last_scraped"]
+        fields = ["title", "slug", "link", "date_last_scraped", "unread"]
 
 
 class EntrySerializer(ModelSerializer):
