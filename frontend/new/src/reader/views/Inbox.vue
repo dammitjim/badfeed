@@ -5,7 +5,6 @@
 </template>
 <script>
 import EntryList from "@/reader/components/EntryList";
-
 import { ACTIONS } from "@/reader/store/main.js";
 
 export default {
@@ -22,6 +21,9 @@ export default {
         async pin(story) {
             await this.$store.dispatch(ACTIONS.PIN_STORY, story);
         }
+    },
+    mounted() {
+        this.$store.dispatch(ACTIONS.FETCH_ENTRIES);
     }
 };
 </script>

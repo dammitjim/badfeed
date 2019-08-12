@@ -29,12 +29,17 @@
     </div>
 </template>
 <script>
+import { ACTIONS } from "@/reader/store/main.js";
+
 export default {
     name: "Pinned",
     computed: {
         stories() {
             return this.$store.state.pinned;
         }
+    },
+    mounted() {
+        this.$store.dispatch(ACTIONS.FETCH_PINNED_ENTRIES);
     }
 };
 </script>
