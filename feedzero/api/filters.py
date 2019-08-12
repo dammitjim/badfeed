@@ -2,7 +2,9 @@ from django_filters import rest_framework as filters
 
 
 class FeedListFilterSet(filters.FilterSet):
-    only_watched = filters.BooleanFilter(method="get_only_watched")
+    only_watched = filters.BooleanFilter(
+        method="get_only_watched", label="Only return watched"
+    )
 
     def get_only_watched(self, queryset, name, value):
         """If true only return the feeds watched by the request user."""

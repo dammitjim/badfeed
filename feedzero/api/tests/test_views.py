@@ -40,6 +40,30 @@ class TestEntryListView:
         for entry in data["results"]:
             assert "state" not in entry
 
+    def test_filter_by_feed(self, auth_api_client, entry_factory, feed_factory):
+        """Should only include entries for the filtered feed."""
+        want_feed = feed_factory()
+        want_entry_1 = entry_factory(feed=want_feed)
+        want_entry_2 = entry_factory(feed=want_feed)
+
+        omit_feed = feed_factory()
+        omit_entry = entry_factory(feed=omit_feed)
+
+        user = auth_api_client.user
+        user.watch(want_entry_1.feed)
+        user.watch(omit_entry.feed)
+
+        url = f"{self.url}?feed={want_entry_1.feed.pk}"
+        response = auth_api_client.get(url)
+
+        data = response.json()
+        assert data["count"] == 2
+
+        guids = [entry["guid"] for entry in data["results"]]
+        assert want_entry_1.guid in guids
+        assert want_entry_2.guid in guids
+        assert omit_entry.guid not in guids
+
 
 @pytest.mark.django_db
 class TestPinnedEntryListView:
@@ -80,13 +104,17 @@ class TestFeedListView:
         response = api_client.get(self.url)
         assert response.status_code == 403
 
-    def test_responds_200(self, auth_api_client, feed_factory):
+    def test_responds_200(self, auth_api_client, feed):
         """Should respond 200 from a basic request."""
-        pass
+        response = auth_api_client.get(self.url)
+        assert response.status_code == 200
 
-    def test_filter_only_watched_feeds(self, auth_api_client, feed_factory):
+    def test_filter_only_watched_feeds(self, auth_api_client, feed, watched_feed):
         """Should only return watched feeds if passed only=user as a GET param."""
-        pass
+        url = f"{self.url}?only_watched=true"
+        response = auth_api_client.get(url)
+        data = response.json()
+        assert data["count"] == 1
 
 
 @pytest.mark.django_db

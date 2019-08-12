@@ -49,12 +49,7 @@ class FeedListView(ListAPIView):
 
     serializer_class = FeedSerializer
     filterset_class = FeedListFilterSet
-
-    def get_queryset(self):
-        only = self.request.GET.get("only", None)
-        if only == "user":
-            return Feed.objects.watched_by(self.request.user)
-        return Feed.objects.all()
+    queryset = Feed.objects.all()
 
 
 class EntryStateCreationView(APIView):
