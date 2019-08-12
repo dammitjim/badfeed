@@ -1,13 +1,13 @@
-from rest_framework.exceptions import ParseError, NotFound
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from rest_framework.exceptions import NotFound, ParseError
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from feedzero.api.filters import FeedListFilterSet
 from feedzero.api.serializers import (
-    EntrySerializer,
     EntryDetailSerializer,
+    EntrySerializer,
     EntryWithStateSerializer,
     FeedSerializer,
 )
