@@ -3,8 +3,7 @@ import Vuex from "vuex";
 import axios from "axios";
 import Cookies from "js-cookie";
 
-import { createSpoofFeeds } from "@/reader/store/mock";
-import { normaliseEntry } from "@/reader/store/normalise";
+import { normaliseEntry, normaliseFeed } from "@/reader/store/normalise";
 
 Vue.use(Vuex);
 
@@ -12,6 +11,8 @@ export const MUTATIONS = {
     REMOVE_STORY: "removeStory",
     PIN_STORY: "pinStory",
     ADD_STORY_TO_INBOX: "addStoryToInbox"
+    ADD_STORY_TO_INBOX: "addStoryToInbox",
+    ADD_FEED_TO_MENU: "addFeedToMenu",
 };
 
 export const ACTIONS = {
@@ -24,6 +25,7 @@ export const ACTIONS = {
 export const store = new Vuex.Store({
     state: {
         feeds: createSpoofFeeds(20),
+        feeds: [],
         inbox: [],
         pinned: []
     },
@@ -36,6 +38,10 @@ export const store = new Vuex.Store({
         },
         addStoryToInbox(state, story) {
             state.inbox.push(story);
+        },
+        addFeedToMenu(state, feed) {
+            state.feeds.push(feed);
+        },
         }
     },
     actions: {
@@ -101,6 +107,22 @@ export const store = new Vuex.Store({
 
                 commit(MUTATIONS.PIN_STORY, entry);
             });
+        },
+        async fetchFeeds({ commit, state }, page = 1) {
+            const response = await axios.get(`/api/v1/feeds/?only_watched=true&page=${page}`);
+            if (response.status !== 200) {
+                throw "Non 200 response status received from API";
+            }
+
+            const feeds = response.data.results.map(normaliseFeed);
+            feeds.forEach(feed => {
+                if (state.feeds.find(f => f.id === feed.id) !== undefined) {
+                    return;
+                }
+
+                commit(MUTATIONS.ADD_FEED_TO_MENU, feed);
+            });
+        },
         }
     }
 });

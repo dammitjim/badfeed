@@ -3,15 +3,16 @@
         <span class="panel-icon">
             <i class="fas fa-book" aria-hidden="true"></i>
         </span>
-        {{ title }}
+        {{ feed.title }}
+        <span v-if="feed.unread > 0"> - {{ feed.unread }}</span>
     </a>
 </template>
 <script>
 export default {
     name: "FeedRow",
     props: {
-        title: {
-            type: String,
+        feed: {
+            type: Object,
             required: true
         }
     }

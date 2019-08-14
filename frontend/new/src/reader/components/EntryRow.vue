@@ -3,7 +3,7 @@
         <div class="level">
             <div>
                 <p>{{ entry.title }}</p>
-                <p>{{ entry.feed.name }} - {{ entry.posted }}</p>
+                <p>{{ entry.feed.title }} - {{ entry.posted }}</p>
             </div>
             <div class="field is-grouped">
                 <p class="control">

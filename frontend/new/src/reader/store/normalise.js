@@ -4,11 +4,18 @@ export const normaliseEntry = apiEntry => {
         title: apiEntry.title,
         summary: apiEntry.summary,
         posted: apiEntry.date_published,
-        feed: {
-            name: apiEntry.feed.title,
-            slug: apiEntry.feed.slug,
-            id: apiEntry.feed.id,
-            unread: apiEntry.feed.unread
-        }
+        content: "",
+        feed: normaliseFeed(apiEntry.feed)
     };
 };
+
+export const normaliseFeed = apiFeed => {
+    return {
+        id: apiFeed.id,
+        title: apiFeed.title,
+        slug: apiFeed.slug,
+        unread: apiFeed.unread,
+        dateLastScraped: apiFeed.date_last_scraped,
+        link: apiFeed.link
+    };
+}
