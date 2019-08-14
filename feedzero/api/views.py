@@ -40,8 +40,7 @@ class EntryDetailView(RetrieveAPIView):
     """Detail view for an individual entry."""
 
     serializer_class = EntryDetailSerializer
-    lookup_field = "slug"
-    lookup_url_kwarg = "slug"
+    queryset = Entry.objects.all()
 
 
 class FeedListView(ListAPIView):

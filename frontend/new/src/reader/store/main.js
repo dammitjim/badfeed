@@ -10,21 +10,21 @@ Vue.use(Vuex);
 export const MUTATIONS = {
     REMOVE_STORY: "removeStory",
     PIN_STORY: "pinStory",
-    ADD_STORY_TO_INBOX: "addStoryToInbox"
     ADD_STORY_TO_INBOX: "addStoryToInbox",
     ADD_FEED_TO_MENU: "addFeedToMenu",
+    REPLACE_ENTRY: "replaceEntry"
 };
 
 export const ACTIONS = {
     PIN_STORY: "pinStory",
     REMOVE_STORY_FROM_INBOX: "removeStoryFromInbox",
     FETCH_ENTRIES: "fetchEntries",
-    FETCH_PINNED_ENTRIES: "fetchPinnedEntries"
+    FETCH_PINNED_ENTRIES: "fetchPinnedEntries",
+    ENRICH_ENTRY: "enrichEntry"
 };
 
 export const store = new Vuex.Store({
     state: {
-        feeds: createSpoofFeeds(20),
         feeds: [],
         inbox: [],
         pinned: []
@@ -42,6 +42,12 @@ export const store = new Vuex.Store({
         addFeedToMenu(state, feed) {
             state.feeds.push(feed);
         },
+        replaceEntry(state, entry) {
+            const index = state.inbox.findIndex(item => {
+                return item.id === entry.id;
+            });
+
+            state.inbox = [...state.inbox.slice(0, index), entry, ...state.inbox.slice(index + 1)];
         }
     },
     actions: {
@@ -78,7 +84,7 @@ export const store = new Vuex.Store({
             dispatch(ACTIONS.FETCH_ENTRIES);
         },
         async fetchEntries({ commit, state }, page = 1) {
-            const response = await axios.get(`http://localhost:8000/api/v1/entries/?page=${page}`);
+            const response = await axios.get(`/api/v1/entries/?page=${page}`);
             if (response.status !== 200) {
                 throw "Non 200 response status received from API";
             }
@@ -92,9 +98,7 @@ export const store = new Vuex.Store({
             });
         },
         async fetchPinnedEntries({ commit, state }, page = 1) {
-            const response = await axios.get(
-                `http://localhost:8000/api/v1/entries/pinned/?page=${page}`
-            );
+            const response = await axios.get(`/api/v1/entries/pinned/?page=${page}`);
             if (response.status !== 200) {
                 throw "Non 200 response status received from API";
             }
@@ -123,6 +127,13 @@ export const store = new Vuex.Store({
                 commit(MUTATIONS.ADD_FEED_TO_MENU, feed);
             });
         },
+        async enrichEntry({ commit }, entry) {
+            const response = await axios.get(`/api/v1/entries/${entry.id}`);
+            if (response.status !== 200) {
+                throw "Non 200 response status received from API";
+            }
+            entry.content = response.data.content;
+            commit(MUTATIONS.REPLACE_ENTRY, entry);
         }
     }
 });
