@@ -33,5 +33,6 @@
 
 {% block root %}
     <div id="reader-app"></div>
+    {% render_bundle "chunk-vendors" %}
     {% render_bundle "reader" %}
 {% endblock %}
