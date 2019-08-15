@@ -28,7 +28,7 @@ export default {
         FeedList,
         TabbedRouter
     }
-}
+};
 </script>
 <style lang="scss" scoped>
 @import url("../styles/views/app.scss");

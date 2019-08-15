@@ -11,7 +11,7 @@
                 </p>
             </div>
             <div class="feed-list__items">
-                <FeedRow :key="feed.id" v-for="feed in feeds" :title="feed.name" />
+                <FeedRow :key="feed.id" v-for="feed in feeds" :feed="feed" />
             </div>
         </b-collapse>
     </div>
@@ -22,6 +22,9 @@ export default {
     name: "FeedList",
     components: {
         FeedRow
+    },
+    mounted() {
+        this.$store.dispatch("fetchFeeds");
     },
     computed: {
         feeds() {

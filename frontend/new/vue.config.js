@@ -1,3 +1,4 @@
+require("dotenv").config();
 const BundleTracker = require("webpack-bundle-tracker");
 
 module.exports = {
@@ -5,15 +6,16 @@ module.exports = {
         reader: {
             entry: "src/reader/main.js",
             template: "public/index.html",
-            chunks: ["chunk-vendors", "chunk-common", "reader"]
+            chunks: ["chunk-vendors", "reader"]
         },
         globalStyles: {
             entry: "src/styles/entry.js",
-            chunks: ["chunk-vendors", "chunk-common", "globalStyles"]
+            chunks: ["chunk-vendors", "globalStyles"]
         }
     },
 
-    publicPath: process.env.NODE_ENV === "production" ? "/static/" : "http://0.0.0.0:8080/",
+    publicPath:
+        process.env.NODE_ENV === "production" ? process.env.CDN_LOCATION : "http://0.0.0.0:8080/",
 
     devServer: {
         publicPath: "/",

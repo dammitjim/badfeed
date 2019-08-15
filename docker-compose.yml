@@ -5,18 +5,6 @@ services:
     image: postgres:11.4
   redis:
     image: redis
-  frontend:
-    image: node:12.7-alpine
-    command: npm run serve
-    working_dir: /code/frontend/new/
-    volumes:
-      - .:/code
-    ports:
-      - "8080:8080"
-    logging:
-      options:
-        max-size: "200k"
-        max-file: "10"
   web:
     build: .
     command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
