@@ -21,7 +21,7 @@ export default {
     },
     methods: {
         done() {
-            this.entries.forEach(e => this.$store.dispatch(ACTIONS.REMOVE_STORY_FROM_INBOX, e));
+            this.$store.dispatch(ACTIONS.MARK_AS_DONE, this.entries);
         }
     }
 };

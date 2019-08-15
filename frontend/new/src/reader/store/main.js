@@ -17,12 +17,15 @@ export const MUTATIONS = {
 
 export const ACTIONS = {
     PIN_STORY: "pinStory",
-    REMOVE_STORY_FROM_INBOX: "removeStoryFromInbox",
     FETCH_ENTRIES: "fetchEntries",
     FETCH_PINNED_ENTRIES: "fetchPinnedEntries",
-    ENRICH_ENTRY: "enrichEntry"
+    ENRICH_ENTRY: "enrichEntry",
+    MARK_AS_DONE: "markAsDone",
+    DONE_WITH_ENTRY: "doneWithEntry",
+    FETCH_FEEDS: "fetchFeeds"
 };
 
+// TODO: refactor basically all of this, so much code reuse
 export const store = new Vuex.Store({
     state: {
         feeds: [],
@@ -35,6 +38,7 @@ export const store = new Vuex.Store({
         },
         removeStory(state, story) {
             state.inbox = state.inbox.filter(s => s.id != story.id);
+            state.pinned = state.pinned.filter(s => s.id != story.id);
         },
         addStoryToInbox(state, story) {
             state.inbox.push(story);
@@ -43,11 +47,25 @@ export const store = new Vuex.Store({
             state.feeds.push(feed);
         },
         replaceEntry(state, entry) {
-            const index = state.inbox.findIndex(item => {
+            let index = state.inbox.findIndex(item => {
                 return item.id === entry.id;
             });
-
-            state.inbox = [...state.inbox.slice(0, index), entry, ...state.inbox.slice(index + 1)];
+            if (index) {
+                state.inbox = [
+                    ...state.inbox.slice(0, index),
+                    entry,
+                    ...state.inbox.slice(index + 1)
+                ];
+            } else {
+                index = state.inbox.findIndex(item => {
+                    return item.id === entry.id;
+                });
+                state.pinned = [
+                    ...state.pinned.slice(0, index),
+                    entry,
+                    ...state.pinned.slice(index + 1)
+                ];
+            }
         }
     },
     actions: {
@@ -79,9 +97,8 @@ export const store = new Vuex.Store({
 
             await dispatch(ACTIONS.FETCH_ENTRIES);
         },
-        async removeStoryFromInbox({ commit, dispatch }, story) {
-            commit(MUTATIONS.REMOVE_STORY, story);
-            dispatch(ACTIONS.FETCH_ENTRIES);
+        async doneWithEntry({ dispatch }, entry) {
+            await dispatch(ACTIONS.MARK_AS_DONE, [entry]);
         },
         async fetchEntries({ commit, state }, page = 1) {
             const response = await axios.get(`/api/v1/entries/?page=${page}`);
@@ -134,6 +151,28 @@ export const store = new Vuex.Store({
             }
             entry.content = response.data.content;
             commit(MUTATIONS.REPLACE_ENTRY, entry);
+        },
+        async markAsDone({ commit, dispatch }, entries) {
+            const actions = entries.map(entry => {
+                return {
+                    state: "deleted",
+                    entry_id: entry.id
+                };
+            });
+            const csrf = Cookies.get("csrftoken");
+            const response = await axios.post(
+                `/api/v1/states/`,
+                { actions },
+                {
+                    headers: { "X-CSRFTOKEN": csrf }
+                }
+            );
+            if (response.status !== 200) {
+                throw "Non 200 response status received from API";
+            }
+            entries.forEach(entry => commit(MUTATIONS.REMOVE_STORY, entry));
+            dispatch(ACTIONS.FETCH_ENTRIES);
+            dispatch(ACTIONS.FETCH_FEEDS);
         }
     }
 });

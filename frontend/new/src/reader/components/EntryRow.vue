@@ -9,18 +9,23 @@
                 <p class="control">
                     <ButtonPin :entry="entry" />
                 </p>
+                <p class="control">
+                    <ButtonDone :entry="entry" />
+                </p>
             </div>
         </div>
         <EntryModal :entry="entry" :open="modalOpen" ref="modal" />
     </div>
 </template>
 <script>
+import ButtonDone from "@/reader/components/ButtonDone";
 import ButtonPin from "@/reader/components/ButtonPin";
 import EntryModal from "@/reader/components/EntryModal";
 
 export default {
     name: "EntryRow",
     components: {
+        ButtonDone,
         ButtonPin,
         EntryModal
     },
