@@ -57,6 +57,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "feedzero.core.context_processors.search_term_processor",
+                "feedzero.core.context_processors.global_context",
             ]
         },
     }

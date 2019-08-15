@@ -33,6 +33,9 @@
 
 {% block root %}
     <div id="reader-app"></div>
-    {% render_bundle "chunk-vendors" %}
+    {% if not debug %}
+        {% comment %}Webpack 4 chunking support not yet in django webpack loader.{% endcomment %}
+        {% render_bundle "chunk-vendors" %}
+    {% endif %}
     {% render_bundle "reader" %}
 {% endblock %}
