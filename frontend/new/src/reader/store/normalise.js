@@ -5,7 +5,9 @@ export const normaliseEntry = apiEntry => {
         summary: apiEntry.summary,
         posted: apiEntry.date_published,
         content: "",
-        feed: normaliseFeed(apiEntry.feed)
+        feed: normaliseFeed(apiEntry.feed),
+        enriched: apiEntry.enriched,
+        link: apiEntry.link
     };
 };
 
@@ -18,4 +20,4 @@ export const normaliseFeed = apiFeed => {
         dateLastScraped: apiFeed.date_last_scraped,
         link: apiFeed.link
     };
-}
+};

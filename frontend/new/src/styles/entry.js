@@ -1,4 +1,4 @@
 // import "buefy/dist/buefy.css";
-import "bulmaswatch/darkly/bulmaswatch.scss";
+import "bulmaswatch/cyborg/bulmaswatch.scss";
 
 import "./main.scss";

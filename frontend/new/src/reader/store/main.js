@@ -150,6 +150,7 @@ export const store = new Vuex.Store({
                 throw "Non 200 response status received from API";
             }
             entry.content = response.data.content;
+            entry.enriched = response.data.enriched;
             commit(MUTATIONS.REPLACE_ENTRY, entry);
         },
         async markAsDone({ commit, dispatch }, entries) {

@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from feedzero.feeds.models import Entry, EntryState, Feed
+from feedzero.feeds.models import Entry, EnrichedContent, EntryState, Feed
 
 
 class FeedSerializer(ModelSerializer):
@@ -22,8 +22,15 @@ class FeedSerializer(ModelSerializer):
         fields = ["id", "title", "slug", "link", "date_last_scraped", "unread"]
 
 
+class EnrichedContentSerializer(ModelSerializer):
+    class Meta:
+        model = EnrichedContent
+        fields = ["entry", "content", "summary", "images"]
+
+
 class EntrySerializer(ModelSerializer):
     feed = FeedSerializer()
+    enriched = EnrichedContentSerializer()
 
     class Meta:
         model = Entry
@@ -36,6 +43,8 @@ class EntrySerializer(ModelSerializer):
             "date_published",
             "content",
             "feed",
+            "slug",
+            "enriched",
         ]
 
 
@@ -67,4 +76,4 @@ class EntryWithStateSerializer(EntrySerializer):
 class EntryDetailSerializer(EntrySerializer):
     class Meta:
         model = EntrySerializer.Meta.model
-        fields = EntrySerializer.Meta.fields + ["content"]
+        fields = EntrySerializer.Meta.fields

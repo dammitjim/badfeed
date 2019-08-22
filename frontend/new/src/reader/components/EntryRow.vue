@@ -1,7 +1,7 @@
 <template>
-    <div class="entry-row box">
+    <div :class="{'entry-row': true, 'box': true, 'expanded': expanded}">
         <div class="level">
-            <div @click="toggleModal">
+            <div @click="expand">
                 <p>{{ entry.title }}</p>
                 <p>{{ entry.feed.title }} - {{ entry.posted }}</p>
             </div>
@@ -14,20 +14,29 @@
                 </p>
             </div>
         </div>
-        <EntryModal :entry="entry" :open="modalOpen" ref="modal" />
+        <div class="level" v-if="expanded">
+            <img :src="entry.enriched.images[0]" />
+            <div class="content" v-html="entry.enriched.summary" />
+        </div>
+        <div class="level" v-if="expanded">
+            <a class="button-pin button" :href="entry.link" target="blank">
+                <span class="icon is-small">
+                    <i class="fas fa-book-open"></i>
+                </span>
+                <span>Continue Reading</span>
+            </a>
+        </div>
     </div>
 </template>
 <script>
 import ButtonDone from "@/reader/components/ButtonDone";
 import ButtonPin from "@/reader/components/ButtonPin";
-import EntryModal from "@/reader/components/EntryModal";
 
 export default {
     name: "EntryRow",
     components: {
         ButtonDone,
-        ButtonPin,
-        EntryModal
+        ButtonPin
     },
     props: {
         entry: {
@@ -37,13 +46,32 @@ export default {
     },
     data() {
         return {
-            modalOpen: false
+            expanded: false,
+            maximised: false
         };
     },
     methods: {
-        toggleModal() {
-            this.$refs.modal.toggle();
+        expand() {
+            this.expanded = !this.expanded;
         }
     }
 };
 </script>
+<style lang="scss" scoped>
+.expanded {
+    z-index: 10;
+    width: 110%;
+    position: relative;
+    left: -5%;
+    bottom: 0.75rem;
+    min-height: 200px;
+
+    &:not(:last-child) {
+        margin-bottom: 0rem;
+    }
+}
+
+img {
+    margin-right: 30px;
+}
+</style>
