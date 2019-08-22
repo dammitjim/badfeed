@@ -1,5 +1,0 @@
-{% if is_watched %}
-    <a href="{% url 'feeds:unwatch' slug=feed.slug %}" class="card-link">Unwatch</a>
-{% else %}
-    <a href="{% url 'feeds:watch' slug=feed.slug %}" class="card-link">Watch</a>
-{% endif %}

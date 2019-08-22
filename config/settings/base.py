@@ -40,7 +40,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "feedzero.feeds.middleware.FeedMenuMiddleware",
 ]
 
 ROOT_URLCONF = "feedzero.urls"
