@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from feedzero.feeds.models import Entry, EnrichedContent, EntryState, Feed
+from feedzero.feeds.models import EnrichedContent, Entry, EntryState, Feed
 
 
 class FeedSerializer(ModelSerializer):
