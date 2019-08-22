@@ -160,6 +160,7 @@ export const store = new Vuex.Store({
                     entry_id: entry.id
                 };
             });
+            entries.forEach(entry => commit(MUTATIONS.REMOVE_STORY, entry));
             const csrf = Cookies.get("csrftoken");
             const response = await axios.post(
                 `/api/v1/states/`,
@@ -171,7 +172,6 @@ export const store = new Vuex.Store({
             if (response.status !== 200) {
                 throw "Non 200 response status received from API";
             }
-            entries.forEach(entry => commit(MUTATIONS.REMOVE_STORY, entry));
             dispatch(ACTIONS.FETCH_ENTRIES);
             dispatch(ACTIONS.FETCH_FEEDS);
         }

@@ -25,7 +25,7 @@ class FeedSerializer(ModelSerializer):
 class EnrichedContentSerializer(ModelSerializer):
     class Meta:
         model = EnrichedContent
-        fields = ["entry", "content", "summary", "images"]
+        fields = ["summary", "images"]
 
 
 class EntrySerializer(ModelSerializer):
