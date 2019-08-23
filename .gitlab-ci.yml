@@ -17,7 +17,7 @@ variables:
 cache:
   paths:
     - ~/.pipenv
-    - ~/frontend/new/node_modules/
+    - ~/frontend/node_modules/
 
 stages:
   - linting
@@ -36,7 +36,7 @@ frontend_lint:
   image: node:12.7-alpine
   stage: linting
   before_script:
-    - cd frontend/new
+    - cd frontend
     - npm install --dev
   script:
     - npm run lint --no-fix
@@ -62,7 +62,7 @@ frontend_test:
   image: node:12.7-alpine
   stage: tests
   before_script:
-    - cd frontend/new
+    - cd frontend
     - npm install --dev
   script:
     - npm run test:unit
