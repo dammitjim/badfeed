@@ -1,37 +1,7 @@
-{% extends "layouts/contained.html" %}
+{% extends "base.html" %}
 {% load render_bundle from webpack_loader %}
 
 {% block main %}
-    <div class="inbox">
-        <div class="inbox__smart">
-            <div class="inbox__smart__actions">
-                <div class="inbox__smart__actions__remaining">
-                    <span>{{ remaining }} remaining...</span>
-                    {% if feed %}
-                        <span><a href="{% url 'feeds:actions' slug=feed.slug %}">Actions</a></span>
-                    {% endif %}
-                </div>
-                <form method="post" action="{% url 'feeds:entry_multi_delete' %}">
-                    {% csrf_token %}
-                    {% for entry in action_entries %}
-                        <input type="hidden" value="{{ entry.pk }}" name="to_delete" />
-                    {% endfor %}
-                    <button type="submit">
-                        <i class="fas fa-backspace"></i>
-                    </button>
-                </form>
-            </div>
-            <div class="inbox__smart__entries">
-                {% include "feeds/components/entry_list.html" with entries=action_entries detail=True %}
-            </div>
-        </div>
-        <div class="inbox__list">
-            {% include "feeds/components/entry_list.html" with entries=list_entries %}
-        </div>
-    </div>
-{% endblock %}
-
-{% block root %}
     <div id="reader-app"></div>
     {% if not debug %}
         {% comment %}Webpack 4 chunking support not yet in django webpack loader.{% endcomment %}

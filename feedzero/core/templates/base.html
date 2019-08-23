@@ -12,6 +12,9 @@
 </head>
 <body>
 {% block root %}
+    {% include "components/global-nav.html" %}
+    {% block main %}
+    {% endblock %}
 {% endblock %}
 {% render_bundle 'globalStyles' %}
 </body>

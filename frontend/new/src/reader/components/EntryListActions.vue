@@ -1,5 +1,5 @@
 <template>
-    <section class="entry-list-actions section">
+    <section class="entry-list-actions">
         <a class="button" @click="done">
             <span class="icon is-small">
                 <i class="fas fa-angle-down"></i>
