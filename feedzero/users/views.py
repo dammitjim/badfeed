@@ -1,19 +1,14 @@
-from django.contrib import messages
+from django.conf import settings
+from django.contrib.auth import logout
 from django.shortcuts import redirect
-from django.urls import reverse
-from django.views.generic import TemplateView
+from django.utils.http import urlencode
+from django.views import View
 
 
-class LoginView(TemplateView):
-    template_name = "users/login.html"
-    extra_context = {"page_title": "Login"}
-
-    def dispatch(self, request, *args, **kwargs):
-        """Redirect already logged in users if they try to be cheeky."""
-        if request.user.is_authenticated:
-            messages.info(request, self.Messages.ALREADY_LOGGED_IN)
-            return redirect(reverse("feeds:inbox"))
-        return super().dispatch(request, *args, **kwargs)
-
-    class Messages:
-        ALREADY_LOGGED_IN = "You are already logged in."
+class LogoutView(View):
+    def get(self, request, *args, **kwargs):
+        """Redirect through to auth0 logout."""
+        logout(request)
+        return_to = urlencode({"returnTo": request.build_absolute_uri("/")})
+        logout_url = f"https://{settings.SOCIAL_AUTH_AUTH0_DOMAIN}/v2/logout?client_id={settings.SOCIAL_AUTH_AUTH0_KEY}&{return_to}"  # noqa
+        return redirect(logout_url)

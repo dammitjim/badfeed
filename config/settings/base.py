@@ -146,7 +146,7 @@ SOCIAL_AUTH_AUTH0_SCOPE = ["openid", "profile"]
 
 LOGIN_URL = "/login/auth0"
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/login"
+LOGOUT_REDIRECT_URL = "/"
 
 WEBPACK_LOADER = {
     "DEFAULT": {
