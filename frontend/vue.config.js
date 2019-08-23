@@ -4,13 +4,10 @@ const BundleTracker = require("webpack-bundle-tracker");
 module.exports = {
     pages: {
         reader: {
-            entry: "src/reader/main.js",
-            template: "public/index.html",
-            chunks: ["chunk-vendors", "reader"]
+            entry: "src/reader/main.js"
         },
         globalStyles: {
-            entry: "src/styles/entry.js",
-            chunks: ["chunk-vendors", "globalStyles"]
+            entry: "src/styles/entry.js"
         }
     },
 
@@ -34,5 +31,6 @@ module.exports = {
                 : "./webpack-stats-dev.json";
 
         config.plugins.push(new BundleTracker({ filename }));
+        config.optimization.splitChunks.minSize = 1;
     }
 };

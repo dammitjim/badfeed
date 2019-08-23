@@ -10,7 +10,7 @@ const s3 = new AWS.S3({
     secretAccessKey: process.env.AWS_SECRET_KEY
 });
 
-fs.readFile("../webpack-stats-prod.json", (err, data) => {
+fs.readFile("./webpack-stats-prod.json", (err, data) => {
     if (err) {
         console.error(err);
         return;
