@@ -1,5 +1,5 @@
-from urllib.parse import urlparse
 import tempfile
+from urllib.parse import urlparse
 
 from django.core import files
 from django_rq import job
