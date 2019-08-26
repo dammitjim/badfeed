@@ -21,8 +21,10 @@ class FeedManager(models.Manager):
 class Feed(SlugifiedMixin, models.Model):
     """A feed of content."""
 
-    title = models.CharField(max_length=255)
     link = models.CharField(max_length=1000, unique=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
+
+    logo = models.FileField(upload_to="feeds/logo/", null=True, blank=True)
 
     scraping_enabled = models.BooleanField(default=True)
 
