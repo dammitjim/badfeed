@@ -6,3 +6,5 @@ secrets.env
 node_modules
 dist
 frontend/webpack-stats-dev.json
+media/
+static/

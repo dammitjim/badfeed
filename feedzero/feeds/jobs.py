@@ -1,6 +1,8 @@
 from urllib.parse import urlparse
+import tempfile
 
 from django_rq import job
+from django.core import files
 import favicon
 import requests
 
@@ -23,6 +25,8 @@ def enrich_feed_with_favicon(feed: Feed):
 
     icon = icons[0]
     response = requests.get(icon.url, stream=True)
-    with open(f"/tmp/{feed.slug}.{icon.format}", "wb") as image:
-        for chunk in response.iter_content(1024):
-            image.write(chunk)
+    filename = f"{feed.slug}.{icon.format}"
+    lf = tempfile.NamedTemporaryFile()
+    for chunk in response.iter_content(1024):
+        lf.write(chunk)
+    feed.logo.save(filename, files.File(lf))

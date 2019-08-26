@@ -110,13 +110,13 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
-STATIC_ROOT = env.str("DJANGO_STATIC_ROOT", default="")
+STATIC_ROOT = env.str("DJANGO_STATIC_ROOT", default="static/")
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "..", "frontend", "theme", "dist", "assets"),
     os.path.join(FRONTEND_DIR, "new", "dist"),
 ]
 
-MEDIA_ROOT = env.str("DJANGO_MEDIA_ROOT", default="")
+MEDIA_ROOT = env.str("DJANGO_MEDIA_ROOT", default="media/")
 
 RQ_ENABLED = env.bool("RQ_ENABLED", default=True)
 RQ_QUEUES = {
