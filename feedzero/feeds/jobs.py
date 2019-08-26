@@ -1,8 +1,8 @@
 from urllib.parse import urlparse
 import tempfile
 
-from django_rq import job
 from django.core import files
+from django_rq import job
 import favicon
 import requests
 
