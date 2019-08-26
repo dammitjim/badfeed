@@ -12,7 +12,10 @@ from feedzero.ingest.constants import REQUESTS_USER_AGENT
 
 @job
 def enrich_feed_with_favicon(feed: Feed):
-    """Pull down favicon from available URL."""
+    """Pull down favicon from available URL.
+
+    TODO if any part of this fails, need a placeholder image.
+    """
     uri = urlparse(feed.link)
     link = f"{uri.scheme}://{uri.netloc}"
 
