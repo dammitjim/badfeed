@@ -31,6 +31,5 @@ module.exports = {
                 : "./webpack-stats-dev.json";
 
         config.plugins.push(new BundleTracker({ filename }));
-        config.optimization.splitChunks.minSize = 1;
     }
 };

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "webpack_loader",
     "django_filters",
+    "django_extensions",
     # internal
     "feedzero.users",
     "feedzero.feeds",
