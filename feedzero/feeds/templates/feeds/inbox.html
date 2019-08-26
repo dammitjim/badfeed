@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load render_bundle from webpack_loader %}
 
-{% block main %}
+{% block layout %}
     <div id="reader-app"></div>
     {% if not debug %}
         {% comment %}Webpack 4 chunking support not yet in django webpack loader.{% endcomment %}

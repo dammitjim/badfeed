@@ -1,7 +1,10 @@
 from django.urls import path
 
-from feedzero.feeds.views import InboxView
+from feedzero.feeds import views
 
 
 app_name = "feeds"
-urlpatterns = [path("", InboxView.as_view(), name="inbox")]
+urlpatterns = [
+    path("", views.InboxView.as_view(), name="inbox"),
+    path("feeds/add/", views.FeedAddView.as_view(), name="add"),
+]
