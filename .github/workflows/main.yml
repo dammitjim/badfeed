@@ -20,10 +20,11 @@ jobs:
         ports:
           - 6379/tcp
     steps:
-      - uses: peaceiris/actions-pipenv@v1.0.0
       - name: Install dependencies
+        uses: peaceiris/actions-pipenv@v1.0.0
         run: pipenv install --dev
       - name: flake8
+        uses: peaceiris/actions-pipenv@v1.0.0
         run: pipenv run flake8 .
 
 
