@@ -44,4 +44,4 @@ jobs:
           DATABASE_NAME: feedzero_ci
           DATABASE_USER: postgres
           DATABASE_PASSWORD: postgres
-          DATABASE_HOST: postgres
+          DATABASE_HOST: localhost
