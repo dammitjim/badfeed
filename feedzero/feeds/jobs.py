@@ -6,12 +6,11 @@ from django_rq import job
 import favicon
 import requests
 
-from feedzero.feeds.models import Feed
 from feedzero.ingest.constants import REQUESTS_USER_AGENT
 
 
 @job
-def enrich_feed_with_favicon(feed: Feed):
+def enrich_feed_with_favicon(feed):
     """Pull down favicon from available URL.
 
     TODO if any part of this fails, need a placeholder image.
