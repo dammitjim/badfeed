@@ -11,7 +11,7 @@ jobs:
         with:
           python-version: '3.x'
           architecture: 'x64'
-        run: python manage.py
+      - run: python manage.py
   # test:
   #   runs-on: ubuntu-18.04
   # build:
