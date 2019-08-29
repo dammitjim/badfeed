@@ -12,13 +12,36 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
       - run: pip install pipenv
-      - run: pipenv install --dev --system --ignore-pipfile
+      - run: pipenv install --dev --ignore-pipfile
       - run: pipenv run flake8 .
       - run: pipenv run black --check .
-  # test:
-  #   runs-on: ubuntu-18.04
-  # build:
-  #   runs-on: ubuntu-18.04
-  #   needs:
-  #     - lint
-  #     - test
+  test:
+    runs-on: ubuntu-18.04
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: feedzero_ci
+      redis:
+        image: redis
+        ports:
+          - 6379/tcp
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.ci
+      DATABASE_NAME: feedzero_ci
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: postgres
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+      - run: pip install pipenv
+      - run: pipenv install --dev --ignore-pipfile
+      - run: pipenv run pytest
