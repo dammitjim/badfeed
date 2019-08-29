@@ -1,0 +1,11 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: pipenv - Python
+        uses: peaceiris/actions-pipenv@v1.0.0
+
