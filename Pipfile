@@ -25,6 +25,9 @@ newspaper3k = "*"
 requests = ">=2.21.0, <2.22.0"
 django-webpack-loader = ">=0.6.0, <0.7.0"
 django-filter = "*"
+favicon = "*"
+django-extensions = "*"
+ipython = "*"
 
 [dev-packages]
 "flake8" = ">=3.7.7,<3.8.0"
@@ -36,6 +39,7 @@ pre-commit = ">=1.15.1,<1.16.0"
 pydocstyle = "*"
 pytest-mock = "*"
 flake8-import-order = "*"
+django-extensions = "*"
 
 [requires]
 python_version = "3.7"
