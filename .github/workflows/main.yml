@@ -11,7 +11,8 @@ jobs:
         with:
           python-version: '3.x'
           architecture: 'x64'
-      - run: python manage.py
+      - run: pip install pipenv
+      - run: pipenv install --dev
   # test:
   #   runs-on: ubuntu-18.04
   # build:
