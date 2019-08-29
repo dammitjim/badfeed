@@ -46,4 +46,4 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/docker/cli@master
-      - run: docker build -t registry.gitlab.com/dammitjim/badfeed:${{ github.ref }} .
+      - run: docker build -t registry.gitlab.com/dammitjim/badfeed:${{ github.sha }} .
