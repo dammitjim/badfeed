@@ -12,10 +12,10 @@ jobs:
           python-version: '3.x'
           architecture: 'x64'
         run: python manage.py
-  test:
-    runs-on: ubuntu-18.04
-  build:
-    runs-on: ubuntu-18.04
-    needs:
-      - lint
-      - test
+  # test:
+  #   runs-on: ubuntu-18.04
+  # build:
+  #   runs-on: ubuntu-18.04
+  #   needs:
+  #     - lint
+  #     - test
