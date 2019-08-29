@@ -30,12 +30,6 @@ jobs:
         image: redis
         ports:
           - 6379/tcp
-    env:
-      DJANGO_SETTINGS_MODULE: config.settings.ci
-      DATABASE_NAME: feedzero_ci
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_HOST: postgres
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v1
@@ -45,3 +39,9 @@ jobs:
       - run: pip install pipenv
       - run: pipenv install --dev --ignore-pipfile
       - run: pipenv run pytest
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.ci
+          DATABASE_NAME: feedzero_ci
+          DATABASE_USER: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_HOST: postgres
