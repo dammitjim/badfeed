@@ -40,12 +40,12 @@ class Feed(SlugifiedMixin, models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         if not self.logo:
             if settings.RQ_ENABLED:
                 enrich_feed_with_favicon.delay(self)
             else:
                 enrich_feed_with_favicon(self)
-        return super().save(*args, **kwargs)
 
     @staticmethod
     def slug_uniqueness_check(text, uids):
