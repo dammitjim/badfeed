@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     services:
       postgresql:
-        image: postgresql
+        image: postgres:latest
         ports:
           - 5432:5432
         env:
