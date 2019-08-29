@@ -8,7 +8,6 @@ from loguru import logger
 import maya
 
 from feedzero.core.models import SlugifiedMixin
-from feedzero.feeds.jobs import enrich_feed_with_favicon
 
 
 class FeedManager(models.Manager):
@@ -38,14 +37,6 @@ class Feed(SlugifiedMixin, models.Model):
     def __str__(self):
         """Str representation of feed."""
         return self.title
-
-    def save(self, *args, **kwargs):
-        if not self.logo:
-            if settings.RQ_ENABLED:
-                enrich_feed_with_favicon.delay(self)
-            else:
-                enrich_feed_with_favicon(self)
-        return super().save(*args, **kwargs)
 
     @staticmethod
     def slug_uniqueness_check(text, uids):
