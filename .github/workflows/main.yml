@@ -42,3 +42,8 @@ jobs:
           DATABASE_PASSWORD: postgres
           DATABASE_HOST: postgres
           REDIS_HOST: redis
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/docker/cli@master
+      - run: docker build -t registry.gitlab.com/dammitjim/badfeed:${{ github.ref }} .
